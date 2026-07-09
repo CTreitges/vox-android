@@ -54,7 +54,7 @@ class WhisperContext private constructor() : Transcriber {
 
     companion object {
         /** Asset-Pfad des gebuendelten Modells (in app/src/main/assets/). */
-        const val MODEL_ASSET = "models/ggml-tiny.bin"
+        const val MODEL_ASSET = "models/ggml-base.bin"
 
         /** Laedt das Modell aus den App-Assets (streamt direkt aus dem APK). */
         fun createFromAsset(context: Context, assetPath: String = MODEL_ASSET): WhisperContext {

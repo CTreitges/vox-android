@@ -46,12 +46,31 @@ android {
         noCompress += "bin"
     }
 
+    signingConfigs {
+        create("release") {
+            // Keystore + Passwort kommen aus Umgebungsvariablen (CI: aus GitHub-Secrets).
+            // Kein Secret im Repo. Fehlt der Keystore lokal, bleibt release unsigniert.
+            val ksPath = System.getenv("WB_KEYSTORE") ?: "keystore/whisperbar-release.p12"
+            val ks = file(ksPath)
+            if (ks.exists()) {
+                storeFile = ks
+                storeType = "PKCS12"
+                storePassword = System.getenv("WB_KEYSTORE_PASSWORD") ?: ""
+                keyAlias = System.getenv("WB_KEY_ALIAS") ?: "whisperbar"
+                keyPassword = System.getenv("WB_KEY_PASSWORD")
+                    ?: System.getenv("WB_KEYSTORE_PASSWORD") ?: ""
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
         }
         release {
             isMinifyEnabled = false
+            val ks = file(System.getenv("WB_KEYSTORE") ?: "keystore/whisperbar-release.p12")
+            if (ks.exists()) signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

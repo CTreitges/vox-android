@@ -10,7 +10,7 @@ Keine Cloud, kein Account, keine API-Keys. Das Whisper-Modell liegt lokal im APK
 ## Features
 
 - 🎤 **Push-to-talk-Diktat** als System-Tastatur — funktioniert in jeder App
-- 🔒 **100 % offline & lokal** — Audio verlässt das Gerät nie (whisper.cpp, ggml-tiny multilingual)
+- 🔒 **100 % offline & lokal** — Audio verlässt das Gerät nie (whisper.cpp, ggml-base multilingual)
 - ✨ **On-device-Textveredelung** — Füllwörter (ähm/äh/um…) entfernen, Sätze groß schreiben,
   Leerzeichen vor Satzzeichen fixen (abschaltbar)
 - 🌍 **Mehrsprachig** — Auto-Erkennung oder feste Sprache (de/en/es/fr/it)
@@ -30,25 +30,32 @@ Keine Cloud, kein Account, keine API-Keys. Das Whisper-Modell liegt lokal im APK
 | Onboarding/Settings | `SetupActivity.kt`, `SettingsActivity.kt` (reines Framework, kein AppCompat) |
 
 Bewusst **kein AndroidX/Compose** im App-Code → schlank, wenige Build-Risiken.
-Das Modell (`ggml-tiny.bin`, ~77 MB) wird zur Build-Zeit geladen (nicht im Git), unkomprimiert
+Das Modell (`ggml-base.bin`, ~148 MB) wird zur Build-Zeit geladen (nicht im Git), unkomprimiert
 im APK abgelegt (`noCompress "bin"`) und vom nativen Asset-Loader direkt gestreamt.
 
 ## Bauen
 
 ### Per GitHub Actions (empfohlen)
 `.github/workflows/build.yml` baut bei jedem Push:
-1. **Build APK + Unit-Tests + Lint** → lädt das signierte Debug-APK als Artefakt `whisperbar-debug-apk` hoch
+1. **Build APK + Unit-Tests + Lint** → Artefakte `whisperbar-debug-apk` (Debug-Key)
+   **und `whisperbar-release-apk` (Release-signiert)**
 2. **Emulator-Instrumented-Tests** (API 30, x86_64, KVM) → transkribiert `jfk.wav` echt auf einem Emulator
 
-APK-Download: Actions-Run öffnen → Artefakt `whisperbar-debug-apk` → `app-debug.apk`.
+APK-Download: Actions-Run öffnen → gewünschtes Artefakt → `app-debug.apk` bzw. `app-release.apk`.
+
+**Release-Signierung:** Ein persistenter PKCS12-Keystore liegt als GitHub-Secrets
+`WB_KEYSTORE_B64` + `WB_KEYSTORE_PASSWORD` (nicht im Repo). Die CI dekodiert ihn und
+signiert `assembleRelease`. Derselbe Key signiert jeden Release → Updates sind installierbar.
+Für lokale Release-Builds: Keystore unter `keystore/whisperbar-release.p12` ablegen und
+`WB_KEYSTORE`/`WB_KEYSTORE_PASSWORD`/`WB_KEY_ALIAS` als Env setzen (fehlt er, bleibt release unsigniert).
 
 ### Lokal (Android Studio)
 ```bash
 git clone --recurse-submodules <repo-url>
 cd whisperbar-android
 # Modell einmalig laden:
-curl -L --fail -o app/src/main/assets/models/ggml-tiny.bin \
-  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin
+curl -L --fail -o app/src/main/assets/models/ggml-base.bin \
+  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
 ./gradlew assembleDebug
 ```
 Voraussetzungen: JDK 17, Android SDK 35, NDK `27.2.12479018`, CMake `3.22.1`.

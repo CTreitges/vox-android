@@ -11,5 +11,11 @@ captures/
 # Grosses Whisper-Modell wird von der CI geladen (nicht committen)
 app/src/main/assets/models/*.bin
 
+# Release-Keystore + Credentials NIEMALS committen (nur in GitHub-Secrets / lokal)
+keystore/
+*.p12
+*.jks
+dist/
+
 # OS
 .DS_Store
