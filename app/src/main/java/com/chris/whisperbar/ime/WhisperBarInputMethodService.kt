@@ -16,11 +16,11 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.inputmethodservice.InputMethodService
 import com.chris.whisperbar.AudioRecorder
+import com.chris.whisperbar.ModelNotAvailableException
 import com.chris.whisperbar.Prefs
 import com.chris.whisperbar.R
 import com.chris.whisperbar.TextPolisher
-import com.chris.whisperbar.Transcriber
-import com.chris.whisperbar.WhisperContext
+import com.chris.whisperbar.WhisperEngine
 import com.chris.whisperbar.SetupActivity
 import com.chris.whisperbar.SettingsActivity
 import java.util.concurrent.Executors
@@ -39,7 +39,7 @@ class WhisperBarInputMethodService : InputMethodService() {
     private val io = Executors.newSingleThreadExecutor { r -> Thread(r, "wb-ime-io") }
     private val main = Handler(Looper.getMainLooper())
 
-    @Volatile private var transcriber: Transcriber? = null
+    @Volatile private var busy = false // Transkription laeuft -> keine neue Aufnahme
 
     private var statusView: TextView? = null
     private var levelView: View? = null
@@ -84,7 +84,7 @@ class WhisperBarInputMethodService : InputMethodService() {
         resetLevel()
         setStatus(R.string.kb_hint_hold)
         // Modell im Hintergrund vorladen, damit das erste Diktat schneller ist.
-        preloadModel()
+        preload()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
@@ -96,6 +96,7 @@ class WhisperBarInputMethodService : InputMethodService() {
     // --- Diktat -------------------------------------------------------------
 
     private fun startDictation() {
+        if (busy) return // vorheriges Diktat wird noch transkribiert
         if (!hasMicPermission()) {
             setStatus(R.string.kb_need_permission)
             openSetup()
@@ -105,7 +106,7 @@ class WhisperBarInputMethodService : InputMethodService() {
         if (recorder.start()) {
             setStatus(R.string.kb_listening)
             micButton?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.recording))
-            preloadModel()
+            preload()
         } else {
             setStatus(R.string.kb_error)
         }
@@ -117,6 +118,7 @@ class WhisperBarInputMethodService : InputMethodService() {
         micButton?.backgroundTintList = null
         resetLevel()
         setStatus(R.string.kb_transcribing)
+        busy = true
         val language = prefs.language
         val options = prefs.polishOptions()
         io.submit {
@@ -129,34 +131,28 @@ class WhisperBarInputMethodService : InputMethodService() {
                     main.post { setStatus(R.string.kb_hint_hold) }
                     return@submit
                 }
-                val t = ensureTranscriber()
-                val raw = t.transcribe(samples, language)
+                val raw = WhisperEngine.transcribe(applicationContext, samples, language)
                 val polished = TextPolisher.polish(raw, options)
                 main.post {
                     commitDictation(polished)
                     setStatus(R.string.kb_hint_hold)
                 }
+            } catch (e: ModelNotAvailableException) {
+                main.post { setStatus(R.string.model_not_loaded) }
             } catch (e: Exception) {
                 Log.e(TAG, "Transkription fehlgeschlagen", e)
                 main.post { setStatus(R.string.kb_error) }
+            } finally {
+                busy = false
             }
         }
     }
 
-    /** Laedt das Modell (blockierend, laeuft auf dem io-Thread). */
-    private fun ensureTranscriber(): Transcriber {
-        transcriber?.let { return it }
-        main.post { setStatus(R.string.kb_loading_model) }
-        val t = WhisperContext.createFromAsset(applicationContext)
-        transcriber = t
-        return t
-    }
-
-    private fun preloadModel() {
-        if (transcriber != null) return
+    /** Modell im Hintergrund vorladen (prozessweit geteilt via WhisperEngine). */
+    private fun preload() {
         io.submit {
             try {
-                ensureTranscriber()
+                WhisperEngine.preload(applicationContext)
             } catch (e: Exception) {
                 Log.e(TAG, "Modell-Preload fehlgeschlagen", e)
             }
@@ -229,7 +225,7 @@ class WhisperBarInputMethodService : InputMethodService() {
 
     override fun onDestroy() {
         if (recorder.isRecording) recorder.cancel()
-        io.submit { transcriber?.release(); transcriber = null }
+        // Engine NICHT freigeben — sie ist prozessweit geteilt (auch vom Overlay genutzt).
         io.shutdown()
         super.onDestroy()
     }

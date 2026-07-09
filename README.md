@@ -9,12 +9,14 @@ Keine Cloud, kein Account, keine API-Keys. Das Whisper-Modell liegt lokal im APK
 
 ## Features
 
-- 🎤 **Push-to-talk-Diktat** als System-Tastatur — funktioniert in jeder App
-- 🔒 **100 % offline & lokal** — Audio verlässt das Gerät nie (whisper.cpp, ggml-base multilingual)
-- ✨ **On-device-Textveredelung** — Füllwörter (ähm/äh/um…) entfernen, Sätze groß schreiben,
-  Leerzeichen vor Satzzeichen fixen (abschaltbar)
-- 🌍 **Mehrsprachig** — Auto-Erkennung oder feste Sprache (de/en/es/fr/it)
-- ⌨️ Basis-Tasten (Leer, Komma, Punkt, Enter, Backspace) + Tastatur-Wechsel + Einstellungen
+- 🎤 **Zwei Diktat-Wege**: (a) eigene **Tastatur (IME)** mit Mikro, (b) **schwebender Mikro-Button**
+  (Overlay + Bedienungshilfe), der Text ins Fokus-Feld schreibt — **ohne** Gboard zu verlassen.
+- 🔒 **100 % offline & lokal** — Audio verlässt das Gerät nie (whisper.cpp, ggml-**small** q5 gebündelt).
+  Modell in den Einstellungen wählbar: **small / base / tiny** (q5, Base/Tiny werden bei Bedarf geladen).
+- ☁️ **Optionale Cloud-API** (opt-in) für noch bessere Qualität — OpenAI-kompatibel (OpenAI, Groq,
+  self-hosted), konfigurierbar. Sendet dann Audio an den Anbieter (nicht mehr offline).
+- ✨ **On-device-Textveredelung** — Füllwörter entfernen, Sätze groß schreiben, Leerzeichen fixen (abschaltbar).
+- 🌍 **Mehrsprachig** — Default **Deutsch** (fest = schneller/genauer), oder auto / en / es / fr / it.
 - 🆓 MIT-lizenziert
 
 ## Architektur

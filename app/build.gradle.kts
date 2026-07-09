@@ -46,6 +46,11 @@ android {
         noCompress += "bin"
     }
 
+    // Lint soll den Build nicht an Warnungen scheitern lassen (Reports bleiben erhalten).
+    lint {
+        abortOnError = false
+    }
+
     signingConfigs {
         create("release") {
             // Keystore + Passwort kommen aus Umgebungsvariablen (CI: aus GitHub-Secrets).

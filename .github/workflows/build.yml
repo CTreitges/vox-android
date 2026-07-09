@@ -14,8 +14,10 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  MODEL_URL: https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
-  MODEL_PATH: app/src/main/assets/models/ggml-base.bin
+  MODEL_URL: https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin
+  MODEL_PATH: app/src/main/assets/models/ggml-small-q5_1.bin
+  TEST_MODEL_URL: https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q5_1.bin
+  TEST_MODEL_PATH: app/src/androidTest/assets/ggml-tiny-q5_1.bin
 
 jobs:
   build-and-unit:
@@ -41,7 +43,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.MODEL_PATH }}
-          key: whisper-ggml-base-v1
+          key: whisper-small-q5-v1
 
       - name: Whisper-Modell laden (falls nicht gecacht)
         if: steps.model-cache.outputs.cache-hit != 'true'
@@ -115,13 +117,26 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.MODEL_PATH }}
-          key: whisper-ggml-base-v1
+          key: whisper-small-q5-v1
 
       - name: Whisper-Modell laden (falls nicht gecacht)
         if: steps.model-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p "$(dirname "$MODEL_PATH")"
           curl -L --fail --retry 3 -o "$MODEL_PATH" "$MODEL_URL"
+
+      - name: Test-Modell (tiny) cachen
+        id: test-model-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TEST_MODEL_PATH }}
+          key: whisper-tiny-q5-test-v1
+
+      - name: Test-Modell laden (falls nicht gecacht)
+        if: steps.test-model-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "$(dirname "$TEST_MODEL_PATH")"
+          curl -L --fail --retry 3 -o "$TEST_MODEL_PATH" "$TEST_MODEL_URL"
 
       - name: KVM freischalten
         run: |

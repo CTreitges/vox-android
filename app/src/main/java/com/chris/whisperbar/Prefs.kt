@@ -9,10 +9,32 @@ class Prefs(context: Context) {
 
     private val sp = context.getSharedPreferences("whisperbar", Context.MODE_PRIVATE)
 
-    /** Erkennungssprache: "auto" oder ISO-Code ("de", "en", "es", "fr", "it"). */
+    /** Erkennungssprache: "auto" oder ISO-Code ("de", "en", "es", "fr", "it"). Default: Deutsch. */
     var language: String
-        get() = sp.getString(KEY_LANGUAGE, "auto") ?: "auto"
+        get() = sp.getString(KEY_LANGUAGE, "de") ?: "de"
         set(v) = sp.edit().putString(KEY_LANGUAGE, v).apply()
+
+    /** Gewaehltes Whisper-Modell. Default: SMALL (gebuendelt). */
+    var model: WhisperModel
+        get() = WhisperModel.fromId(sp.getString(KEY_MODEL, WhisperModel.SMALL.id))
+        set(v) = sp.edit().putString(KEY_MODEL, v.id).apply()
+
+    /** Cloud-API statt On-Device nutzen (bessere Qualität, SENDET Audio an den Anbieter). */
+    var useApi: Boolean
+        get() = sp.getBoolean(KEY_USE_API, false)
+        set(v) = sp.edit().putBoolean(KEY_USE_API, v).apply()
+
+    var apiBaseUrl: String
+        get() = sp.getString(KEY_API_URL, DEFAULT_API_URL) ?: DEFAULT_API_URL
+        set(v) = sp.edit().putString(KEY_API_URL, v).apply()
+
+    var apiKey: String
+        get() = sp.getString(KEY_API_KEY, "") ?: ""
+        set(v) = sp.edit().putString(KEY_API_KEY, v).apply()
+
+    var apiModel: String
+        get() = sp.getString(KEY_API_MODEL, DEFAULT_API_MODEL) ?: DEFAULT_API_MODEL
+        set(v) = sp.edit().putString(KEY_API_MODEL, v).apply()
 
     var removeFillers: Boolean
         get() = sp.getBoolean(KEY_REMOVE_FILLERS, true)
@@ -35,7 +57,15 @@ class Prefs(context: Context) {
 
     companion object {
         private const val KEY_LANGUAGE = "language"
+        private const val KEY_MODEL = "model"
+        private const val KEY_USE_API = "use_api"
+        private const val KEY_API_URL = "api_url"
+        private const val KEY_API_KEY = "api_key"
+        private const val KEY_API_MODEL = "api_model"
         private const val KEY_REMOVE_FILLERS = "remove_fillers"
+
+        const val DEFAULT_API_URL = "https://api.openai.com/v1"
+        const val DEFAULT_API_MODEL = "whisper-1"
         private const val KEY_AUTO_CAP = "auto_capitalize"
         private const val KEY_TRAILING_SPACE = "trailing_space"
 

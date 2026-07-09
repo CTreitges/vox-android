@@ -27,7 +27,6 @@ class WhisperTranscriptionTest {
     @Test
     fun transcribesJfkSample() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
-        val appContext = instrumentation.targetContext
         val testContext = instrumentation.context
 
         val samples = testContext.assets.open("jfk.wav").use { readWavPcm16Mono(it) }
@@ -36,7 +35,9 @@ class WhisperTranscriptionTest {
             samples.size > 16_000 * 5,
         )
 
-        val whisper = WhisperContext.createFromAsset(appContext)
+        // Bewusst das kleine tiny-q5 (Test-Asset) statt des gebuendelten small -> schneller
+        // auf dem Emulator; beweist trotzdem die komplette JNI+Modell+native-Pipeline.
+        val whisper = WhisperContext.createFromAsset(testContext, "ggml-tiny-q5_1.bin")
         val transcript = try {
             whisper.transcribe(samples, "en")
         } finally {

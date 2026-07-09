@@ -37,5 +37,44 @@
     <string name="pref_remove_fillers">Füllwörter entfernen (ähm, äh …)</string>
     <string name="pref_auto_cap">Automatisch groß schreiben</string>
     <string name="pref_trailing_space">Leerzeichen nach Diktat anhängen</string>
-    <string name="pref_model_info">Modell: ggml-base (multilingual, lokal)</string>
+    <string name="pref_model">Modell (Qualität ↔ Tempo)</string>
+    <string name="pref_model_info">Modelle sind quantisiert (q5). Small ist gebündelt; Base/Tiny werden bei Auswahl einmalig geladen.</string>
+
+    <!-- Modell-Laden -->
+    <string name="model_downloading">Lade Modell …</string>
+    <string name="model_download_failed">Modell-Download fehlgeschlagen</string>
+    <string name="model_ready">Modell bereit</string>
+    <string name="model_not_loaded">Modell nicht geladen — in den Einstellungen laden</string>
+
+    <!-- Schwebender Mikro-Button -->
+    <string name="float_channel">WhisperBar Diktat</string>
+    <string name="float_running">WhisperBar-Diktat aktiv</string>
+    <string name="float_running_text">Tippe den schwebenden Knopf zum Diktieren</string>
+    <string name="float_stop">Beenden</string>
+    <string name="float_no_overlay">Bitte „Über anderen Apps anzeigen" erlauben</string>
+    <string name="float_clipboard_fallback">Text kopiert — Bedienungshilfe aktivieren zum automatischen Einfügen</string>
+
+    <!-- Bedienungshilfe -->
+    <string name="a11y_label">WhisperBar Text-Einfügen</string>
+    <string name="a11y_description">Fügt diktierten Text ins gerade fokussierte Feld ein, damit du beim Diktieren nicht die Tastatur wechseln musst. Es wird nichts mitgelesen oder gespeichert.</string>
+
+    <!-- Setup: Diktat ohne Tastaturwechsel -->
+    <string name="setup_float_title">Diktat ohne Tastatur-Wechsel (empfohlen)</string>
+    <string name="setup_float_intro">So bleibt Gboard aktiv und du startest das Diktat per schwebendem Knopf:</string>
+    <string name="setup_overlay_btn">Über anderen Apps anzeigen erlauben</string>
+    <string name="setup_a11y_btn">Bedienungshilfe „WhisperBar" aktivieren</string>
+    <string name="setup_start_bubble">Schwebenden Mikro-Button starten</string>
+    <string name="setup_stop_bubble">Schwebenden Mikro-Button beenden</string>
+    <string name="setup_notif_btn">Benachrichtigungen erlauben</string>
+
+    <string name="model_download_btn">Modell laden</string>
+
+    <!-- Cloud-API -->
+    <string name="pref_api_title">Cloud-API (optional, bessere Qualität)</string>
+    <string name="pref_api_enable">Cloud-API statt On-Device nutzen</string>
+    <string name="pref_api_privacy">Achtung: Im API-Modus wird dein Audio an den Anbieter gesendet (nicht mehr offline).</string>
+    <string name="pref_api_url_hint">Base-URL (z. B. https://api.openai.com/v1)</string>
+    <string name="pref_api_key_hint">API-Key</string>
+    <string name="pref_api_model_hint">Modell (z. B. whisper-1)</string>
+    <string name="pref_api_examples">Beispiele: OpenAI whisper-1 oder gpt-4o-transcribe · Groq (Base-URL https://api.groq.com/openai/v1, Modell whisper-large-v3-turbo). Key wird nur lokal gespeichert.</string>
 </resources>

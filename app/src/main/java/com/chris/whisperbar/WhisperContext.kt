@@ -25,6 +25,13 @@ class WhisperContext private constructor() : Transcriber {
         }
     }
 
+    private fun initFromFile(path: String) {
+        ptr = worker.submit<Long> { WhisperLib.initContext(path) }.get()
+        if (ptr == 0L) {
+            throw RuntimeException("Whisper-Modell konnte nicht geladen werden: $path")
+        }
+    }
+
     override fun transcribe(samples: FloatArray, language: String): String {
         if (samples.isEmpty()) return ""
         return worker.submit<String> {
@@ -53,12 +60,27 @@ class WhisperContext private constructor() : Transcriber {
     }
 
     companion object {
-        /** Asset-Pfad des gebuendelten Modells (in app/src/main/assets/). */
-        const val MODEL_ASSET = "models/ggml-base.bin"
+        /** Asset-Pfad des gebuendelten Standard-Modells (in app/src/main/assets/). */
+        const val MODEL_ASSET = "models/ggml-small-q5_1.bin"
 
-        /** Laedt das Modell aus den App-Assets (streamt direkt aus dem APK). */
+        /**
+         * Laedt das Modell aus den Assets des uebergebenen Context (streamt direkt aus
+         * dem APK). Wichtig: NICHT applicationContext erzwingen — im Instrumented-Test
+         * muss der Test-Context seine eigenen (androidTest-)Assets liefern koennen.
+         */
         fun createFromAsset(context: Context, assetPath: String = MODEL_ASSET): WhisperContext {
-            return WhisperContext().apply { initFromAsset(context.applicationContext, assetPath) }
+            return WhisperContext().apply { initFromAsset(context, assetPath) }
+        }
+
+        /** Laedt das Modell aus einer Datei (heruntergeladene Modelle in filesDir). */
+        fun createFromFile(path: String): WhisperContext {
+            return WhisperContext().apply { initFromFile(path) }
+        }
+
+        /** Laedt aus der angegebenen Quelle (gebuendeltes Asset oder Datei). */
+        fun createFrom(context: Context, source: ModelSource): WhisperContext = when (source) {
+            is ModelSource.Asset -> createFromAsset(context, source.path)
+            is ModelSource.FileP -> createFromFile(source.path)
         }
 
         fun systemInfo(): String = WhisperLib.getSystemInfo()

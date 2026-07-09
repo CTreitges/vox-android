@@ -17,7 +17,7 @@ import kotlin.math.abs
 class AudioRecorder {
 
     companion object {
-        const val SAMPLE_RATE = 16_000
+        const val SAMPLE_RATE = 16_000 // == AudioUtils.SAMPLE_RATE
         private const val TAG = "WB-AudioRecorder"
         private val CHANNEL = AudioFormat.CHANNEL_IN_MONO
         private val ENCODING = AudioFormat.ENCODING_PCM_16BIT
