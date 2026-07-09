@@ -1,0 +1,118 @@
+package com.chris.whisperbar
+
+import android.annotation.SuppressLint
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
+import android.util.Log
+import java.io.ByteArrayOutputStream
+import kotlin.math.abs
+
+/**
+ * Nimmt Mikrofon-Audio als 16 kHz Mono PCM16 auf und liefert es als FloatArray
+ * (Whisper-Format, [-1, 1]). Push-to-talk: [start] beim Druecken, [stop] beim Loslassen.
+ *
+ * Braucht die RECORD_AUDIO-Berechtigung (wird in der SetupActivity angefragt).
+ */
+class AudioRecorder {
+
+    companion object {
+        const val SAMPLE_RATE = 16_000
+        private const val TAG = "WB-AudioRecorder"
+        private val CHANNEL = AudioFormat.CHANNEL_IN_MONO
+        private val ENCODING = AudioFormat.ENCODING_PCM_16BIT
+    }
+
+    @Volatile private var recording = false
+    private var thread: Thread? = null
+    private val pcm = ByteArrayOutputStream()
+
+    /** Optionaler Pegel-Callback (0..1) fuer eine simple Waveform-Anzeige. */
+    var onAmplitude: ((Float) -> Unit)? = null
+
+    val isRecording: Boolean get() = recording
+
+    @SuppressLint("MissingPermission") // Aufrufer stellt Berechtigung sicher (SetupActivity).
+    fun start(): Boolean {
+        if (recording) return true
+        val minBuf = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, ENCODING)
+        if (minBuf <= 0) {
+            Log.e(TAG, "getMinBufferSize fehlgeschlagen: $minBuf")
+            return false
+        }
+        val bufferSize = minBuf * 2
+        val recorder = try {
+            AudioRecord(
+                MediaRecorder.AudioSource.VOICE_RECOGNITION,
+                SAMPLE_RATE, CHANNEL, ENCODING, bufferSize,
+            )
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Keine RECORD_AUDIO-Berechtigung", e)
+            return false
+        }
+        if (recorder.state != AudioRecord.STATE_INITIALIZED) {
+            Log.e(TAG, "AudioRecord nicht initialisiert")
+            recorder.release()
+            return false
+        }
+
+        synchronized(pcm) { pcm.reset() }
+        recording = true
+        recorder.startRecording()
+
+        thread = Thread {
+            val buf = ShortArray(bufferSize / 2)
+            val bytes = ByteArray(buf.size * 2)
+            try {
+                while (recording) {
+                    val n = recorder.read(buf, 0, buf.size)
+                    if (n <= 0) continue
+                    var peak = 0
+                    for (i in 0 until n) {
+                        val s = buf[i].toInt()
+                        val a = abs(s)
+                        if (a > peak) peak = a
+                        // little-endian PCM16
+                        bytes[i * 2] = (s and 0xFF).toByte()
+                        bytes[i * 2 + 1] = ((s shr 8) and 0xFF).toByte()
+                    }
+                    synchronized(pcm) { pcm.write(bytes, 0, n * 2) }
+                    onAmplitude?.invoke(peak / 32768f)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Aufnahme-Loop-Fehler", e)
+            } finally {
+                try { recorder.stop() } catch (_: Exception) {}
+                recorder.release()
+            }
+        }.apply { start() }
+        return true
+    }
+
+    /** Stoppt die Aufnahme und liefert die gesammelten Samples als FloatArray. */
+    fun stop(): FloatArray {
+        if (!recording) return FloatArray(0)
+        recording = false
+        try { thread?.join(2_000) } catch (_: InterruptedException) {}
+        thread = null
+
+        val raw = synchronized(pcm) { pcm.toByteArray() }
+        val sampleCount = raw.size / 2
+        val out = FloatArray(sampleCount)
+        for (i in 0 until sampleCount) {
+            val lo = raw[i * 2].toInt() and 0xFF
+            val hi = raw[i * 2 + 1].toInt() // Vorzeichen erhalten
+            val sample = (hi shl 8) or lo
+            out[i] = sample / 32768f
+        }
+        return out
+    }
+
+    /** Aufnahme abbrechen, Samples verwerfen. */
+    fun cancel() {
+        recording = false
+        try { thread?.join(1_000) } catch (_: InterruptedException) {}
+        thread = null
+        synchronized(pcm) { pcm.reset() }
+    }
+}

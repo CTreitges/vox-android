@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="kb_background">#1B1E24</color>
+    <color name="kb_surface">#2A2E37</color>
+    <color name="kb_key">#3A3F4B</color>
+    <color name="kb_key_pressed">#4B5160</color>
+    <color name="kb_text">#ECEFF4</color>
+    <color name="kb_text_dim">#9AA0AD</color>
+    <color name="accent">#4C8DFF</color>
+    <color name="accent_pressed">#2F6FE0</color>
+    <color name="recording">#FF4C4C</color>
+    <color name="launcher_bg">#4C8DFF</color>
+</resources>

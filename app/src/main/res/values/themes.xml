@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Framework-Theme (kein AppCompat noetig). -->
+    <style name="AppTheme" parent="@android:style/Theme.Material.Light.DarkActionBar">
+        <item name="android:colorPrimary">@color/accent</item>
+        <item name="android:colorAccent">@color/accent</item>
+    </style>
+
+    <!-- Tastatur-Utility-Buttons. -->
+    <style name="Key">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_marginHorizontal">3dp</item>
+        <item name="android:background">@drawable/key_bg</item>
+        <item name="android:textColor">@color/kb_text</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:minWidth">44dp</item>
+        <item name="android:paddingHorizontal">10dp</item>
+    </style>
+</resources>

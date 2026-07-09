@@ -1,0 +1,15 @@
+# Gradle / Android build
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.idea/
+captures/
+.cxx/
+
+# Grosses Whisper-Modell wird von der CI geladen (nicht committen)
+app/src/main/assets/models/*.bin
+
+# OS
+.DS_Store

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WhisperBar</string>
+    <string name="ime_label">WhisperBar Diktat</string>
+    <string name="settings_title">WhisperBar Einstellungen</string>
+
+    <string name="subtype_de">Deutsch</string>
+    <string name="subtype_en">Englisch</string>
+
+    <!-- Setup -->
+    <string name="setup_title">WhisperBar einrichten</string>
+    <string name="setup_intro">Diktiere per Whisper-KI direkt in jede App — voll offline, lokal auf deinem Gerät. Drei Schritte:</string>
+    <string name="setup_step_mic">1. Mikrofon erlauben</string>
+    <string name="setup_step_enable">2. WhisperBar als Tastatur aktivieren</string>
+    <string name="setup_step_select">3. WhisperBar als Eingabemethode wählen</string>
+    <string name="setup_grant_mic">Mikrofon erlauben</string>
+    <string name="setup_open_settings">Tastatur-Einstellungen öffnen</string>
+    <string name="setup_pick_ime">Eingabemethode wählen</string>
+    <string name="setup_try">Hier ausprobieren — tippe rein und wechsle zur WhisperBar-Tastatur:</string>
+    <string name="setup_try_hint">Zum Diktieren hierher tippen …</string>
+    <string name="setup_open_prefs">Einstellungen</string>
+    <string name="status_done">✓ erledigt</string>
+    <string name="status_open">✗ offen</string>
+
+    <!-- Keyboard -->
+    <string name="kb_hint_hold">Halte das Mikrofon gedrückt und sprich</string>
+    <string name="kb_listening">Höre zu … loslassen zum Beenden</string>
+    <string name="kb_transcribing">Transkribiere …</string>
+    <string name="kb_loading_model">Modell wird geladen …</string>
+    <string name="kb_need_permission">Mikrofon-Berechtigung fehlt — tippe zum Einrichten</string>
+    <string name="kb_error">Fehler bei der Erkennung</string>
+    <string name="kb_space">Leer</string>
+    <string name="cd_mic">Diktat-Mikrofon</string>
+
+    <!-- Settings -->
+    <string name="pref_language">Sprache</string>
+    <string name="pref_remove_fillers">Füllwörter entfernen (ähm, äh …)</string>
+    <string name="pref_auto_cap">Automatisch groß schreiben</string>
+    <string name="pref_trailing_space">Leerzeichen nach Diktat anhängen</string>
+    <string name="pref_model_info">Modell: ggml-tiny (multilingual, lokal)</string>
+</resources>
