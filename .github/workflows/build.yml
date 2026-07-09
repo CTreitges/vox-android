@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# Ältere, überholte Läufe desselben Branches abbrechen (spart CI-Minuten).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   MODEL_URL: https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin
   MODEL_PATH: app/src/main/assets/models/ggml-tiny.bin

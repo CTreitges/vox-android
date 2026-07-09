@@ -18,8 +18,9 @@ class TextPolisherTest {
     }
 
     @Test fun whitespaceWirdNormalisiert() {
-        assertEquals("Hallo Welt", TextPolisher.polish("  hallo   welt  ", full))
-        assertEquals("Hallo Welt", TextPolisher.polish("hallo\n\twelt", full))
+        // Nur Satzanfang gross (kein Title-Case) -> "welt" bleibt klein.
+        assertEquals("Hallo welt", TextPolisher.polish("  hallo   welt  ", full))
+        assertEquals("Hallo welt", TextPolisher.polish("hallo\n\twelt", full))
     }
 
     @Test fun ersterBuchstabeGross() {
@@ -73,7 +74,7 @@ class TextPolisherTest {
 
     @Test fun leerzeichenVorSatzzeichenEntfernt() {
         assertEquals(
-            "Hallo, Welt!",
+            "Hallo, welt!",
             TextPolisher.polish("hallo , welt !", full),
         )
     }
@@ -89,6 +90,25 @@ class TextPolisherTest {
         assertEquals(
             "das bleibt klein.",
             TextPolisher.polish("das bleibt klein.", PolishOptions(autoCapitalize = false)),
+        )
+    }
+
+    @Test fun autoModusLoeschtKeineEchtenWoerter() {
+        // "um" (dt.) und "este" (span.) sind echte Woerter -> im auto-Modus nicht entfernen.
+        assertEquals(
+            "Ich gehe um die Ecke.",
+            TextPolisher.polish("ich gehe um die Ecke.", PolishOptions(language = "auto")),
+        )
+        assertEquals(
+            "Compré este libro.",
+            TextPolisher.polish("compré este libro.", PolishOptions(language = "auto")),
+        )
+    }
+
+    @Test fun autoModusEntferntEindeutigeFueller() {
+        assertEquals(
+            "Ich denke ja.",
+            TextPolisher.polish("ich ähm denke uh ja.", PolishOptions(language = "auto")),
         )
     }
 }

@@ -113,21 +113,22 @@ class WhisperBarInputMethodService : InputMethodService() {
 
     private fun stopDictation() {
         if (!recorder.isRecording) return
-        val samples = recorder.stop()
+        // Sofortiges UI-Feedback auf dem Main-Thread ...
         micButton?.backgroundTintList = null
         resetLevel()
-
-        // Sehr kurze Aufnahmen (< 0,3 s) verwerfen — meist versehentliche Taps.
-        if (samples.size < AudioRecorder.SAMPLE_RATE * 3 / 10) {
-            setStatus(R.string.kb_hint_hold)
-            return
-        }
-
         setStatus(R.string.kb_transcribing)
         val language = prefs.language
         val options = prefs.polishOptions()
         io.submit {
             try {
+                // ... aber stop() (join + PCM->Float) und Transkription bewusst auf dem
+                // io-Thread, NIE auf dem UI-Thread (sonst Freeze/ANR beim Loslassen).
+                val samples = recorder.stop()
+                // Sehr kurze Aufnahmen (< 0,3 s) verwerfen — meist versehentliche Taps.
+                if (samples.size < AudioRecorder.SAMPLE_RATE * 3 / 10) {
+                    main.post { setStatus(R.string.kb_hint_hold) }
+                    return@submit
+                }
                 val t = ensureTranscriber()
                 val raw = t.transcribe(samples, language)
                 val polished = TextPolisher.polish(raw, options)

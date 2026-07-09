@@ -64,8 +64,15 @@ object TextPolisher {
         return text
     }
 
+    // Im auto-Modus NUR sprachuebergreifend eindeutige Disfluenzen — niemals Woerter,
+    // die in irgendeiner Sprache echt sind (z.B. dt. "um", span. "este"). Sonst wuerde
+    // der auto-Modus legitime Eingaben loeschen.
+    private val AUTO_FILLERS = listOf(
+        "ähm", "äh", "öhm", "ähem", "öh", "uh", "uhm", "erm", "euh", "ehm", "hmm", "mmm",
+    )
+
     private fun fillersFor(language: String): List<String> {
-        if (language == "auto") return FILLERS.values.flatten().distinct()
+        if (language == "auto") return AUTO_FILLERS
         return FILLERS[language] ?: emptyList()
     }
 
