@@ -91,6 +91,14 @@ unkomprimiert im APK abgelegt (`noCompress "bin"`) und vom nativen Asset-Loader 
 
 APK-Download: Actions-Run öffnen → gewünschtes Artefakt → `app-debug.apk` bzw. `app-release.apk`.
 
+### Release veröffentlichen
+Version in `app/build.gradle.kts` hochziehen (`versionCode` **und** `versionName`), die neue
+Version in `.github/release-version` schreiben (z. B. `v2.0`) und optional Release-Notes unter
+`.github/release-notes/v2.0.md` ablegen. Beim nächsten Push legt der `release`-Job daraus ein
+GitHub-Release mit dem signierten APK an. Steht die Version schon als Release im Repo, passiert
+nichts — weitere Pushes bleiben also ruhig. Ein Tag-Push `v*` oder ein manueller Start mit dem
+Eingabefeld `release_tag` funktionieren ebenfalls und überschreiben ein bestehendes Release.
+
 **Release-Signierung:** Ein persistenter PKCS12-Keystore liegt als GitHub-Secrets
 `WB_KEYSTORE_B64` + `WB_KEYSTORE_PASSWORD` (nicht im Repo). Die CI dekodiert ihn und
 signiert `assembleRelease`. Derselbe Key signiert jeden Release → Updates sind installierbar.
