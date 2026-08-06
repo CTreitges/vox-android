@@ -1,8 +1,11 @@
 package com.chris.whisperbar.a11y
 
 import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.AccessibilityServiceInfo
+import android.content.Context
 import android.os.Bundle
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityNodeInfo
 
 /**
@@ -110,7 +113,22 @@ class TextInserterAccessibilityService : AccessibilityService() {
         @Volatile
         private var instance: TextInserterAccessibilityService? = null
 
+        /** Ob der Dienst laeuft UND gebunden ist — Voraussetzung fuers Einfuegen. */
         fun isRunning(): Boolean = instance != null
+
+        /**
+         * Ob der Nutzer den Dienst eingeschaltet hat — gelesen aus der Systemeinstellung
+         * statt aus [instance]. Zwischen "eingeschaltet" und "gebunden" liegen ein paar
+         * hundert Millisekunden; fuer die Statusanzeige zaehlt, was der Nutzer umgelegt
+         * hat, sonst steht dort noch "offen", obwohl der Schalter schon an ist.
+         */
+        fun isEnabled(context: Context): Boolean {
+            val am = context.getSystemService(AccessibilityManager::class.java) ?: return false
+            return runCatching {
+                am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+                    .any { it.resolveInfo?.serviceInfo?.packageName == context.packageName }
+            }.getOrDefault(false)
+        }
 
         /** Versucht den Text einzufuegen; false, wenn Dienst aus oder kein Fokusfeld. */
         fun tryInsert(text: String): Boolean = instance?.insert(text) ?: false

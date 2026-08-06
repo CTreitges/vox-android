@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  accessibilityEventTypes bewusst nur typeViewFocused: der Dienst wertet gar keine
+  Ereignisse aus (onAccessibilityEvent ist leer) — er wird ausschliesslich aktiv, wenn
+  ihm der schwebende Knopf fertigen Text uebergibt. typeWindowContentChanged stand hier
+  frueher zusaetzlich drin und feuert bei jedem Scrollen und jeder Animation: lauter
+  Ereignisse, die das System serialisiert und zu uns schickt, damit wir sie wegwerfen.
+-->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeViewFocused|typeWindowContentChanged"
+    android:accessibilityEventTypes="typeViewFocused"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagDefault"
     android:canRetrieveWindowContent="true"

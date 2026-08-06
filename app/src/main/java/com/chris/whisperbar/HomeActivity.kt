@@ -5,9 +5,12 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.ContentObserver
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
@@ -109,8 +112,25 @@ class HomeActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        // Die Bedienungshilfe laesst sich auch von aussen umschalten, waehrend dieser
+        // Bildschirm offen bleibt — etwa mit der Lautstaerke-Tastenkombination. Ohne
+        // Beobachter stuende der Schritt dann weiter auf "offen", obwohl er erledigt ist.
+        contentResolver.registerContentObserver(
+            Settings.Secure.getUriFor(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES),
+            false,
+            a11yObserver,
+        )
         refresh()
         maybeExplainRestrictedSetting()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        contentResolver.unregisterContentObserver(a11yObserver)
+    }
+
+    private val a11yObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
+        override fun onChange(selfChange: Boolean) = refresh()
     }
 
     // --- Bedienungshilfe: Androids „eingeschränkte Einstellungen" -------------
@@ -134,7 +154,7 @@ class HomeActivity : Activity() {
     private fun maybeExplainRestrictedSetting() {
         if (!awaitingA11y) return
         awaitingA11y = false
-        if (TextInserterAccessibilityService.isRunning()) return
+        if (TextInserterAccessibilityService.isEnabled(this)) return
         if (Build.VERSION.SDK_INT < 33 || restrictedHintShown) return
         restrictedHintShown = true
         showRestrictedSettingHelp()
@@ -187,7 +207,7 @@ class HomeActivity : Activity() {
             ),
             SetupStep(
                 R.string.setup_row_a11y, R.string.setup_row_a11y_hint,
-                done = { TextInserterAccessibilityService.isRunning() },
+                done = { TextInserterAccessibilityService.isEnabled(this) },
                 action = { openAccessibilitySettings() },
             ),
         )
@@ -253,7 +273,7 @@ class HomeActivity : Activity() {
 
         gestures.visibility = if (running) View.VISIBLE else View.GONE
         a11yWarning.visibility =
-            if (ready && !TextInserterAccessibilityService.isRunning()) View.VISIBLE else View.GONE
+            if (ready && !TextInserterAccessibilityService.isEnabled(this)) View.VISIBLE else View.GONE
 
         updateChipSelection()
     }
