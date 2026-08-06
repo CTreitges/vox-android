@@ -128,6 +128,16 @@ Voraussetzungen: JDK 17, Android SDK 35, NDK `27.2.12479018`, CMake `3.22.1`.
 Das erste Diktat lädt kurz das Modell (danach bleibt es im Speicher). Auf sehr alten
 Geräten ist `tiny` am schnellsten.
 
+### „Bedienungshilfe lässt sich nicht aktivieren"
+Ab Android 13 sperrt das System Bedienungshilfen für Apps, die als APK-Datei installiert
+wurden („Aus Sicherheitsgründen ist diese Einstellung derzeit nicht verfügbar"). Freigeben:
+**Einstellungen → Apps → WhisperBar → ⋮ → „Eingeschränkte Einstellungen zulassen"**, danach
+lässt sich der Schalter unter *Bedienungshilfen* umlegen. Die App erklärt das ab 2.1 selbst,
+sobald sie merkt, dass es nicht geklappt hat.
+
+Die Bedienungshilfe ist optional: ohne sie landet der Text in der Zwischenablage, und über den
+Tastatur-Weg wird sie gar nicht gebraucht.
+
 ## Tests
 - **Unit** (`app/src/test/…`): Textveredelung, Stille-Trimmung inkl. Index-Variante,
   WAV-Encoding und die Tempo-Heuristiken (`WhisperTuningTest`) — läuft ohne Gerät.

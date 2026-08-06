@@ -20,7 +20,7 @@
     <string name="home_grant_overlay">Anzeige über anderen Apps erlauben</string>
 
     <string name="home_gestures">Tippen = Diktat starten und beenden · Ziehen = verschieben · Lange drücken = letztes Diktat zurücknehmen</string>
-    <string name="home_a11y_warning">Ohne die Bedienungshilfe landet der Text nur in der Zwischenablage statt direkt im Textfeld.</string>
+    <string name="home_a11y_warning">Ohne die Bedienungshilfe landet der Text nur in der Zwischenablage statt direkt im Textfeld. Lässt sie sich nicht einschalten? Hier tippen.</string>
 
     <string name="section_setup">Einrichtung</string>
     <string name="section_quick">Schnelleinstellung</string>
@@ -109,6 +109,13 @@
     <!-- Bedienungshilfe -->
     <string name="a11y_label">WhisperBar Text-Einfügen</string>
     <string name="a11y_description">Fügt diktierten Text ins gerade fokussierte Feld ein, damit du beim Diktieren nicht die Tastatur wechseln musst. Es wird nichts mitgelesen oder gespeichert.</string>
+
+    <!-- Androids „eingeschränkte Einstellungen" ab Android 13 -->
+    <string name="a11y_blocked_title">Schalter ausgegraut?</string>
+    <string name="a11y_blocked_message">Android sperrt Bedienungshilfen für Apps, die als APK-Datei installiert wurden — daher die Meldung „Aus Sicherheitsgründen ist diese Einstellung derzeit nicht verfügbar".\n\nSo gibst du sie frei:\n\n1. Unten auf „App-Info öffnen" tippen\n2. Oben rechts das Menü ⋮ antippen\n3. „Eingeschränkte Einstellungen zulassen" wählen\n4. Zurück zu den Bedienungshilfen und WhisperBar einschalten\n\nOhne Bedienungshilfe funktioniert das Diktat weiterhin — der Text landet dann in der Zwischenablage statt direkt im Feld. Wer sie gar nicht will, nutzt WhisperBar als Tastatur; dafür wird sie nicht gebraucht.</string>
+    <string name="a11y_blocked_open_app_info">App-Info öffnen</string>
+    <string name="a11y_blocked_retry">Nochmal versuchen</string>
+    <string name="a11y_blocked_later">Später</string>
 
     <!-- Cloud-API -->
     <string name="pref_api_title">Cloud-API</string>

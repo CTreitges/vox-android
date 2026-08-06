@@ -2,6 +2,7 @@ package com.chris.whisperbar
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -46,6 +47,12 @@ class HomeActivity : Activity() {
     private lateinit var prefs: Prefs
     private lateinit var steps: List<SetupStep>
 
+    /** Der Nutzer ist gerade in den Bedienungshilfe-Einstellungen — Ergebnis pruefen. */
+    private var awaitingA11y = false
+
+    /** Der Hinweis auf die eingeschraenkten Einstellungen kam schon; nicht wiederholen. */
+    private var restrictedHintShown = false
+
     private lateinit var stateDot: View
     private lateinit var stateTitle: TextView
     private lateinit var stateDetail: TextView
@@ -80,6 +87,8 @@ class HomeActivity : Activity() {
         steps = buildSteps()
 
         primary.setOnClickListener { doPrimaryAction() }
+        // Zweiter Weg zur Erklaerung: wer den Hinweis liest, kommt direkt zur Anleitung.
+        a11yWarning.setOnClickListener { showRestrictedSettingHelp() }
         findViewById<ImageButton>(R.id.btn_settings).setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
@@ -101,6 +110,51 @@ class HomeActivity : Activity() {
     override fun onResume() {
         super.onResume()
         refresh()
+        maybeExplainRestrictedSetting()
+    }
+
+    // --- Bedienungshilfe: Androids „eingeschränkte Einstellungen" -------------
+
+    private fun openAccessibilitySettings() {
+        awaitingA11y = true
+        startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+    }
+
+    /**
+     * Ab Android 13 sperrt das System den Bedienungshilfe-Schalter fuer Apps, die per
+     * APK-Datei statt aus einem Store installiert wurden („Aus Sicherheitsgründen ist
+     * diese Einstellung derzeit nicht verfügbar"). Der Ausweg — App-Info, Menü ⋮,
+     * „Eingeschränkte Einstellungen zulassen" — ist so gut versteckt, dass ohne Hinweis
+     * kaum jemand darauf kommt.
+     *
+     * Deshalb: nur wer gerade in den Bedienungshilfen war und trotzdem ohne aktivierten
+     * Dienst zurueckkommt, bekommt die Erklaerung — und das hoechstens einmal pro
+     * App-Start, damit es nicht nervt.
+     */
+    private fun maybeExplainRestrictedSetting() {
+        if (!awaitingA11y) return
+        awaitingA11y = false
+        if (TextInserterAccessibilityService.isRunning()) return
+        if (Build.VERSION.SDK_INT < 33 || restrictedHintShown) return
+        restrictedHintShown = true
+        showRestrictedSettingHelp()
+    }
+
+    private fun showRestrictedSettingHelp() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.a11y_blocked_title)
+            .setMessage(R.string.a11y_blocked_message)
+            .setPositiveButton(R.string.a11y_blocked_open_app_info) { _, _ ->
+                startActivity(
+                    Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:$packageName"),
+                    ),
+                )
+            }
+            .setNeutralButton(R.string.a11y_blocked_retry) { _, _ -> openAccessibilitySettings() }
+            .setNegativeButton(R.string.a11y_blocked_later, null)
+            .show()
     }
 
     override fun onRequestPermissionsResult(
@@ -134,7 +188,7 @@ class HomeActivity : Activity() {
             SetupStep(
                 R.string.setup_row_a11y, R.string.setup_row_a11y_hint,
                 done = { TextInserterAccessibilityService.isRunning() },
-                action = { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
+                action = { openAccessibilitySettings() },
             ),
         )
         if (Build.VERSION.SDK_INT >= 33) {
