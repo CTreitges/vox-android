@@ -8,10 +8,15 @@ import java.io.ByteArrayOutputStream
  */
 object WavEncoder {
 
-    fun encode(samples: FloatArray, sampleRate: Int = AudioUtils.SAMPLE_RATE): ByteArray {
-        val pcm = ByteArray(samples.size * 2)
-        for (i in samples.indices) {
-            val s = (samples[i].coerceIn(-1f, 1f) * 32767f).toInt()
+    fun encode(samples: FloatArray, sampleRate: Int = AudioUtils.SAMPLE_RATE): ByteArray =
+        encode(AudioSlice.of(samples), sampleRate)
+
+    /** Kodiert nur den Ausschnitt [audio] — ohne den Puffer vorher zu kopieren. */
+    fun encode(audio: AudioSlice, sampleRate: Int = AudioUtils.SAMPLE_RATE): ByteArray {
+        val pcm = ByteArray(audio.length * 2)
+        val src = audio.data
+        for (i in 0 until audio.length) {
+            val s = (src[audio.offset + i].coerceIn(-1f, 1f) * 32767f).toInt()
             pcm[i * 2] = (s and 0xFF).toByte()
             pcm[i * 2 + 1] = ((s shr 8) and 0xFF).toByte()
         }

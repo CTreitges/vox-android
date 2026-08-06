@@ -32,17 +32,24 @@ class WhisperContext private constructor() : Transcriber {
         }
     }
 
-    override fun transcribe(samples: FloatArray, language: String): String {
-        if (samples.isEmpty()) return ""
+    /** Voller Encoder-Kontext statt der laengenabhaengigen Verkuerzung erzwingen. */
+    @Volatile var fastMode: Boolean = true
+
+    override fun transcribe(audio: AudioSlice, language: String): String {
+        if (audio.isEmpty) return ""
+        val audioCtx = WhisperTuning.audioCtxFor(audio.length, fast = fastMode)
+        val threads = CpuInfo.inferenceThreads
         return worker.submit<String> {
             val ctx = ptr
             check(ctx != 0L) { "WhisperContext bereits freigegeben" }
-            val threads = Runtime.getRuntime().availableProcessors().coerceIn(2, 6)
-            WhisperLib.fullTranscribe(ctx, threads, language, samples)
+            WhisperLib.fullTranscribe(
+                ctx, threads, language, audioCtx, audio.data, audio.offset, audio.length,
+            )
             val count = WhisperLib.getTextSegmentCount(ctx)
-            buildString {
-                for (i in 0 until count) append(WhisperLib.getTextSegment(ctx, i))
-            }
+            // StringBuilder mit Startgroesse: spart das Nachwachsen bei laengeren Diktaten.
+            val sb = StringBuilder(count * 48 + 16)
+            for (i in 0 until count) sb.append(WhisperLib.getTextSegment(ctx, i))
+            sb.toString()
         }.get()
     }
 

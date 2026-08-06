@@ -20,9 +20,9 @@ class ApiTranscriber(
     private val model: String,
 ) : Transcriber {
 
-    override fun transcribe(samples: FloatArray, language: String): String {
+    override fun transcribe(audio: AudioSlice, language: String): String {
         if (apiKey.isBlank()) throw ApiNotConfiguredException()
-        val wav = WavEncoder.encode(samples, AudioUtils.SAMPLE_RATE)
+        val wav = WavEncoder.encode(audio, AudioUtils.SAMPLE_RATE)
         val boundary = "----whisperbar${System.nanoTime()}"
         val endpoint = baseUrl.trimEnd('/') + "/audio/transcriptions"
 

@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Startbildschirm. Leitgedanke: EIN Hauptknopf, der immer den naechsten sinnvollen
+  Schritt macht — fehlt eine Berechtigung, holt er sie; ist alles da, startet er das
+  Diktat. Erledigte Einrichtungsschritte verschwinden aus der Liste.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="18dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="32dp">
+
+        <!-- Kopfzeile -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/home_subtitle"
+                    style="@style/TextHint" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btn_settings"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_row"
+                android:contentDescription="@string/open_settings"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_settings" />
+        </LinearLayout>
+
+        <!-- Statuskarte mit dem Hauptknopf -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    android:id="@+id/state_dot"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/bg_dot_ok" />
+
+                <TextView
+                    android:id="@+id/state_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/state_ready"
+                    style="@style/TextTitle" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/state_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                style="@style/TextHint" />
+
+            <Button
+                android:id="@+id/btn_primary"
+                style="@style/ButtonPrimary"
+                android:layout_marginTop="16dp"
+                android:text="@string/home_start_bubble" />
+
+            <TextView
+                android:id="@+id/gestures"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/home_gestures"
+                style="@style/TextHint" />
+
+            <TextView
+                android:id="@+id/a11y_warning"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/home_a11y_warning"
+                android:textColor="@color/warning"
+                android:textSize="13sp"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Einrichtung -->
+        <TextView
+            android:id="@+id/label_setup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/section_setup"
+            style="@style/TextSection" />
+
+        <LinearLayout
+            android:id="@+id/setup_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp">
+
+            <LinearLayout
+                android:id="@+id/setup_rows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <LinearLayout
+                android:id="@+id/setup_done"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:minHeight="52dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="6dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="12dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_check" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_all_done"
+                    android:textColor="@color/text"
+                    android:textSize="15sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Schnelleinstellung -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/section_quick"
+            style="@style/TextSection" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/quick_language"
+                style="@style/TextHint" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/language_chips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/quick_speed"
+                style="@style/TextHint" />
+
+            <LinearLayout
+                android:id="@+id/speed_chips"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal" />
+        </LinearLayout>
+
+        <!-- Tastatur-Weg -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/section_keyboard"
+            style="@style/TextSection" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/keyboard_intro"
+                style="@style/TextHint" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_kb_enable"
+                    style="@style/ButtonGhost"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/keyboard_enable" />
+
+                <Button
+                    android:id="@+id/btn_kb_select"
+                    style="@style/ButtonGhost"
+                    android:text="@string/keyboard_select" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Probierfeld -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/section_try"
+            style="@style/TextSection" />
+
+        <EditText
+            android:id="@+id/try_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_field"
+            android:gravity="top"
+            android:hint="@string/try_hint"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:minLines="3"
+            android:padding="14dp"
+            android:textColor="@color/text"
+            android:textColorHint="@color/text_dim"
+            android:textSize="15sp" />
+    </LinearLayout>
+</ScrollView>

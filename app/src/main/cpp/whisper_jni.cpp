@@ -6,6 +6,7 @@
 #include <android/asset_manager_jni.h>
 #include <android/log.h>
 #include <string.h>
+#include <vector>
 #include "whisper.h"
 
 #define TAG "WhisperBarJNI"
@@ -78,11 +79,23 @@ Java_com_chris_whisperbar_WhisperLib_freeContext(
 JNIEXPORT void JNICALL
 Java_com_chris_whisperbar_WhisperLib_fullTranscribe(
         JNIEnv *env, jobject thiz, jlong context_ptr,
-        jint num_threads, jstring language_str, jfloatArray audio_data) {
+        jint num_threads, jstring language_str, jint audio_ctx,
+        jfloatArray audio_data, jint audio_offset, jint audio_length) {
     (void) thiz;
     struct whisper_context *ctx = (struct whisper_context *) context_ptr;
-    jfloat *audio = env->GetFloatArrayElements(audio_data, nullptr);
-    const jsize audio_len = env->GetArrayLength(audio_data);
+
+    // Nur den tatsaechlich benoetigten Ausschnitt kopieren. Der Aufnahme-Puffer ist
+    // gewachsen und meist deutlich groesser als das getrimmte Audio — GetFloatArrayElements
+    // wuerde ihn komplett kopieren, GetFloatArrayRegion kopiert exakt den Bereich.
+    const jsize total = env->GetArrayLength(audio_data);
+    if (audio_offset < 0 || audio_length <= 0 || audio_offset + audio_length > total) {
+        LOGW("Ungueltiger Audio-Bereich: offset=%d len=%d total=%d",
+             (int) audio_offset, (int) audio_length, (int) total);
+        return;
+    }
+    std::vector<float> audio((size_t) audio_length);
+    env->GetFloatArrayRegion(audio_data, audio_offset, audio_length, audio.data());
+
     const char *language = env->GetStringUTFChars(language_str, nullptr);
 
     struct whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
@@ -98,13 +111,29 @@ Java_com_chris_whisperbar_WhisperLib_fullTranscribe(
     params.n_threads        = num_threads;
     params.language         = language; // "auto" => Auto-Erkennung
 
+    // --- Die drei Parameter, die das Tempo bestimmen ---------------------------
+    //
+    // 1. audio_ctx: Whisper padded JEDES Audio auf 30 s und laesst den Encoder ueber
+    //    alle 1500 Positionen laufen. Bei einem 3-Sekunden-Diktat ist der allergroesste
+    //    Teil davon Stille. Der Deckel spart genau diese Arbeit.
+    if (audio_ctx > 0) {
+        params.audio_ctx = audio_ctx;
+    }
+    // 2. Kein Temperatur-Fallback: schlaegt die Dekodierung fehl, wiederholt whisper
+    //    denselben Abschnitt sonst bis zu fuenfmal mit steigender Temperatur — im
+    //    schlechtesten Fall die fuenffache Wartezeit. Fuer kurze Diktate nicht die
+    //    Qualitaet wert.
+    params.temperature      = 0.0f;
+    params.temperature_inc  = 0.0f;
+    // 3. Greedy ohne Mehrfachziehung — bei temperature 0 waeren die Durchlaeufe identisch.
+    params.greedy.best_of   = 1;
+
     whisper_reset_timings(ctx);
-    if (whisper_full(ctx, params, audio, audio_len) != 0) {
+    if (whisper_full(ctx, params, audio.data(), (int) audio.size()) != 0) {
         LOGW("whisper_full ist fehlgeschlagen");
     }
 
     env->ReleaseStringUTFChars(language_str, language);
-    env->ReleaseFloatArrayElements(audio_data, audio, JNI_ABORT);
 }
 
 JNIEXPORT jint JNICALL

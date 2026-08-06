@@ -1,59 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Diktat-Tastatur. Aufbau von oben nach unten:
+   1. Statuszeile mit Einstellungs-Taste
+   2. Wellenform (nur waehrend der Aufnahme sichtbar aktiv)
+   3. grosser Mikro-Orb — tippen ODER halten
+   4. eine Reihe Bearbeitungs-Tasten inkl. "Diktat zurueck"
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@color/kb_background"
-    android:paddingHorizontal="10dp"
-    android:paddingTop="8dp"
+    android:paddingHorizontal="8dp"
+    android:paddingTop="6dp"
     android:paddingBottom="10dp">
 
-    <TextView
-        android:id="@+id/status"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingVertical="6dp"
-        android:textColor="@color/kb_text_dim"
-        android:textSize="13sp"
-        android:text="@string/kb_hint_hold" />
+        android:layout_height="34dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:baselineAligned="false">
 
-    <View
-        android:id="@+id/level"
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingStart="40dp"
+            android:textColor="@color/kb_text_dim"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="@string/kb_hint_idle" />
+
+        <ImageButton
+            android:id="@+id/key_settings"
+            android:layout_width="40dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_row"
+            android:contentDescription="@string/open_settings"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_settings" />
+    </LinearLayout>
+
+    <com.chris.whisperbar.ui.WaveformView
+        android:id="@+id/waveform"
         android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_marginHorizontal="40dp"
-        android:layout_marginBottom="6dp"
-        android:background="@color/accent"
-        android:scaleX="0"
-        android:alpha="0.9" />
+        android:layout_height="30dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="2dp" />
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="118dp">
+        android:layout_height="106dp">
 
-        <ImageButton
+        <com.chris.whisperbar.ui.MicOrbView
             android:id="@+id/mic"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
+            android:layout_width="102dp"
+            android:layout_height="102dp"
             android:layout_gravity="center"
-            android:background="@drawable/mic_button_bg"
-            android:contentDescription="@string/cd_mic"
-            android:scaleType="center"
+            android:contentDescription="@string/cd_mic" />
+
+        <ImageView
+            android:id="@+id/mic_icon"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
             android:src="@drawable/ic_mic" />
     </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="50dp"
         android:layout_marginTop="8dp"
         android:orientation="horizontal"
         android:baselineAligned="false">
 
-        <Button
+        <ImageButton
             android:id="@+id/key_globe"
-            style="@style/Key"
-            android:text="🌐" />
+            style="@style/KeyIcon"
+            android:contentDescription="@string/cd_switch_keyboard"
+            android:src="@drawable/ic_globe" />
+
+        <ImageButton
+            android:id="@+id/key_undo"
+            style="@style/KeyIcon"
+            android:contentDescription="@string/cd_undo"
+            android:src="@drawable/ic_undo" />
 
         <Button
             android:id="@+id/key_comma"
@@ -63,7 +100,7 @@
         <Button
             android:id="@+id/key_space"
             style="@style/Key"
-            android:layout_weight="1"
+            android:layout_weight="3"
             android:text="@string/kb_space" />
 
         <Button
@@ -71,19 +108,17 @@
             style="@style/Key"
             android:text="." />
 
-        <Button
+        <ImageButton
             android:id="@+id/key_backspace"
-            style="@style/Key"
-            android:text="⌫" />
+            style="@style/KeyIcon"
+            android:contentDescription="@string/cd_backspace"
+            android:src="@drawable/ic_backspace" />
 
-        <Button
+        <ImageButton
             android:id="@+id/key_enter"
-            style="@style/Key"
-            android:text="⏎" />
-
-        <Button
-            android:id="@+id/key_settings"
-            style="@style/Key"
-            android:text="⚙" />
+            style="@style/KeyIcon"
+            android:background="@drawable/bg_key_accent"
+            android:contentDescription="@string/cd_enter"
+            android:src="@drawable/ic_enter" />
     </LinearLayout>
 </LinearLayout>

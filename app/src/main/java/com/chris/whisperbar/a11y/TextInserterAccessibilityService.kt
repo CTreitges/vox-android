@@ -12,8 +12,14 @@ import android.view.accessibility.AccessibilityNodeInfo
  *
  * Bewusst clipboard-frei (ACTION_SET_TEXT), da Zwischenablage-Schreibzugriff auf
  * Android 10+ fuer Hintergrund-Prozesse eingeschraenkt ist.
+ *
+ * Merkt sich das zuletzt Eingefuegte, damit ein misslungenes Diktat mit einer Geste
+ * wieder verschwindet ([undoLast]) — sonst muesste man Wort fuer Wort loeschen.
  */
 class TextInserterAccessibilityService : AccessibilityService() {
+
+    /** Zuletzt eingefuegter Text; null, sobald er nicht mehr zurueckgenommen werden kann. */
+    private var lastInserted: String? = null
 
     override fun onServiceConnected() {
         instance = this
@@ -28,22 +34,17 @@ class TextInserterAccessibilityService : AccessibilityService() {
         super.onDestroy()
     }
 
+    /** Das aktuell fokussierte, beschreibbare Feld — oder null. */
+    private fun focusedEditable(): AccessibilityNodeInfo? =
+        rootInActiveWindow?.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)?.takeIf { it.isEditable }
+
     /** Fuegt [text] an der Cursor-Position ein. Gibt true bei Erfolg. */
     fun insert(text: String): Boolean {
         if (text.isEmpty()) return true
-        val root = rootInActiveWindow ?: return false
-        val node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)?.takeIf { it.isEditable }
-            ?: return false
+        val node = focusedEditable() ?: return false
 
         val old = node.text?.toString() ?: ""
-        var selStart = node.textSelectionStart
-        var selEnd = node.textSelectionEnd
-        if (selStart !in 0..old.length || selEnd !in 0..old.length) {
-            selStart = old.length
-            selEnd = old.length
-        }
-        val lo = minOf(selStart, selEnd)
-        val hi = maxOf(selStart, selEnd)
+        val (lo, hi) = selectionOf(node, old)
 
         // Fuehrendes Leerzeichen, wenn direkt an ein Wort angefuegt wird.
         val needsSpace = lo > 0 && !old[lo - 1].isWhitespace() &&
@@ -51,18 +52,58 @@ class TextInserterAccessibilityService : AccessibilityService() {
         val ins = if (needsSpace) " $text" else text
 
         val combined = old.substring(0, lo) + ins + old.substring(hi)
-        val setArgs = Bundle().apply {
-            putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, combined)
-        }
-        if (!node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, setArgs)) return false
+        if (!setText(node, combined)) return false
 
         val cursor = lo + ins.length
-        val selArgs = Bundle().apply {
-            putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, cursor)
-            putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, cursor)
-        }
-        node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, selArgs)
+        setSelection(node, cursor, cursor)
+        lastInserted = ins
         return true
+    }
+
+    /**
+     * Nimmt das zuletzt Eingefuegte zurueck — aber nur, wenn es unveraendert direkt vor
+     * dem Cursor steht. Sonst haette man in der Zwischenzeit weitergetippt und wuerde
+     * fremden Text loeschen.
+     */
+    fun undoLast(): Boolean {
+        val text = lastInserted ?: return false
+        val node = focusedEditable() ?: return false
+        val old = node.text?.toString() ?: return false
+        val (lo, hi) = selectionOf(node, old)
+        if (lo != hi || lo < text.length) return false
+        if (old.substring(lo - text.length, lo) != text) return false
+
+        val combined = old.substring(0, lo - text.length) + old.substring(lo)
+        if (!setText(node, combined)) return false
+        val cursor = lo - text.length
+        setSelection(node, cursor, cursor)
+        lastInserted = null
+        return true
+    }
+
+    private fun selectionOf(node: AccessibilityNodeInfo, text: String): Pair<Int, Int> {
+        var start = node.textSelectionStart
+        var end = node.textSelectionEnd
+        if (start !in 0..text.length || end !in 0..text.length) {
+            start = text.length
+            end = text.length
+        }
+        return minOf(start, end) to maxOf(start, end)
+    }
+
+    private fun setText(node: AccessibilityNodeInfo, value: String): Boolean {
+        val args = Bundle().apply {
+            putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, value)
+        }
+        return node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
+    }
+
+    private fun setSelection(node: AccessibilityNodeInfo, start: Int, end: Int) {
+        val args = Bundle().apply {
+            putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, start)
+            putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, end)
+        }
+        node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, args)
     }
 
     companion object {
@@ -73,5 +114,8 @@ class TextInserterAccessibilityService : AccessibilityService() {
 
         /** Versucht den Text einzufuegen; false, wenn Dienst aus oder kein Fokusfeld. */
         fun tryInsert(text: String): Boolean = instance?.insert(text) ?: false
+
+        /** Versucht das letzte Diktat zurueckzunehmen; false, wenn nicht moeglich. */
+        fun tryUndo(): Boolean = instance?.undoLast() ?: false
     }
 }

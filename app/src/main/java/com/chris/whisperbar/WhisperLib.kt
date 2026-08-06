@@ -16,7 +16,20 @@ internal object WhisperLib {
     external fun initContextFromAsset(assetManager: AssetManager, assetPath: String): Long
     external fun initContext(modelPath: String): Long
     external fun freeContext(contextPtr: Long)
-    external fun fullTranscribe(contextPtr: Long, numThreads: Int, language: String, audioData: FloatArray)
+    /**
+     * @param audioOffset / [audioLength] Teilbereich von [audioData] — nur dieser wird
+     *   nach nativ kopiert, der Rest des Aufnahme-Puffers wird gar nicht angefasst.
+     * @param audioCtx gedeckelte Encoder-Positionen (siehe [WhisperTuning.audioCtxFor]).
+     */
+    external fun fullTranscribe(
+        contextPtr: Long,
+        numThreads: Int,
+        language: String,
+        audioCtx: Int,
+        audioData: FloatArray,
+        audioOffset: Int,
+        audioLength: Int,
+    )
     external fun getTextSegmentCount(contextPtr: Long): Int
     external fun getTextSegment(contextPtr: Long, index: Int): String
     external fun getSystemInfo(): String

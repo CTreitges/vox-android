@@ -2,79 +2,121 @@
 <resources>
     <string name="app_name">WhisperBar</string>
     <string name="ime_label">WhisperBar Diktat</string>
-    <string name="settings_title">WhisperBar Einstellungen</string>
+    <string name="settings_title">Einstellungen</string>
 
     <string name="subtype_de">Deutsch</string>
     <string name="subtype_en">Englisch</string>
 
-    <!-- Setup -->
-    <string name="setup_title">WhisperBar einrichten</string>
-    <string name="setup_intro">Diktiere per Whisper-KI direkt in jede App — voll offline, lokal auf deinem Gerät. Drei Schritte:</string>
-    <string name="setup_step_mic">1. Mikrofon erlauben</string>
-    <string name="setup_step_enable">2. WhisperBar als Tastatur aktivieren</string>
-    <string name="setup_step_select">3. WhisperBar als Eingabemethode wählen</string>
-    <string name="setup_grant_mic">Mikrofon erlauben</string>
-    <string name="setup_open_settings">Tastatur-Einstellungen öffnen</string>
-    <string name="setup_pick_ime">Eingabemethode wählen</string>
-    <string name="setup_try">Hier ausprobieren — tippe rein und wechsle zur WhisperBar-Tastatur:</string>
-    <string name="setup_try_hint">Zum Diktieren hierher tippen …</string>
-    <string name="setup_open_prefs">Einstellungen</string>
-    <string name="status_done">✓ erledigt</string>
-    <string name="status_open">✗ offen</string>
+    <!-- Startbildschirm -->
+    <string name="home_subtitle">Diktieren in jede App — offline auf deinem Gerät</string>
 
-    <!-- Keyboard -->
-    <string name="kb_hint_hold">Halte das Mikrofon gedrückt und sprich</string>
-    <string name="kb_listening">Höre zu … loslassen zum Beenden</string>
-    <string name="kb_transcribing">Transkribiere …</string>
-    <string name="kb_loading_model">Modell wird geladen …</string>
-    <string name="kb_need_permission">Mikrofon-Berechtigung fehlt — tippe zum Einrichten</string>
-    <string name="kb_error">Fehler bei der Erkennung</string>
+    <string name="state_ready">Bereit zum Diktieren</string>
+    <string name="state_active">Diktat aktiv</string>
+    <string name="state_setup">Noch kurz einrichten</string>
+
+    <string name="home_start_bubble">Diktat-Knopf starten</string>
+    <string name="home_stop_bubble">Diktat-Knopf beenden</string>
+    <string name="home_grant_mic">Mikrofon erlauben</string>
+    <string name="home_grant_overlay">Anzeige über anderen Apps erlauben</string>
+
+    <string name="home_gestures">Tippen = Diktat starten und beenden · Ziehen = verschieben · Lange drücken = letztes Diktat zurücknehmen</string>
+    <string name="home_a11y_warning">Ohne die Bedienungshilfe landet der Text nur in der Zwischenablage statt direkt im Textfeld.</string>
+
+    <string name="section_setup">Einrichtung</string>
+    <string name="section_quick">Schnelleinstellung</string>
+    <string name="section_keyboard">Alternative: eigene Tastatur</string>
+    <string name="section_try">Ausprobieren</string>
+
+    <string name="setup_all_done">Alles eingerichtet</string>
+    <string name="setup_row_mic">Mikrofon erlauben</string>
+    <string name="setup_row_mic_hint">Ohne Mikrofon kein Diktat</string>
+    <string name="setup_row_overlay">Über anderen Apps anzeigen</string>
+    <string name="setup_row_overlay_hint">Für den schwebenden Knopf</string>
+    <string name="setup_row_a11y">Bedienungshilfe „WhisperBar" aktivieren</string>
+    <string name="setup_row_a11y_hint">Fügt den Text direkt ins Feld ein</string>
+    <string name="setup_row_notif">Benachrichtigungen erlauben</string>
+    <string name="setup_row_notif_hint">Zeigt, dass das Diktat läuft</string>
+
+    <string name="quick_language">Sprache</string>
+    <string name="quick_speed">Tempo</string>
+    <string name="speed_turbo">Turbo</string>
+    <string name="speed_quality">Beste Qualität</string>
+
+    <string name="keyboard_intro">Statt des schwebenden Knopfs kannst du WhisperBar auch als Tastatur nutzen.</string>
+    <string name="keyboard_enable">Aktivieren</string>
+    <string name="keyboard_select">Auswählen</string>
+
+    <string name="try_hint">Hier tippen und diktieren …</string>
+    <string name="open_settings">Alle Einstellungen</string>
+
+    <!-- Tastatur -->
+    <string name="kb_hint_idle">Tippen zum Diktieren · Halten für kurze Einwürfe</string>
+    <string name="kb_hint_hold">Mikrofon gedrückt halten und sprechen</string>
+    <string name="kb_listening">Ich höre zu …</string>
+    <string name="kb_transcribing">Erkenne …</string>
+    <string name="kb_need_permission">Mikrofon-Berechtigung fehlt</string>
+    <string name="kb_error">Erkennung fehlgeschlagen</string>
     <string name="kb_space">Leer</string>
-    <string name="cd_mic">Diktat-Mikrofon</string>
 
-    <!-- Settings -->
+    <string name="cd_mic">Diktat-Mikrofon</string>
+    <string name="cd_undo">Letztes Diktat zurücknehmen</string>
+    <string name="cd_backspace">Löschen</string>
+    <string name="cd_enter">Zeilenumbruch</string>
+    <string name="cd_switch_keyboard">Tastatur wechseln</string>
+
+    <!-- Einstellungen -->
+    <string name="pref_section_recognition">Erkennung</string>
+    <string name="pref_section_operation">Bedienung</string>
+    <string name="pref_section_text">Textveredelung</string>
+
     <string name="pref_language">Sprache</string>
+    <string name="pref_language_hint">Eine feste Sprache ist schneller und genauer als die automatische Erkennung.</string>
+    <string name="pref_model">Modell</string>
+    <string name="pref_model_info">Alle Modelle sind quantisiert (q5). Small ist im APK enthalten; Base und Tiny werden bei Bedarf einmalig geladen.</string>
+
+    <string name="pref_fast_mode">Turbo-Erkennung</string>
+    <string name="pref_fast_mode_hint">Rechnet nur so viel Audio, wie du wirklich gesprochen hast, statt immer 30 Sekunden. Kurze Diktate werden dadurch um ein Vielfaches schneller.</string>
+
+    <string name="pref_hands_free">Freihändig diktieren</string>
+    <string name="pref_hands_free_hint">Kurz tippen startet das Diktat, es endet nach einer Sprechpause von selbst. Halten funktioniert weiterhin.</string>
+    <string name="pref_auto_stop">Pause bis zum Ende</string>
+    <string name="pref_haptics">Kurz vibrieren</string>
+    <string name="pref_bubble_autostart">Diktat-Knopf nach Neustart wieder starten</string>
+
     <string name="pref_remove_fillers">Füllwörter entfernen (ähm, äh …)</string>
-    <string name="pref_auto_cap">Automatisch groß schreiben</string>
-    <string name="pref_trailing_space">Leerzeichen nach Diktat anhängen</string>
-    <string name="pref_model">Modell (Qualität ↔ Tempo)</string>
-    <string name="pref_model_info">Modelle sind quantisiert (q5). Small ist gebündelt; Base/Tiny werden bei Auswahl einmalig geladen.</string>
+    <string name="pref_auto_cap">Sätze automatisch groß schreiben</string>
+    <string name="pref_trailing_space">Leerzeichen nach dem Diktat anhängen</string>
 
     <!-- Modell-Laden -->
     <string name="model_downloading">Lade Modell …</string>
     <string name="model_download_failed">Modell-Download fehlgeschlagen</string>
-    <string name="model_ready">Modell bereit</string>
+    <string name="model_bundled">Im APK enthalten</string>
+    <string name="model_available">Geladen</string>
     <string name="model_not_loaded">Modell nicht geladen — in den Einstellungen laden</string>
+    <string name="model_download_btn">Laden</string>
 
-    <!-- Schwebender Mikro-Button -->
+    <!-- Schwebender Knopf -->
     <string name="float_channel">WhisperBar Diktat</string>
     <string name="float_running">WhisperBar-Diktat aktiv</string>
     <string name="float_running_text">Tippe den schwebenden Knopf zum Diktieren</string>
     <string name="float_stop">Beenden</string>
     <string name="float_no_overlay">Bitte „Über anderen Apps anzeigen" erlauben</string>
-    <string name="float_clipboard_fallback">Text kopiert — Bedienungshilfe aktivieren zum automatischen Einfügen</string>
+    <string name="float_clipboard_fallback">Text kopiert — Bedienungshilfe aktivieren für automatisches Einfügen</string>
+    <string name="float_cancelled">Diktat verworfen</string>
+    <string name="float_undone">Letztes Diktat zurückgenommen</string>
+    <string name="float_undo_failed">Nichts zum Zurücknehmen</string>
 
     <!-- Bedienungshilfe -->
     <string name="a11y_label">WhisperBar Text-Einfügen</string>
     <string name="a11y_description">Fügt diktierten Text ins gerade fokussierte Feld ein, damit du beim Diktieren nicht die Tastatur wechseln musst. Es wird nichts mitgelesen oder gespeichert.</string>
 
-    <!-- Setup: Diktat ohne Tastaturwechsel -->
-    <string name="setup_float_title">Diktat ohne Tastatur-Wechsel (empfohlen)</string>
-    <string name="setup_float_intro">So bleibt Gboard aktiv und du startest das Diktat per schwebendem Knopf:</string>
-    <string name="setup_overlay_btn">Über anderen Apps anzeigen erlauben</string>
-    <string name="setup_a11y_btn">Bedienungshilfe „WhisperBar" aktivieren</string>
-    <string name="setup_start_bubble">Schwebenden Mikro-Button starten</string>
-    <string name="setup_stop_bubble">Schwebenden Mikro-Button beenden</string>
-    <string name="setup_notif_btn">Benachrichtigungen erlauben</string>
-
-    <string name="model_download_btn">Modell laden</string>
-
     <!-- Cloud-API -->
-    <string name="pref_api_title">Cloud-API (optional, bessere Qualität)</string>
+    <string name="pref_api_title">Cloud-API</string>
     <string name="pref_api_enable">Cloud-API statt On-Device nutzen</string>
-    <string name="pref_api_privacy">Achtung: Im API-Modus wird dein Audio an den Anbieter gesendet (nicht mehr offline).</string>
+    <string name="pref_api_privacy">Achtung: Im API-Modus wird dein Audio an den Anbieter gesendet — das Diktat ist dann nicht mehr offline.</string>
     <string name="pref_api_url_hint">Base-URL (z. B. https://api.openai.com/v1)</string>
     <string name="pref_api_key_hint">API-Key</string>
     <string name="pref_api_model_hint">Modell (z. B. whisper-1)</string>
-    <string name="pref_api_examples">Beispiele: OpenAI whisper-1 oder gpt-4o-transcribe · Groq (Base-URL https://api.groq.com/openai/v1, Modell whisper-large-v3-turbo). Key wird nur lokal gespeichert.</string>
+    <string name="pref_api_examples">Beispiele: OpenAI whisper-1 oder gpt-4o-transcribe · Groq (Base-URL https://api.groq.com/openai/v1, Modell whisper-large-v3-turbo). Der Key wird nur lokal gespeichert.</string>
+    <string name="api_not_configured">Cloud-API ist aktiv, aber kein API-Key gesetzt</string>
 </resources>

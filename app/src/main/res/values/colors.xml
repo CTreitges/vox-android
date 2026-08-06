@@ -1,13 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Farb-Tokens (Hell). Die Dunkel-Variante liegt in values-night/colors.xml unter
+  denselben Namen — Layouts und Code referenzieren nur Tokens, nie Rohwerte, damit
+  Tastatur, Einstellungen und schwebender Knopf automatisch zum Systemthema passen.
+-->
 <resources>
-    <color name="kb_background">#1B1E24</color>
-    <color name="kb_surface">#2A2E37</color>
-    <color name="kb_key">#3A3F4B</color>
-    <color name="kb_key_pressed">#4B5160</color>
-    <color name="kb_text">#ECEFF4</color>
-    <color name="kb_text_dim">#9AA0AD</color>
-    <color name="accent">#4C8DFF</color>
-    <color name="accent_pressed">#2F6FE0</color>
-    <color name="recording">#FF4C4C</color>
-    <color name="launcher_bg">#4C8DFF</color>
+    <!-- Flaechen -->
+    <color name="bg">#F4F5F9</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_alt">#EAECF4</color>
+    <color name="surface_pressed">#DCDFEB</color>
+    <color name="outline">#DEE2EC</color>
+
+    <!-- Schrift -->
+    <color name="text">#12141C</color>
+    <color name="text_dim">#5F6779</color>
+
+    <!-- Akzent -->
+    <color name="accent">#6C4DF6</color>
+    <color name="accent_pressed">#5A3DE0</color>
+    <color name="accent_soft">#EDE8FF</color>
+    <color name="on_accent">#FFFFFF</color>
+
+    <!-- Zustaende -->
+    <color name="recording">#E5384F</color>
+    <color name="success">#12915A</color>
+    <color name="warning">#B26A00</color>
+
+    <!-- Tastatur: eigene Tokens, damit sie unabhaengig nachjustierbar bleibt -->
+    <color name="kb_background">#E8EAF2</color>
+    <color name="kb_key">#FFFFFF</color>
+    <color name="kb_key_pressed">#D8DCE8</color>
+    <color name="kb_text">#12141C</color>
+    <color name="kb_text_dim">#5F6779</color>
+
 </resources>

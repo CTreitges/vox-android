@@ -11,16 +11,22 @@ import java.net.URL
  */
 enum class WhisperModel(
     val id: String,
-    val display: String,
+    /** Kurzname fuer Chips und Statuszeilen. */
+    val shortName: String,
+    /** Was die Wahl praktisch bedeutet — steht unter dem Kurznamen. */
+    val tagline: String,
     val fileName: String,
     val approxMb: Int,
     /** Erwartete Dateigroesse in Bytes (fuer die Download-Integritaetspruefung). */
     val bytes: Long,
     val bundled: Boolean,
 ) {
-    SMALL("small", "Small — beste Qualität (~181 MB)", "ggml-small-q5_1.bin", 181, 190_085_487L, true),
-    BASE("base", "Base — ausgewogen (~56 MB)", "ggml-base-q5_1.bin", 56, 59_707_625L, false),
-    TINY("tiny", "Tiny — am schnellsten (~30 MB)", "ggml-tiny-q5_1.bin", 30, 32_152_673L, false);
+    SMALL("small", "Small", "Beste Qualität, braucht am längsten", "ggml-small-q5_1.bin", 181, 190_085_487L, true),
+    BASE("base", "Base", "Guter Kompromiss für den Alltag", "ggml-base-q5_1.bin", 56, 59_707_625L, false),
+    TINY("tiny", "Tiny", "Am schnellsten, gröbere Erkennung", "ggml-tiny-q5_1.bin", 30, 32_152_673L, false);
+
+    /** Zeile fuer die Auswahlliste. */
+    val display: String get() = "$shortName — $tagline"
 
     val url: String get() = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$fileName"
 

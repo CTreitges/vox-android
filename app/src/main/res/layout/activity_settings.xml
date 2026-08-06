@@ -1,145 +1,322 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Einstellungen in Karten gruppiert: Erkennung / Bedienung / Text / Cloud.
+  Die Cloud-Felder erscheinen erst, wenn der Schalter an ist — vorher sind sie nur
+  Rauschen, das die Seite dreimal so lang macht.
+-->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingHorizontal="18dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="32dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/pref_model"
-            android:textSize="16sp"
+            android:text="@string/settings_title"
+            android:textColor="@color/text"
+            android:textSize="28sp"
             android:textStyle="bold" />
 
-        <Spinner
-            android:id="@+id/spinner_model"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
-
-        <TextView
-            android:id="@+id/model_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="?android:attr/textColorSecondary" />
-
-        <Button
-            android:id="@+id/btn_model_download"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/model_download_btn" />
-
+        <!-- Erkennung -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="@string/pref_language"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:layout_marginBottom="8dp"
+            android:text="@string/pref_section_recognition"
+            style="@style/TextSection" />
 
-        <Spinner
-            android:id="@+id/spinner_language"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <Switch
-            android:id="@+id/switch_fillers"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/pref_remove_fillers" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pref_language"
+                android:textColor="@color/text"
+                android:textSize="15sp" />
 
-        <Switch
-            android:id="@+id/switch_cap"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/pref_auto_cap" />
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:scrollbars="none">
 
-        <Switch
-            android:id="@+id/switch_space"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/pref_trailing_space" />
+                <LinearLayout
+                    android:id="@+id/language_chips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/pref_model_info"
-            android:textColor="?android:attr/textColorSecondary" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/pref_language_hint"
+                style="@style/TextHint" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="28dp"
-            android:background="?android:attr/listDivider" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="16dp"
+                android:background="@color/outline" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pref_model"
+                android:textColor="@color/text"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:id="@+id/model_options"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/pref_model_info"
+                style="@style/TextHint" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="16dp"
+                android:background="@color/outline" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="10dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_bolt" />
+
+                <Switch
+                    android:id="@+id/switch_fast"
+                    style="@style/Switch"
+                    android:text="@string/pref_fast_mode" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pref_fast_mode_hint"
+                style="@style/TextHint" />
+        </LinearLayout>
+
+        <!-- Bedienung -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/pref_section_operation"
+            style="@style/TextSection" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <Switch
+                android:id="@+id/switch_hands_free"
+                style="@style/Switch"
+                android:text="@string/pref_hands_free" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pref_hands_free_hint"
+                style="@style/TextHint" />
+
+            <LinearLayout
+                android:id="@+id/auto_stop_block"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pref_auto_stop"
+                    android:textColor="@color/text"
+                    android:textSize="15sp" />
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:id="@+id/auto_stop_chips"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+                </HorizontalScrollView>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="14dp"
+                android:background="@color/outline" />
+
+            <Switch
+                android:id="@+id/switch_haptics"
+                style="@style/Switch"
+                android:text="@string/pref_haptics" />
+
+            <Switch
+                android:id="@+id/switch_autostart"
+                style="@style/Switch"
+                android:text="@string/pref_bubble_autostart" />
+        </LinearLayout>
+
+        <!-- Textveredelung -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/pref_section_text"
+            style="@style/TextSection" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <Switch
+                android:id="@+id/switch_fillers"
+                style="@style/Switch"
+                android:text="@string/pref_remove_fillers" />
+
+            <Switch
+                android:id="@+id/switch_cap"
+                style="@style/Switch"
+                android:text="@string/pref_auto_cap" />
+
+            <Switch
+                android:id="@+id/switch_space"
+                style="@style/Switch"
+                android:text="@string/pref_trailing_space" />
+        </LinearLayout>
+
+        <!-- Cloud-API -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
             android:text="@string/pref_api_title"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            style="@style/TextSection" />
 
-        <Switch
-            android:id="@+id/switch_api"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/pref_api_enable" />
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/pref_api_privacy"
-            android:textColor="@color/recording"
-            android:textSize="12sp" />
+            <Switch
+                android:id="@+id/switch_api"
+                style="@style/Switch"
+                android:text="@string/pref_api_enable" />
 
-        <EditText
-            android:id="@+id/api_url"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="@string/pref_api_url_hint"
-            android:inputType="textUri"
-            android:importantForAutofill="no" />
+            <LinearLayout
+                android:id="@+id/api_block"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
 
-        <EditText
-            android:id="@+id/api_key"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="@string/pref_api_key_hint"
-            android:inputType="textPassword"
-            android:importantForAutofill="no" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/pref_api_privacy"
+                    android:textColor="@color/recording"
+                    android:textSize="13sp" />
 
-        <EditText
-            android:id="@+id/api_model"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="@string/pref_api_model_hint"
-            android:inputType="text"
-            android:importantForAutofill="no" />
+                <EditText
+                    android:id="@+id/api_url"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_field"
+                    android:hint="@string/pref_api_url_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textUri"
+                    android:padding="12dp"
+                    android:textColor="@color/text"
+                    android:textColorHint="@color/text_dim"
+                    android:textSize="14sp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="@string/pref_api_examples"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp" />
+                <EditText
+                    android:id="@+id/api_key"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_field"
+                    android:hint="@string/pref_api_key_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textPassword"
+                    android:padding="12dp"
+                    android:textColor="@color/text"
+                    android:textColorHint="@color/text_dim"
+                    android:textSize="14sp" />
+
+                <EditText
+                    android:id="@+id/api_model"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_field"
+                    android:hint="@string/pref_api_model_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    android:padding="12dp"
+                    android:textColor="@color/text"
+                    android:textColorHint="@color/text_dim"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/pref_api_examples"
+                    style="@style/TextHint" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -1,6 +1,7 @@
 package com.chris.whisperbar.overlay
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,12 +13,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
-import android.content.res.ColorStateList
 import android.graphics.PixelFormat
+import android.graphics.Point
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import android.view.Gravity
@@ -27,49 +29,61 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.Toast
-import com.chris.whisperbar.AudioRecorder
-import com.chris.whisperbar.ModelNotAvailableException
+import com.chris.whisperbar.HomeActivity
 import com.chris.whisperbar.Prefs
 import com.chris.whisperbar.R
-import com.chris.whisperbar.SetupActivity
-import com.chris.whisperbar.TextPolisher
 import com.chris.whisperbar.WhisperEngine
 import com.chris.whisperbar.a11y.TextInserterAccessibilityService
-import java.util.concurrent.Executors
+import com.chris.whisperbar.dictation.DictationController
+import com.chris.whisperbar.dictation.DictationPhase
+import com.chris.whisperbar.ui.MicOrbView
 import kotlin.math.abs
+import kotlin.math.hypot
 
 /**
- * Schwebender Mikro-Button (Overlay ueber allen Apps). Tippen = Aufnahme starten,
- * nochmal tippen = stoppen, transkribieren und den Text via Bedienungshilfe ins gerade
- * fokussierte Feld einfuegen. So bleibt Gboard die aktive Tastatur.
+ * Schwebender Mikro-Knopf ueber allen Apps. Diktieren, ohne die Tastatur zu wechseln —
+ * der Text landet per Bedienungshilfe im gerade fokussierten Feld, Gboard bleibt aktiv.
  *
- * Foreground-Service (Typ microphone), damit der Button dauerhaft sichtbar bleibt.
+ * ### Gesten
+ * | Geste | Wirkung |
+ * |---|---|
+ * | Tippen | Diktat starten / beenden (endet auch nach einer Sprechpause von selbst) |
+ * | Ziehen | Verschieben — rastet am naechsten Bildschirmrand ein, Position bleibt gespeichert |
+ * | Auf ✕ ziehen | Laufende Aufnahme verwerfen bzw. den Knopf ausblenden |
+ * | Lang druecken | Letztes Diktat zuruecknehmen |
+ *
+ * Im Ruhezustand ist der Knopf halbtransparent, damit er nicht stoert, und wird beim
+ * Beruehren wieder voll sichtbar.
  */
-class FloatingMicService : Service() {
+class FloatingMicService : Service(), DictationController.Listener {
 
     private lateinit var wm: WindowManager
     private lateinit var prefs: Prefs
-    private val recorder = AudioRecorder()
-    private val io = Executors.newSingleThreadExecutor { r -> Thread(r, "wb-float-io") }
+    private lateinit var controller: DictationController
     private val main = Handler(Looper.getMainLooper())
 
     private var bubbleView: View? = null
-    private var micView: ImageView? = null
+    private var orb: MicOrbView? = null
+    private var icon: ImageView? = null
     private lateinit var lp: WindowManager.LayoutParams
 
-    @Volatile private var recording = false
-    @Volatile private var busy = false // Transkription laeuft -> Taps ignorieren
+    private var cancelView: View? = null
+    private var cancelTarget: View? = null
+
+    private var bubbleSize = 0
+    private var overCancel = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
-        prefs = Prefs(this)
+        prefs = Prefs.get(this)
         wm = getSystemService(WINDOW_SERVICE) as WindowManager
-        try {
-            startAsForeground()
-        } catch (e: Exception) {
-            Log.e(TAG, "Foreground-Start fehlgeschlagen", e)
+
+        // Ohne Mikrofon-Recht darf auf Android 14+ gar kein Vordergrunddienst vom Typ
+        // "microphone" starten — das waere ein harter Absturz statt einer Fehlermeldung.
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            toast(getString(R.string.kb_need_permission))
             stopSelf()
             return
         }
@@ -78,9 +92,18 @@ class FloatingMicService : Service() {
             stopSelf()
             return
         }
+        try {
+            startAsForeground()
+        } catch (e: Exception) {
+            Log.e(TAG, "Foreground-Start fehlgeschlagen", e)
+            stopSelf()
+            return
+        }
+
+        controller = DictationController(this, this)
         addBubble()
         isRunning = true
-        io.submit { WhisperEngine.preload(applicationContext) }
+        WhisperEngine.preloadAsync(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -95,20 +118,27 @@ class FloatingMicService : Service() {
 
     private fun startAsForeground() {
         val nm = getSystemService(NotificationManager::class.java)
-        val channel = NotificationChannel(
-            CHANNEL_ID, getString(R.string.float_channel), NotificationManager.IMPORTANCE_LOW,
+        nm.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL_ID, getString(R.string.float_channel), NotificationManager.IMPORTANCE_LOW,
+            ),
         )
-        nm.createNotificationChannel(channel)
 
         val stopPi = PendingIntent.getService(
             this, 1,
             Intent(this, FloatingMicService::class.java).setAction(ACTION_STOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
+        val openPi = PendingIntent.getActivity(
+            this, 2,
+            Intent(this, HomeActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
         val notif = Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_mic)
             .setContentTitle(getString(R.string.float_running))
             .setContentText(getString(R.string.float_running_text))
+            .setContentIntent(openPi)
             .addAction(R.drawable.ic_mic, getString(R.string.float_stop), stopPi)
             .setOngoing(true)
             .build()
@@ -120,110 +150,247 @@ class FloatingMicService : Service() {
         }
     }
 
-    // --- Bubble --------------------------------------------------------------
+    // --- Blase ---------------------------------------------------------------
 
     private fun addBubble() {
         val v = LayoutInflater.from(this).inflate(R.layout.floating_mic, null)
-        micView = v.findViewById(R.id.bubble_mic)
+        orb = v.findViewById(R.id.bubble_orb)
+        icon = v.findViewById(R.id.bubble_icon)
+        bubbleSize = dp(BUBBLE_DP)
+
+        val screen = screenSize()
         lp = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT,
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 24
-            y = 320
+            // Gespeicherte Position wiederherstellen; beim ersten Start rechts mittig.
+            x = prefs.bubbleX.takeIf { it != Int.MIN_VALUE } ?: (screen.x - bubbleSize)
+            y = prefs.bubbleY.takeIf { it != Int.MIN_VALUE } ?: (screen.y / 2)
         }
-        v.setOnTouchListener(dragTapListener())
+        clampToScreen(screen)
+
+        v.setOnTouchListener(BubbleTouchListener())
+        orb?.setOnClickListener { controller.toggle() } // Bedienungshilfen
         wm.addView(v, lp)
         bubbleView = v
+        applyPhase(DictationPhase.IDLE)
     }
 
-    private fun dragTapListener() = object : View.OnTouchListener {
-        var downX = 0f
-        var downY = 0f
-        var startX = 0
-        var startY = 0
-        var moved = false
+    /**
+     * Zieh- und Tipp-Erkennung in einem. Ein Tipp ist eine kurze Beruehrung ohne
+     * nennenswerte Bewegung — alles andere ist ein Ziehen.
+     */
+    private inner class BubbleTouchListener : View.OnTouchListener {
+        private var downX = 0f
+        private var downY = 0f
+        private var startX = 0
+        private var startY = 0
+        private var downAt = 0L
+        private var dragging = false
+        private var longPressFired = false
+
+        private val longPress = Runnable {
+            longPressFired = true
+            undoLastDictation()
+        }
 
         override fun onTouch(view: View, e: MotionEvent): Boolean {
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    downX = e.rawX; downY = e.rawY; startX = lp.x; startY = lp.y; moved = false
+                    downX = e.rawX; downY = e.rawY
+                    startX = lp.x; startY = lp.y
+                    downAt = SystemClock.uptimeMillis()
+                    dragging = false
+                    longPressFired = false
+                    bubbleView?.animate()?.alpha(1f)?.setDuration(80)?.start()
+                    main.postDelayed(longPress, LONG_PRESS_MS)
                 }
+
                 MotionEvent.ACTION_MOVE -> {
                     val dx = (e.rawX - downX).toInt()
                     val dy = (e.rawY - downY).toInt()
-                    if (abs(dx) > 12 || abs(dy) > 12) moved = true
-                    lp.x = startX + dx
-                    lp.y = startY + dy
-                    runCatching { wm.updateViewLayout(bubbleView, lp) }
+                    if (!dragging && (abs(dx) > touchSlop() || abs(dy) > touchSlop())) {
+                        dragging = true
+                        main.removeCallbacks(longPress)
+                        showCancelTarget()
+                    }
+                    if (dragging) {
+                        lp.x = startX + dx
+                        lp.y = startY + dy
+                        clampToScreen(screenSize())
+                        runCatching { wm.updateViewLayout(bubbleView, lp) }
+                        updateCancelHighlight()
+                    }
                 }
-                MotionEvent.ACTION_UP -> if (!moved) onTap()
+
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    main.removeCallbacks(longPress)
+                    if (dragging) {
+                        val onTarget = overCancel
+                        hideCancelTarget()
+                        if (onTarget) {
+                            onDroppedOnCancel()
+                        } else {
+                            snapToEdge()
+                        }
+                    } else if (!longPressFired &&
+                        SystemClock.uptimeMillis() - downAt < LONG_PRESS_MS &&
+                        e.actionMasked == MotionEvent.ACTION_UP
+                    ) {
+                        controller.toggle()
+                    }
+                    fadeIdleBubble()
+                }
             }
             return true
         }
     }
 
-    private fun onTap() {
-        if (busy) return // waehrend laufender Transkription keine neue Aufnahme starten
-        if (!recording) startRec() else stopRec()
+    /** Auf ✕ abgelegt: laufende Aufnahme verwerfen, sonst den Knopf ausblenden. */
+    private fun onDroppedOnCancel() {
+        if (controller.isRecording) {
+            controller.cancel()
+            toast(getString(R.string.float_cancelled))
+            snapToEdge()
+        } else {
+            stopSelf()
+        }
     }
 
-    // --- Aufnahme + Transkription -------------------------------------------
+    private fun undoLastDictation() {
+        val message = if (TextInserterAccessibilityService.tryUndo()) R.string.float_undone
+        else R.string.float_undo_failed
+        toast(getString(message))
+    }
 
-    private fun startRec() {
-        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            toast(getString(R.string.kb_need_permission))
-            openSetup()
+    // --- Positionierung ------------------------------------------------------
+
+    private fun screenSize(): Point {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val b = wm.currentWindowMetrics.bounds
+            return Point(b.width(), b.height())
+        }
+        @Suppress("DEPRECATION")
+        return Point().also { wm.defaultDisplay.getSize(it) }
+    }
+
+    /** Haelt die Blase komplett im sichtbaren Bereich — auch nach einer Drehung. */
+    private fun clampToScreen(screen: Point) {
+        lp.x = lp.x.coerceIn(0, (screen.x - bubbleSize).coerceAtLeast(0))
+        lp.y = lp.y.coerceIn(dp(TOP_INSET_DP), (screen.y - bubbleSize - dp(BOTTOM_INSET_DP)).coerceAtLeast(0))
+    }
+
+    /** Weich an den naechstgelegenen linken/rechten Rand ziehen und Position merken. */
+    private fun snapToEdge() {
+        val screen = screenSize()
+        val maxX = (screen.x - bubbleSize).coerceAtLeast(0)
+        val targetX = if (lp.x + bubbleSize / 2 < screen.x / 2) 0 else maxX
+        val fromX = lp.x
+        if (fromX == targetX) {
+            savePosition()
             return
         }
-        if (recorder.start()) {
-            recording = true
-            micView?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.recording))
-        } else {
-            toast(getString(R.string.kb_error))
-        }
-    }
-
-    private fun stopRec() {
-        if (!recording) return
-        recording = false
-        busy = true
-        micView?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.accent_pressed))
-        val language = prefs.language
-        val options = prefs.polishOptions()
-        val trailing = prefs.trailingSpace
-        io.submit {
-            try {
-                val samples = recorder.stop()
-                if (samples.size < AudioRecorder.SAMPLE_RATE * 3 / 10) {
-                    main.post { resetBubble() }
-                    return@submit
-                }
-                val raw = WhisperEngine.transcribe(applicationContext, samples, language)
-                val text = TextPolisher.polish(raw, options).let { if (trailing && it.isNotEmpty()) "$it " else it }
-                main.post {
-                    if (text.isNotBlank()) {
-                        if (!TextInserterAccessibilityService.tryInsert(text)) fallbackClipboard(text)
-                    }
-                    resetBubble()
-                }
-            } catch (e: ModelNotAvailableException) {
-                main.post { toast(getString(R.string.model_not_loaded)); resetBubble() }
-            } catch (e: Exception) {
-                Log.e(TAG, "Transkription fehlgeschlagen", e)
-                main.post { toast(getString(R.string.kb_error)); resetBubble() }
+        ValueAnimator.ofInt(fromX, targetX).apply {
+            duration = SNAP_MS
+            addUpdateListener {
+                lp.x = it.animatedValue as Int
+                runCatching { wm.updateViewLayout(bubbleView, lp) }
             }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) = savePosition()
+            })
+            start()
         }
     }
 
-    private fun resetBubble() {
-        busy = false
-        micView?.backgroundTintList = null
+    private fun savePosition() {
+        prefs.bubbleX = lp.x
+        prefs.bubbleY = lp.y
+    }
+
+    // --- Ablegeziel ----------------------------------------------------------
+
+    private fun showCancelTarget() {
+        if (cancelView != null) return
+        val v = LayoutInflater.from(this).inflate(R.layout.floating_cancel, null)
+        cancelTarget = v.findViewById(R.id.cancel_target)
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            PixelFormat.TRANSLUCENT,
+        ).apply {
+            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            y = dp(CANCEL_BOTTOM_DP)
+        }
+        runCatching { wm.addView(v, params) }
+        v.alpha = 0f
+        v.animate().alpha(1f).setDuration(120).start()
+        cancelView = v
+    }
+
+    private fun hideCancelTarget() {
+        val v = cancelView ?: return
+        cancelView = null
+        cancelTarget = null
+        overCancel = false
+        runCatching { wm.removeView(v) }
+    }
+
+    /** Markiert das Ziel, sobald die Blase nah genug ist. */
+    private fun updateCancelHighlight() {
+        val target = cancelTarget ?: return
+        val screen = screenSize()
+        val targetCx = screen.x / 2f
+        val targetCy = screen.y - dp(CANCEL_BOTTOM_DP) - target.height / 2f
+        val bubbleCx = lp.x + bubbleSize / 2f
+        val bubbleCy = lp.y + bubbleSize / 2f
+        val near = hypot(bubbleCx - targetCx, bubbleCy - targetCy) < dp(CANCEL_RADIUS_DP)
+        if (near != overCancel) {
+            overCancel = near
+            target.isActivated = near
+            target.animate().scaleX(if (near) 1.2f else 1f).scaleY(if (near) 1.2f else 1f)
+                .setDuration(90).start()
+        }
+    }
+
+    // --- DictationController.Listener ---------------------------------------
+
+    override fun onPhase(phase: DictationPhase) = applyPhase(phase)
+
+    override fun onLevel(level: Float) {
+        orb?.setLevel(level)
+    }
+
+    override fun onResult(text: String) {
+        if (!TextInserterAccessibilityService.tryInsert(text)) fallbackClipboard(text)
+    }
+
+    override fun onError(messageRes: Int) {
+        toast(getString(messageRes))
+    }
+
+    private fun applyPhase(phase: DictationPhase) {
+        orb?.phase = phase
+        icon?.setImageResource(
+            if (phase == DictationPhase.RECORDING) R.drawable.ic_stop else R.drawable.ic_mic,
+        )
+        if (phase == DictationPhase.IDLE) fadeIdleBubble()
+        else bubbleView?.animate()?.alpha(1f)?.setDuration(120)?.start()
+    }
+
+    /** Im Ruhezustand zuruecknehmen, damit der Knopf nicht dauerhaft im Weg ist. */
+    private fun fadeIdleBubble() {
+        if (controller.phase != DictationPhase.IDLE) return
+        bubbleView?.animate()?.alpha(IDLE_ALPHA)?.setStartDelay(IDLE_FADE_DELAY_MS)
+            ?.setDuration(300)?.start()
     }
 
     private fun fallbackClipboard(text: String) {
@@ -234,9 +401,12 @@ class FloatingMicService : Service() {
         toast(getString(R.string.float_clipboard_fallback))
     }
 
-    private fun openSetup() = startActivity(
-        Intent(this, SetupActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-    )
+    // --- Helfer --------------------------------------------------------------
+
+    private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
+
+    private fun touchSlop() =
+        android.view.ViewConfiguration.get(this).scaledTouchSlop
 
     private fun toast(msg: String) = main.post {
         Toast.makeText(applicationContext, msg, Toast.LENGTH_SHORT).show()
@@ -244,10 +414,10 @@ class FloatingMicService : Service() {
 
     override fun onDestroy() {
         isRunning = false
+        hideCancelTarget()
         runCatching { bubbleView?.let { wm.removeView(it) } }
         bubbleView = null
-        if (recorder.isRecording) recorder.cancel()
-        io.shutdown()
+        if (this::controller.isInitialized) controller.shutdown()
         super.onDestroy()
     }
 
@@ -257,14 +427,23 @@ class FloatingMicService : Service() {
         private const val CHANNEL_ID = "whisperbar_float"
         const val ACTION_STOP = "com.chris.whisperbar.STOP_FLOAT"
 
-        /** Ob der schwebende Button aktuell laeuft (fuer die Setup-Statusanzeige). */
+        private const val BUBBLE_DP = 64
+        private const val TOP_INSET_DP = 48
+        private const val BOTTOM_INSET_DP = 24
+        private const val CANCEL_BOTTOM_DP = 96
+        private const val CANCEL_RADIUS_DP = 96
+        private const val SNAP_MS = 180L
+        private const val LONG_PRESS_MS = 550L
+        private const val IDLE_ALPHA = 0.55f
+        private const val IDLE_FADE_DELAY_MS = 1_500L
+
+        /** Ob der schwebende Knopf aktuell laeuft (fuer die Statusanzeige im Hauptbildschirm). */
         @Volatile
         var isRunning = false
             private set
 
         fun start(context: Context) {
-            val i = Intent(context, FloatingMicService::class.java)
-            context.startForegroundService(i)
+            context.startForegroundService(Intent(context, FloatingMicService::class.java))
         }
 
         fun stop(context: Context) {

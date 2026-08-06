@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Schwebender Diktat-Knopf. Der Rand traegt Pegel-Ring und Fortschritts-Bogen des Orbs. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bubble_root"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:padding="4dp">
+    android:layout_height="wrap_content">
+
+    <com.chris.whisperbar.ui.MicOrbView
+        android:id="@+id/bubble_orb"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/cd_mic" />
 
     <ImageView
-        android:id="@+id/bubble_mic"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:id="@+id/bubble_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_gravity="center"
-        android:background="@drawable/bubble_bg"
-        android:contentDescription="@string/cd_mic"
-        android:padding="13dp"
-        android:elevation="6dp"
+        android:importantForAccessibility="no"
         android:src="@drawable/ic_mic" />
 </FrameLayout>
