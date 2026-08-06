@@ -4,6 +4,13 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: >-
+          Version für ein GitHub-Release, z. B. v2.0. Leer lassen = nur bauen.
+          Das Tag wird dabei auf dem gewählten Branch angelegt.
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -163,8 +170,9 @@ jobs:
 
   release:
     name: GitHub-Release veröffentlichen
-    # Nur bei einem Tag wie v2.0 — normale Pushes bauen weiterhin nur Artefakte.
-    if: startsWith(github.ref, 'refs/tags/v')
+    # Zwei Wege: ein Tag-Push (v*) oder ein manueller Start mit gesetztem
+    # release_tag. Normale Pushes bauen weiterhin nur Artefakte.
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
     needs: build-and-unit
     runs-on: ubuntu-latest
     permissions:
@@ -178,26 +186,35 @@ jobs:
           name: whisperbar-release-apk
           path: dist
 
-      - name: APK nach Version benennen
+      - name: Version bestimmen und APK benennen
+        id: v
+        env:
+          INPUT_TAG: ${{ inputs.release_tag }}
         run: |
-          mv dist/app-release.apk "dist/whisperbar-${GITHUB_REF_NAME}.apk"
+          TAG="${INPUT_TAG:-$GITHUB_REF_NAME}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          mv dist/app-release.apk "dist/whisperbar-$TAG.apk"
           ls -la dist
 
       - name: Release anlegen bzw. aktualisieren
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.v.outputs.tag }}
         run: |
-          NOTES_FILE=".github/release-notes/${GITHUB_REF_NAME}.md"
+          NOTES_FILE=".github/release-notes/${TAG}.md"
           if [ -f "$NOTES_FILE" ]; then
             NOTES_ARG=(--notes-file "$NOTES_FILE")
           else
             NOTES_ARG=(--generate-notes)
           fi
-          # Idempotent: bei einem erneuten Lauf desselben Tags nur die Datei ersetzen.
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist/*.apk --clobber
+          # Idempotent: bei einem erneuten Lauf derselben Version nur die Datei
+          # ersetzen, statt am schon vorhandenen Release zu scheitern.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.apk --clobber
           else
-            gh release create "$GITHUB_REF_NAME" dist/*.apk \
-              --title "WhisperBar $GITHUB_REF_NAME" \
+            # --target legt das Tag gleich mit an, auf genau diesem Commit.
+            gh release create "$TAG" dist/*.apk \
+              --target "$GITHUB_SHA" \
+              --title "WhisperBar $TAG" \
               "${NOTES_ARG[@]}"
           fi
