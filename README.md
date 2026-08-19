@@ -11,7 +11,7 @@ Anbieter, den du einträgst.
 
 > **Hinweis zur Version 2.0:** Der frühere On-Device-Betrieb (whisper.cpp im APK, ~154 MB) ist
 > raus — er lieferte auf dem Telefon zu schlechte Ergebnisse. Der letzte Stand mit lokalem Modell
-> liegt als Tag [`offline-v1`](../../releases/tag/offline-v1) im Repo.
+> liegt als Tag [`offline-v1`](../../tree/offline-v1) im Repo.
 
 ## Features
 
