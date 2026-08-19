@@ -14,15 +14,7 @@ class Prefs(context: Context) {
         get() = sp.getString(KEY_LANGUAGE, "de") ?: "de"
         set(v) = sp.edit().putString(KEY_LANGUAGE, v).apply()
 
-    /** Gewaehltes Whisper-Modell. Default: SMALL (gebuendelt). */
-    var model: WhisperModel
-        get() = WhisperModel.fromId(sp.getString(KEY_MODEL, WhisperModel.SMALL.id))
-        set(v) = sp.edit().putString(KEY_MODEL, v.id).apply()
-
-    /** Cloud-API statt On-Device nutzen (bessere Qualität, SENDET Audio an den Anbieter). */
-    var useApi: Boolean
-        get() = sp.getBoolean(KEY_USE_API, false)
-        set(v) = sp.edit().putBoolean(KEY_USE_API, v).apply()
+    // --- Transkriptions-API --------------------------------------------------
 
     var apiBaseUrl: String
         get() = sp.getString(KEY_API_URL, DEFAULT_API_URL) ?: DEFAULT_API_URL
@@ -35,6 +27,16 @@ class Prefs(context: Context) {
     var apiModel: String
         get() = sp.getString(KEY_API_MODEL, DEFAULT_API_MODEL) ?: DEFAULT_API_MODEL
         set(v) = sp.edit().putString(KEY_API_MODEL, v).apply()
+
+    /**
+     * Kontext fuer die Erkennung (Eigennamen, Fachbegriffe, gewuenschte Schreibweisen).
+     * Geht als `prompt` an die API — kostet nichts extra.
+     */
+    var apiPrompt: String
+        get() = sp.getString(KEY_API_PROMPT, "") ?: ""
+        set(v) = sp.edit().putString(KEY_API_PROMPT, v).apply()
+
+    // --- Nachbearbeitung -----------------------------------------------------
 
     var removeFillers: Boolean
         get() = sp.getBoolean(KEY_REMOVE_FILLERS, true)
@@ -49,6 +51,25 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_TRAILING_SPACE, true)
         set(v) = sp.edit().putBoolean(KEY_TRAILING_SPACE, v).apply()
 
+    /** Zweiter API-Aufruf: Sprachmodell glaettet Zeichensetzung und Grammatik. */
+    var llmPolish: Boolean
+        get() = sp.getBoolean(KEY_LLM_POLISH, false)
+        set(v) = sp.edit().putBoolean(KEY_LLM_POLISH, v).apply()
+
+    var llmModel: String
+        get() = sp.getString(KEY_LLM_MODEL, DEFAULT_LLM_MODEL) ?: DEFAULT_LLM_MODEL
+        set(v) = sp.edit().putString(KEY_LLM_MODEL, v).apply()
+
+    /**
+     * Statt fester Wortliste entscheidet das Sprachmodell selbst, welche Fuellwoerter,
+     * Versprecher und Wiederholungen weg koennen. Wirkt nur mit [llmPolish].
+     */
+    var smartFillers: Boolean
+        get() = sp.getBoolean(KEY_SMART_FILLERS, false)
+        set(v) = sp.edit().putBoolean(KEY_SMART_FILLERS, v).apply()
+
+    // --- Schwebender Knopf ---------------------------------------------------
+
     /** Zuletzt gemerkte Position des schwebenden Knopfs (Bildschirm-Pixel). */
     var floatX: Int
         get() = sp.getInt(KEY_FLOAT_X, DEFAULT_FLOAT_X)
@@ -58,27 +79,32 @@ class Prefs(context: Context) {
         get() = sp.getInt(KEY_FLOAT_Y, DEFAULT_FLOAT_Y)
         set(v) = sp.edit().putInt(KEY_FLOAT_Y, v).apply()
 
-    fun polishOptions() = PolishOptions(
-        removeFillers = removeFillers,
-        autoCapitalize = autoCapitalize,
-        language = language,
-    )
-
     companion object {
         private const val KEY_LANGUAGE = "language"
-        private const val KEY_MODEL = "model"
-        private const val KEY_USE_API = "use_api"
         private const val KEY_API_URL = "api_url"
         private const val KEY_API_KEY = "api_key"
         private const val KEY_API_MODEL = "api_model"
+        private const val KEY_API_PROMPT = "api_prompt"
         private const val KEY_REMOVE_FILLERS = "remove_fillers"
-
-        const val DEFAULT_API_URL = "https://api.openai.com/v1"
-        const val DEFAULT_API_MODEL = "whisper-1"
         private const val KEY_AUTO_CAP = "auto_capitalize"
         private const val KEY_TRAILING_SPACE = "trailing_space"
+        private const val KEY_LLM_POLISH = "llm_polish"
+        private const val KEY_LLM_MODEL = "llm_model"
+        private const val KEY_SMART_FILLERS = "smart_fillers"
         private const val KEY_FLOAT_X = "float_x"
         private const val KEY_FLOAT_Y = "float_y"
+
+        const val DEFAULT_API_URL = "https://api.openai.com/v1"
+
+        /**
+         * Aktuelles Transkriptionsmodell statt des alten whisper-1 — deutlich bessere
+         * Zeichensetzung und Eigennamen bei gleichem Endpunkt. Frei aenderbar, damit
+         * Groq & Co. (z. B. whisper-large-v3-turbo) weiter funktionieren.
+         */
+        const val DEFAULT_API_MODEL = "gpt-4o-transcribe"
+
+        /** Guenstiges Modell fuer die optionale Textveredelung. */
+        const val DEFAULT_LLM_MODEL = "gpt-4o-mini"
 
         /** Startposition des schwebenden Knopfs, wenn noch nichts verschoben wurde. */
         const val DEFAULT_FLOAT_X = 24

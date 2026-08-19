@@ -16,34 +16,41 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.inputmethodservice.InputMethodService
 import com.chris.whisperbar.AudioRecorder
-import com.chris.whisperbar.ModelNotAvailableException
 import com.chris.whisperbar.Prefs
 import com.chris.whisperbar.R
-import com.chris.whisperbar.TextPolisher
-import com.chris.whisperbar.WhisperEngine
+import com.chris.whisperbar.TranscriptionEngine
 import com.chris.whisperbar.SetupActivity
 import com.chris.whisperbar.SettingsActivity
+import com.chris.whisperbar.api.ApiNotConfiguredException
+import com.chris.whisperbar.api.isRetryable
 import java.util.concurrent.Executors
 
 /**
  * Diktier-Tastatur: grosser Push-to-talk-Mikro-Knopf plus ein paar Basis-Tasten.
- * Halten = aufnehmen, loslassen = per whisper.cpp transkribieren und Text ins
- * aktive Feld schreiben. Modell wird lokal aus den App-Assets geladen.
+ * Halten = aufnehmen, loslassen = ueber die API transkribieren und Text ins aktive
+ * Feld schreiben.
+ *
+ * Scheitert die Anfrage (kein Netz, Server-Aussetzer), bleibt das Audio gepuffert und
+ * die Wiederholen-Taste erscheint — sonst waere ein langes Diktat verloren.
  */
 class WhisperBarInputMethodService : InputMethodService() {
 
     private lateinit var prefs: Prefs
     private val recorder = AudioRecorder()
 
-    // Alle Whisper-/IO-Arbeiten seriell auf einem Hintergrund-Thread; UI ueber main.
+    // Alle Netz-/IO-Arbeiten seriell auf einem Hintergrund-Thread; UI ueber main.
     private val io = Executors.newSingleThreadExecutor { r -> Thread(r, "wb-ime-io") }
     private val main = Handler(Looper.getMainLooper())
 
-    @Volatile private var busy = false // Transkription laeuft -> keine neue Aufnahme
+    @Volatile private var busy = false // Anfrage laeuft -> keine neue Aufnahme
+
+    /** Audio des letzten fehlgeschlagenen Versuchs. */
+    private var pendingSamples: FloatArray? = null
 
     private var statusView: TextView? = null
     private var levelView: View? = null
     private var micButton: ImageButton? = null
+    private var retryButton: Button? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -55,6 +62,7 @@ class WhisperBarInputMethodService : InputMethodService() {
         statusView = root.findViewById(R.id.status)
         levelView = root.findViewById(R.id.level)
         micButton = root.findViewById(R.id.mic)
+        retryButton = root.findViewById(R.id.key_retry)
 
         recorder.onAmplitude = { amp ->
             main.post { levelView?.scaleX = amp.coerceIn(0f, 1f) }
@@ -75,6 +83,7 @@ class WhisperBarInputMethodService : InputMethodService() {
         root.findViewById<Button>(R.id.key_backspace).setOnClickListener { backspace() }
         root.findViewById<Button>(R.id.key_enter).setOnClickListener { performEnter() }
         root.findViewById<Button>(R.id.key_settings).setOnClickListener { openSettings() }
+        retryButton?.setOnClickListener { retry() }
 
         return root
     }
@@ -82,9 +91,11 @@ class WhisperBarInputMethodService : InputMethodService() {
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
         resetLevel()
-        setStatus(R.string.kb_hint_hold)
-        // Modell im Hintergrund vorladen, damit das erste Diktat schneller ist.
-        preload()
+        showRetry(false)
+        setStatus(
+            if (TranscriptionEngine.isConfigured(this)) R.string.kb_hint_hold
+            else R.string.api_not_configured,
+        )
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
@@ -96,17 +107,23 @@ class WhisperBarInputMethodService : InputMethodService() {
     // --- Diktat -------------------------------------------------------------
 
     private fun startDictation() {
-        if (busy) return // vorheriges Diktat wird noch transkribiert
+        if (busy) return // vorheriges Diktat wird noch uebertragen
         if (!hasMicPermission()) {
             setStatus(R.string.kb_need_permission)
             openSetup()
             return
         }
+        if (!TranscriptionEngine.isConfigured(this)) {
+            setStatus(R.string.api_not_configured)
+            openSettings()
+            return
+        }
         if (recorder.isRecording) return
         if (recorder.start()) {
+            showRetry(false)
+            pendingSamples = null
             setStatus(R.string.kb_listening)
             micButton?.backgroundTintList = ColorStateList.valueOf(getColor(R.color.recording))
-            preload()
         } else {
             setStatus(R.string.kb_error)
         }
@@ -119,43 +136,51 @@ class WhisperBarInputMethodService : InputMethodService() {
         resetLevel()
         setStatus(R.string.kb_transcribing)
         busy = true
-        val language = prefs.language
-        val options = prefs.polishOptions()
         io.submit {
-            try {
-                // ... aber stop() (join + PCM->Float) und Transkription bewusst auf dem
-                // io-Thread, NIE auf dem UI-Thread (sonst Freeze/ANR beim Loslassen).
-                val samples = recorder.stop()
-                // Sehr kurze Aufnahmen (< 0,3 s) verwerfen — meist versehentliche Taps.
-                if (samples.size < AudioRecorder.SAMPLE_RATE * 3 / 10) {
-                    main.post { setStatus(R.string.kb_hint_hold) }
-                    return@submit
-                }
-                val raw = WhisperEngine.transcribe(applicationContext, samples, language)
-                val polished = TextPolisher.polish(raw, options)
-                main.post {
-                    commitDictation(polished)
-                    setStatus(R.string.kb_hint_hold)
-                }
-            } catch (e: ModelNotAvailableException) {
-                main.post { setStatus(R.string.model_not_loaded) }
-            } catch (e: Exception) {
-                Log.e(TAG, "Transkription fehlgeschlagen", e)
-                main.post { setStatus(R.string.kb_error) }
-            } finally {
+            // ... aber stop() (join + PCM->Float) und die Anfrage bewusst auf dem
+            // io-Thread, NIE auf dem UI-Thread (sonst Freeze/ANR beim Loslassen).
+            val samples = recorder.stop()
+            // Sehr kurze Aufnahmen (< 0,3 s) verwerfen — meist versehentliche Taps.
+            if (samples.size < AudioRecorder.SAMPLE_RATE * 3 / 10) {
                 busy = false
+                main.post { setStatus(R.string.kb_hint_hold) }
+                return@submit
             }
+            send(samples)
         }
     }
 
-    /** Modell im Hintergrund vorladen (prozessweit geteilt via WhisperEngine). */
-    private fun preload() {
-        io.submit {
-            try {
-                WhisperEngine.preload(applicationContext)
-            } catch (e: Exception) {
-                Log.e(TAG, "Modell-Preload fehlgeschlagen", e)
+    private fun retry() {
+        val samples = pendingSamples ?: return
+        if (busy) return
+        busy = true
+        showRetry(false)
+        setStatus(R.string.kb_transcribing)
+        io.submit { send(samples) }
+    }
+
+    /** Laeuft auf dem io-Thread. */
+    private fun send(samples: FloatArray) {
+        try {
+            val text = TranscriptionEngine.transcribe(applicationContext, samples)
+            pendingSamples = null
+            main.post {
+                commitDictation(text)
+                setStatus(R.string.kb_hint_hold)
             }
+        } catch (e: ApiNotConfiguredException) {
+            pendingSamples = null
+            main.post { setStatus(R.string.api_not_configured) }
+        } catch (e: Exception) {
+            Log.e(TAG, "Transkription fehlgeschlagen", e)
+            val retryable = e.isRetryable()
+            pendingSamples = if (retryable) samples else null
+            main.post {
+                statusView?.text = e.message ?: getString(R.string.kb_error)
+                showRetry(retryable)
+            }
+        } finally {
+            busy = false
         }
     }
 
@@ -219,13 +244,16 @@ class WhisperBarInputMethodService : InputMethodService() {
         statusView?.setText(resId)
     }
 
+    private fun showRetry(visible: Boolean) {
+        retryButton?.visibility = if (visible) View.VISIBLE else View.GONE
+    }
+
     private fun resetLevel() {
         levelView?.scaleX = 0f
     }
 
     override fun onDestroy() {
         if (recorder.isRecording) recorder.cancel()
-        // Engine NICHT freigeben — sie ist prozessweit geteilt (auch vom Overlay genutzt).
         io.shutdown()
         super.onDestroy()
     }

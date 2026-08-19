@@ -6,44 +6,13 @@ plugins {
 android {
     namespace = "com.chris.whisperbar"
     compileSdk = 35
-    ndkVersion = "27.2.12479018"
 
     defaultConfig {
         applicationId = "com.chris.whisperbar"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        externalNativeBuild {
-            cmake {
-                cppFlags += "-std=c++17"
-                arguments += listOf(
-                    "-DGGML_OPENMP=OFF",
-                    "-DGGML_NATIVE=OFF",
-                    "-DWHISPER_BUILD_TESTS=OFF",
-                    "-DWHISPER_BUILD_EXAMPLES=OFF",
-                )
-            }
-        }
-        // arm64-v8a = reale Geraete, x86_64 = CI-Emulator.
-        ndk {
-            abiFilters += listOf("arm64-v8a", "x86_64")
-        }
-    }
-
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
-    }
-
-    // Grosses GGML-Modell nicht komprimieren, damit der Asset-Streaming-Loader es lesen kann.
-    androidResources {
-        noCompress += "bin"
+        versionCode = 2
+        versionName = "2.0"
     }
 
     // Lint soll den Build nicht an Warnungen scheitern lassen (Reports bleiben erhalten).
@@ -90,20 +59,9 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-
-    // whisper.cpp braucht keine 16 KB-Page-Ausrichtung fuer diesen Build; Standard-Packaging.
-    packaging {
-        jniLibs {
-            useLegacyPackaging = false
-        }
-    }
 }
 
 dependencies {
     // Bewusst KEIN AndroidX/Compose im App-Code — reine Framework-APIs (schlank, wenige Build-Risiken).
     testImplementation("junit:junit:4.13.2")
-
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test:runner:1.6.2")
-    androidTestImplementation("androidx.test:rules:1.6.1")
 }

@@ -20,4 +20,19 @@ object BubblePosition {
         val maxY = (screenH - height).coerceAtLeast(0)
         return BubblePos(x.coerceIn(0, maxX), y.coerceIn(0, maxY))
     }
+
+    /**
+     * Ob der Knopf ueber dem Abbrechen-Ziel schwebt. Verglichen werden die
+     * Mittelpunkte — der Treffer-Radius ist bewusst grosszuegig, weil der Finger
+     * den Knopf beim Ziehen verdeckt.
+     */
+    fun isOverCancel(
+        bubbleX: Int, bubbleY: Int, bubbleW: Int, bubbleH: Int,
+        cancelX: Int, cancelY: Int, cancelW: Int, cancelH: Int,
+        radius: Int,
+    ): Boolean {
+        val dx = (bubbleX + bubbleW / 2) - (cancelX + cancelW / 2)
+        val dy = (bubbleY + bubbleH / 2) - (cancelY + cancelH / 2)
+        return dx * dx + dy * dy <= radius * radius
+    }
 }

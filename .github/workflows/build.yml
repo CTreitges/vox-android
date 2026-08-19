@@ -13,20 +13,12 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  MODEL_URL: https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin
-  MODEL_PATH: app/src/main/assets/models/ggml-small-q5_1.bin
-  TEST_MODEL_URL: https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny-q5_1.bin
-  TEST_MODEL_PATH: app/src/androidTest/assets/ggml-tiny-q5_1.bin
-
 jobs:
   build-and-unit:
     name: Build APK + Unit-Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - uses: actions/setup-java@v4
         with:
@@ -34,23 +26,6 @@ jobs:
           java-version: '17'
 
       - uses: android-actions/setup-android@v3
-
-      - name: NDK + CMake installieren
-        run: sdkmanager --install "ndk;27.2.12479018" "cmake;3.22.1"
-
-      - name: Whisper-Modell cachen
-        id: model-cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.MODEL_PATH }}
-          key: whisper-small-q5-v1
-
-      - name: Whisper-Modell laden (falls nicht gecacht)
-        if: steps.model-cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p "$(dirname "$MODEL_PATH")"
-          curl -L --fail --retry 3 -o "$MODEL_PATH" "$MODEL_URL"
-          ls -la "$(dirname "$MODEL_PATH")"
 
       - name: Unit-Tests + Lint
         run: ./gradlew --no-daemon testDebugUnitTest lintDebug
@@ -90,73 +65,3 @@ jobs:
         with:
           name: unit-and-lint-reports
           path: app/build/reports/
-
-  instrumented-tests:
-    name: Emulator-Instrumented-Tests
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        api-level: [30]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - uses: android-actions/setup-android@v3
-
-      - name: NDK + CMake installieren
-        run: sdkmanager --install "ndk;27.2.12479018" "cmake;3.22.1"
-
-      - name: Whisper-Modell cachen
-        id: model-cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.MODEL_PATH }}
-          key: whisper-small-q5-v1
-
-      - name: Whisper-Modell laden (falls nicht gecacht)
-        if: steps.model-cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p "$(dirname "$MODEL_PATH")"
-          curl -L --fail --retry 3 -o "$MODEL_PATH" "$MODEL_URL"
-
-      - name: Test-Modell (tiny) cachen
-        id: test-model-cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.TEST_MODEL_PATH }}
-          key: whisper-tiny-q5-test-v1
-
-      - name: Test-Modell laden (falls nicht gecacht)
-        if: steps.test-model-cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p "$(dirname "$TEST_MODEL_PATH")"
-          curl -L --fail --retry 3 -o "$TEST_MODEL_PATH" "$TEST_MODEL_URL"
-
-      - name: KVM freischalten
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Instrumented-Tests auf Emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          arch: x86_64
-          target: google_apis
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: ./gradlew --no-daemon connectedDebugAndroidTest
-
-      - name: Instrumented-Testberichte hochladen
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: instrumented-test-reports
-          path: app/build/reports/androidTests/

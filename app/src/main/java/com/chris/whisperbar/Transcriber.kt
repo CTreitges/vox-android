@@ -2,7 +2,7 @@ package com.chris.whisperbar
 
 /**
  * Abstraktion ueber die Spracherkennung, damit UI/IME nicht direkt an die
- * JNI-Schicht koppeln. Implementiert von [WhisperContext] (whisper.cpp).
+ * HTTP-Schicht koppeln. Implementiert von [com.chris.whisperbar.api.ApiTranscriber].
  */
 interface Transcriber {
     /**
@@ -12,6 +12,6 @@ interface Transcriber {
      */
     fun transcribe(samples: FloatArray, language: String): String
 
-    /** Native Ressourcen freigeben. */
+    /** Ressourcen freigeben. */
     fun release()
 }

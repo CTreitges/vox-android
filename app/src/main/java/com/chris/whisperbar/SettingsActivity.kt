@@ -2,113 +2,50 @@ package com.chris.whisperbar
 
 import android.app.Activity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Switch
-import android.widget.TextView
-import android.widget.Toast
-import java.util.concurrent.Executors
 
 /**
- * Einstellungen: Modell (Qualität ↔ Tempo, Download nur auf expliziten Button-Druck),
- * Sprache, Nachbearbeitung und optional eine Cloud-API. Persistiert via [Prefs].
+ * Einstellungen: Zugang zur Transkriptions-API, Sprache und Nachbearbeitung.
+ * Persistiert via [Prefs].
  */
 class SettingsActivity : Activity() {
 
     private lateinit var prefs: Prefs
-    private val io = Executors.newSingleThreadExecutor()
-    private val main = Handler(Looper.getMainLooper())
-    private val models = WhisperModel.entries
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = Prefs(this)
         setContentView(R.layout.activity_settings)
 
-        setupModelSpinner()
+        setupApiSection()
         setupLanguageSpinner()
         setupSwitches()
-        setupApiSection()
     }
 
     override fun onPause() {
         super.onPause()
-        // API-Textfelder persistieren (Leereingabe -> Defaults).
+        // Textfelder persistieren (Leereingabe -> Defaults).
         prefs.apiBaseUrl = field(R.id.api_url).ifBlank { Prefs.DEFAULT_API_URL }
         prefs.apiKey = field(R.id.api_key)
         prefs.apiModel = field(R.id.api_model).ifBlank { Prefs.DEFAULT_API_MODEL }
+        prefs.apiPrompt = field(R.id.api_prompt)
+        prefs.llmModel = field(R.id.llm_model).ifBlank { Prefs.DEFAULT_LLM_MODEL }
     }
 
     private fun field(id: Int) = findViewById<EditText>(id).text.toString().trim()
 
-    // --- Modell -------------------------------------------------------------
+    // --- API ----------------------------------------------------------------
 
-    private fun setupModelSpinner() {
-        val spinner = findViewById<Spinner>(R.id.spinner_model)
-        spinner.adapter = ArrayAdapter(
-            this, android.R.layout.simple_spinner_dropdown_item, models.map { it.display },
-        )
-        spinner.setSelection(models.indexOf(prefs.model))
-        refreshModelUi(prefs.model)
-
-        // Kein Auto-Download: die Auswahl aktiviert nur ein bereits vorhandenes Modell.
-        // Nicht vorhandene Modelle werden NUR per Button geladen. (Fix: kein Download beim Öffnen.)
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
-                val chosen = models[position]
-                if (ModelManager.isAvailable(this@SettingsActivity, chosen)) prefs.model = chosen
-                refreshModelUi(chosen)
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
-        findViewById<Button>(R.id.btn_model_download).setOnClickListener {
-            val chosen = models[spinner.selectedItemPosition]
-            if (ModelManager.isAvailable(this, chosen)) {
-                prefs.model = chosen
-                refreshModelUi(chosen)
-            } else {
-                downloadModel(chosen)
-            }
-        }
-    }
-
-    private fun downloadModel(model: WhisperModel) {
-        val status = findViewById<TextView>(R.id.model_status)
-        val btn = findViewById<Button>(R.id.btn_model_download)
-        val spinner = findViewById<Spinner>(R.id.spinner_model)
-        btn.isEnabled = false
-        spinner.isEnabled = false
-        status.text = "${getString(R.string.model_downloading)} 0%"
-        io.submit {
-            val ok = ModelManager.download(this, model) { pct ->
-                main.post { status.text = "${getString(R.string.model_downloading)} $pct%" }
-            }
-            main.post {
-                btn.isEnabled = true
-                spinner.isEnabled = true
-                if (ok) prefs.model = model
-                else Toast.makeText(this, R.string.model_download_failed, Toast.LENGTH_LONG).show()
-                refreshModelUi(model)
-            }
-        }
-    }
-
-    private fun refreshModelUi(model: WhisperModel) {
-        val status = findViewById<TextView>(R.id.model_status)
-        val btn = findViewById<Button>(R.id.btn_model_download)
-        val available = ModelManager.isAvailable(this, model)
-        status.text = when {
-            model.bundled -> "✓ im APK enthalten"
-            available -> if (model == prefs.model) getString(R.string.model_ready) else "geladen"
-            else -> "nicht geladen (~${model.approxMb} MB)"
-        }
-        btn.visibility = if (!available) android.view.View.VISIBLE else android.view.View.GONE
+    private fun setupApiSection() {
+        findViewById<EditText>(R.id.api_url).setText(prefs.apiBaseUrl)
+        findViewById<EditText>(R.id.api_key).setText(prefs.apiKey)
+        findViewById<EditText>(R.id.api_model).setText(prefs.apiModel)
+        findViewById<EditText>(R.id.api_prompt).setText(prefs.apiPrompt)
+        findViewById<EditText>(R.id.llm_model).setText(prefs.llmModel)
     }
 
     // --- Sprache + Schalter -------------------------------------------------
@@ -140,17 +77,20 @@ class SettingsActivity : Activity() {
             isChecked = prefs.trailingSpace
             setOnCheckedChangeListener { _, checked -> prefs.trailingSpace = checked }
         }
-    }
 
-    // --- Cloud-API ----------------------------------------------------------
-
-    private fun setupApiSection() {
-        findViewById<Switch>(R.id.switch_api).apply {
-            isChecked = prefs.useApi
-            setOnCheckedChangeListener { _, checked -> prefs.useApi = checked }
+        val smart = findViewById<Switch>(R.id.switch_smart_fillers).apply {
+            isChecked = prefs.smartFillers
+            setOnCheckedChangeListener { _, checked -> prefs.smartFillers = checked }
         }
-        findViewById<EditText>(R.id.api_url).setText(prefs.apiBaseUrl)
-        findViewById<EditText>(R.id.api_key).setText(prefs.apiKey)
-        findViewById<EditText>(R.id.api_model).setText(prefs.apiModel)
+        findViewById<Switch>(R.id.switch_llm).apply {
+            isChecked = prefs.llmPolish
+            // Die KI-Fuellwortentscheidung haengt an der Veredelung — ohne sie gibt es
+            // keinen zweiten Aufruf, in dem sie stattfinden koennte.
+            smart.isEnabled = isChecked
+            setOnCheckedChangeListener { _, checked ->
+                prefs.llmPolish = checked
+                smart.isEnabled = checked
+            }
+        }
     }
 }

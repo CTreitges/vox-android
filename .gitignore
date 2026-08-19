@@ -8,10 +8,6 @@ local.properties
 captures/
 .cxx/
 
-# Grosse Whisper-Modelle werden von der CI geladen (nicht committen)
-app/src/main/assets/models/*.bin
-app/src/androidTest/assets/*.bin
-
 # Release-Keystore + Credentials NIEMALS committen (nur in GitHub-Secrets / lokal)
 keystore/
 *.p12

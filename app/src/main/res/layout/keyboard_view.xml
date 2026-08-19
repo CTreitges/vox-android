@@ -82,6 +82,12 @@
             android:text="⏎" />
 
         <Button
+            android:id="@+id/key_retry"
+            style="@style/Key"
+            android:visibility="gone"
+            android:text="↻" />
+
+        <Button
             android:id="@+id/key_settings"
             style="@style/Key"
             android:text="⚙" />

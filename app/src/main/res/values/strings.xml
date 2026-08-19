@@ -9,10 +9,12 @@
 
     <!-- Setup -->
     <string name="setup_title">WhisperBar einrichten</string>
-    <string name="setup_intro">Diktiere per Whisper-KI direkt in jede App — voll offline, lokal auf deinem Gerät. Drei Schritte:</string>
-    <string name="setup_step_mic">1. Mikrofon erlauben</string>
-    <string name="setup_step_enable">2. WhisperBar als Tastatur aktivieren</string>
-    <string name="setup_step_select">3. WhisperBar als Eingabemethode wählen</string>
+    <string name="setup_intro">Diktiere in jede App. Die Erkennung läuft über deinen eigenen API-Zugang — dafür brauchst du einmalig einen API-Key.</string>
+    <string name="setup_step_api">1. API-Key hinterlegen</string>
+    <string name="setup_step_mic">2. Mikrofon erlauben</string>
+    <string name="setup_step_enable">3. WhisperBar als Tastatur aktivieren</string>
+    <string name="setup_step_select">4. WhisperBar als Eingabemethode wählen</string>
+    <string name="setup_api_btn">API-Key eintragen</string>
     <string name="setup_grant_mic">Mikrofon erlauben</string>
     <string name="setup_open_settings">Tastatur-Einstellungen öffnen</string>
     <string name="setup_pick_ime">Eingabemethode wählen</string>
@@ -25,26 +27,28 @@
     <!-- Keyboard -->
     <string name="kb_hint_hold">Halte das Mikrofon gedrückt und sprich</string>
     <string name="kb_listening">Höre zu … loslassen zum Beenden</string>
-    <string name="kb_transcribing">Transkribiere …</string>
-    <string name="kb_loading_model">Modell wird geladen …</string>
+    <string name="kb_transcribing">Wird übertragen …</string>
     <string name="kb_need_permission">Mikrofon-Berechtigung fehlt — tippe zum Einrichten</string>
     <string name="kb_error">Fehler bei der Erkennung</string>
     <string name="kb_space">Leer</string>
     <string name="cd_mic">Diktat-Mikrofon</string>
+    <string name="cd_cancel">Diktat verwerfen</string>
+
+    <!-- API -->
+    <string name="api_not_configured">Kein API-Key hinterlegt — in den Einstellungen eintragen</string>
 
     <!-- Settings -->
+    <string name="pref_recognition">Erkennung</string>
+    <string name="pref_quality">Textqualität</string>
     <string name="pref_language">Sprache</string>
     <string name="pref_remove_fillers">Füllwörter entfernen (ähm, äh …)</string>
     <string name="pref_auto_cap">Automatisch groß schreiben</string>
     <string name="pref_trailing_space">Leerzeichen nach Diktat anhängen</string>
-    <string name="pref_model">Modell (Qualität ↔ Tempo)</string>
-    <string name="pref_model_info">Modelle sind quantisiert (q5). Small ist gebündelt; Base/Tiny werden bei Auswahl einmalig geladen.</string>
-
-    <!-- Modell-Laden -->
-    <string name="model_downloading">Lade Modell …</string>
-    <string name="model_download_failed">Modell-Download fehlgeschlagen</string>
-    <string name="model_ready">Modell bereit</string>
-    <string name="model_not_loaded">Modell nicht geladen — in den Einstellungen laden</string>
+    <string name="pref_llm_polish">Text von der KI glätten lassen</string>
+    <string name="pref_llm_polish_info">Zweite Anfrage: korrigiert Zeichensetzung, Groß-/Kleinschreibung und Absätze. Kostet etwas extra und ein bis zwei Sekunden mehr.</string>
+    <string name="pref_smart_fillers">Füllwörter intelligent entfernen</string>
+    <string name="pref_smart_fillers_info">Statt fester Wortliste entscheidet die KI selbst, welche Füllwörter, Versprecher und Wiederholungen weg können. Braucht das Glätten oben.</string>
+    <string name="pref_llm_model_hint">Modell zum Glätten (z. B. gpt-4o-mini)</string>
 
     <!-- Schwebender Mikro-Button -->
     <string name="float_channel">WhisperBar Diktat</string>
@@ -53,6 +57,9 @@
     <string name="float_stop">Beenden</string>
     <string name="float_no_overlay">Bitte „Über anderen Apps anzeigen" erlauben</string>
     <string name="float_clipboard_fallback">Text kopiert — Bedienungshilfe aktivieren zum automatischen Einfügen</string>
+    <string name="float_sending">sendet …</string>
+    <string name="float_retry_hint">tippen = erneut</string>
+    <string name="float_discarded">Diktat verworfen</string>
 
     <!-- Bedienungshilfe -->
     <string name="a11y_label">WhisperBar Text-Einfügen</string>
@@ -67,14 +74,13 @@
     <string name="setup_stop_bubble">Schwebenden Mikro-Button beenden</string>
     <string name="setup_notif_btn">Benachrichtigungen erlauben</string>
 
-    <string name="model_download_btn">Modell laden</string>
-
-    <!-- Cloud-API -->
-    <string name="pref_api_title">Cloud-API (optional, bessere Qualität)</string>
-    <string name="pref_api_enable">Cloud-API statt On-Device nutzen</string>
-    <string name="pref_api_privacy">Achtung: Im API-Modus wird dein Audio an den Anbieter gesendet (nicht mehr offline).</string>
+    <!-- API-Zugang -->
+    <string name="pref_api_title">API-Zugang</string>
+    <string name="pref_api_privacy">Achtung: Dein Audio wird zur Erkennung an den eingetragenen Anbieter gesendet.</string>
     <string name="pref_api_url_hint">Base-URL (z. B. https://api.openai.com/v1)</string>
     <string name="pref_api_key_hint">API-Key</string>
-    <string name="pref_api_model_hint">Modell (z. B. whisper-1)</string>
-    <string name="pref_api_examples">Beispiele: OpenAI whisper-1 oder gpt-4o-transcribe · Groq (Base-URL https://api.groq.com/openai/v1, Modell whisper-large-v3-turbo). Key wird nur lokal gespeichert.</string>
+    <string name="pref_api_model_hint">Modell (z. B. gpt-4o-transcribe)</string>
+    <string name="pref_api_prompt_hint">Kontext: Namen, Fachbegriffe, Schreibweisen</string>
+    <string name="pref_api_prompt_info">Wird als Prompt mitgeschickt und hilft der Erkennung bei Eigennamen und Fachwörtern. Kostet nichts extra.</string>
+    <string name="pref_api_examples">Beispiele: OpenAI gpt-4o-transcribe oder whisper-1 · Groq (Base-URL https://api.groq.com/openai/v1, Modell whisper-large-v3-turbo). Der Key wird nur lokal auf dem Gerät gespeichert.</string>
 </resources>

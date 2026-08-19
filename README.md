@@ -1,49 +1,72 @@
-# WhisperBar — lokale Diktier-Tastatur für Android
+# WhisperBar — Diktier-Tastatur für Android
 
-Eine kostenlose, **komplett offline** laufende Alternative zu [Wispr Flow](https://wisprflow.ai/)
-und der Mac-App [Whisper Bar](https://whisperbar.app/) (Kevin Chromik) — als Android-**Tastatur (IME)**.
-Halte den Mikro-Knopf, sprich, und der per [whisper.cpp](https://github.com/ggerganov/whisper.cpp)
-**auf dem Gerät** erkannte Text landet direkt im aktiven Textfeld jeder App (WhatsApp, Gmail, Browser …).
+Diktieren in **jede** App: halte den Mikro-Knopf, sprich, und der erkannte Text landet direkt
+im aktiven Textfeld (WhatsApp, Gmail, Browser …). Eine schlanke Alternative zu
+[Wispr Flow](https://wisprflow.ai/) und der Mac-App [Whisper Bar](https://whisperbar.app/)
+(Kevin Chromik) — als Android-**Tastatur (IME)** *und* als schwebender Knopf über allen Apps.
 
-Keine Cloud, kein Account, keine API-Keys. Das Whisper-Modell liegt lokal im APK.
+Die Erkennung läuft über **deinen eigenen API-Zugang** (OpenAI-kompatibel: OpenAI, Groq,
+self-hosted). Du brauchst also einmalig einen API-Key; dein Audio geht zur Erkennung an den
+Anbieter, den du einträgst.
+
+> **Hinweis zur Version 2.0:** Der frühere On-Device-Betrieb (whisper.cpp im APK, ~154 MB) ist
+> raus — er lieferte auf dem Telefon zu schlechte Ergebnisse. Der letzte Stand mit lokalem Modell
+> liegt als Tag [`offline-v1`](../../releases/tag/offline-v1) im Repo.
 
 ## Features
 
-- 🎤 **Zwei Diktat-Wege**: (a) eigene **Tastatur (IME)** mit Mikro, (b) **schwebender Mikro-Button**
+- 🎤 **Zwei Diktat-Wege**: (a) eigene **Tastatur (IME)** mit Mikro, (b) **schwebender Mikro-Knopf**
   (Overlay + Bedienungshilfe), der Text ins Fokus-Feld schreibt — **ohne** Gboard zu verlassen.
-- 🔒 **100 % offline & lokal** — Audio verlässt das Gerät nie (whisper.cpp, ggml-**small** q5 gebündelt).
-  Modell in den Einstellungen wählbar: **small / base / tiny** (q5, Base/Tiny werden bei Bedarf geladen).
-- ☁️ **Optionale Cloud-API** (opt-in) für noch bessere Qualität — OpenAI-kompatibel (OpenAI, Groq,
-  self-hosted), konfigurierbar. Sendet dann Audio an den Anbieter (nicht mehr offline).
-- ✨ **On-device-Textveredelung** — Füllwörter entfernen, Sätze groß schreiben, Leerzeichen fixen (abschaltbar).
-- 🌍 **Mehrsprachig** — Default **Deutsch** (fest = schneller/genauer), oder auto / en / es / fr / it.
-- 🆓 MIT-lizenziert
+- 🔵 **Sichtbare Zustände** am schwebenden Knopf: bereit · nimmt auf (mit Timer) · sendet · Fehler.
+  Ziehen aufs ✕ am unteren Rand verwirft das Diktat, der Knopf merkt sich seine Position.
+- ↻ **Kein Diktat geht verloren**: Scheitert die Anfrage (kein Netz, Server-Aussetzer), bleibt das
+  Audio gepuffert — ein Tipp sendet erneut.
+- ✨ **Textveredelung**: Füllwörter entfernen, Sätze groß schreiben, Whitespace/Satzzeichen fixen
+  (lokal, ohne Extra-Kosten) — optional zusätzlich **KI-Glättung** für Zeichensetzung, Grammatik
+  und Absätze, wahlweise mit **intelligenter Füllwort-Entfernung** (die KI entscheidet selbst,
+  statt fester Wortliste).
+- 🏷️ **Kontext-Prompt**: Eigennamen und Fachbegriffe hinterlegen — verbessert die Erkennung, kostet nichts.
+- 🌍 **Mehrsprachig** — Default **Deutsch**, oder auto / en / es / fr / it.
+- 🆓 MIT-lizenziert · APK ~2 MB · kein AndroidX/Compose
 
 ## Architektur
 
 | Schicht | Umsetzung |
 |---|---|
-| Spracherkennung | `whisper.cpp` (C/C++), als Git-Submodul, per NDK zu `libwhisperbar.so` gebaut |
-| JNI-Brücke | `app/src/main/cpp/whisper_jni.cpp` ↔ `WhisperLib.kt` |
-| Whisper-Wrapper | `WhisperContext.kt` — thread-sicher (ein Worker-Thread), Modell aus Asset gestreamt |
-| Audio | `AudioRecorder.kt` — 16 kHz Mono PCM16 → Float |
-| Textveredelung | `TextPolisher.kt` — reines Kotlin, JVM-unit-getestet |
-| Tastatur | `ime/WhisperBarInputMethodService.kt` — `InputMethodService` |
+| Aufnahme | `AudioRecorder.kt` — 16 kHz Mono PCM16 → Float, `AudioUtils.trimSilence` |
+| Upload | `WavEncoder.kt` — WAV im Speicher, `api/Http.kt` — HttpURLConnection, typisierte Fehler |
+| Erkennung | `api/ApiTranscriber.kt` — `POST /audio/transcriptions` (multipart, mit `prompt`) |
+| KI-Glättung | `api/TextRefiner.kt` — optional, `POST /chat/completions`; Anweisung in `RefinePrompt` |
+| Pipeline | `TranscriptionEngine.kt` — Stille schneiden → erkennen → glätten → polieren |
+| Textveredelung | `TextPolisher.kt` + `PolishPlan` — reines Kotlin, JVM-unit-getestet |
+| Tastatur | `ime/WhisperBarInputMethodService.kt` — `InputMethodService`, Wiederholen-Taste |
+| Schwebender Knopf | `overlay/FloatingMicService.kt` + `BubbleState`/`BubbleUi`/`BubblePosition` |
+| Text einfügen | `a11y/TextInserterAccessibilityService.kt` + `TextInsertion` (clipboard-frei) |
 | Onboarding/Settings | `SetupActivity.kt`, `SettingsActivity.kt` (reines Framework, kein AppCompat) |
 
-Bewusst **kein AndroidX/Compose** im App-Code → schlank, wenige Build-Risiken.
-Das Modell (`ggml-base.bin`, ~148 MB) wird zur Build-Zeit geladen (nicht im Git), unkomprimiert
-im APK abgelegt (`noCompress "bin"`) und vom nativen Asset-Loader direkt gestreamt.
+Bewusst **kein AndroidX/Compose** im App-Code und keine HTTP-Bibliothek → schlank, wenige Build-Risiken.
+Die gesamte Rechen-Logik ohne Android-Abhängigkeit (Einfügen, Position, Formatierung, Polish-Plan,
+Prompt-Bau) liegt in reinen Kotlin-Objekten und ist damit ohne Emulator testbar.
+
+## Einrichten
+
+1. APK installieren, App **WhisperBar** öffnen.
+2. **API-Key eintragen** (Einstellungen): Base-URL, Key, Modell.
+   - OpenAI: `https://api.openai.com/v1`, Modell `gpt-4o-transcribe` (Default) oder `whisper-1`
+   - Groq: `https://api.groq.com/openai/v1`, Modell `whisper-large-v3-turbo`
+   Der Key wird nur lokal auf dem Gerät gespeichert.
+3. Mikrofon erlauben.
+4. Entweder Tastatur aktivieren + als Eingabemethode wählen — **oder** (empfohlen) „Über anderen
+   Apps anzeigen" + Bedienungshilfe „WhisperBar" aktivieren und den schwebenden Knopf starten.
+
+**Schwebender Knopf:** antippen = aufnehmen, nochmal antippen = senden, ziehen = verschieben,
+auf das ✕ ziehen = verwerfen. Nach einem Fehler bedeutet ein Tipp „erneut senden".
 
 ## Bauen
 
 ### Per GitHub Actions (empfohlen)
-`.github/workflows/build.yml` baut bei jedem Push:
-1. **Build APK + Unit-Tests + Lint** → Artefakte `whisperbar-debug-apk` (Debug-Key)
-   **und `whisperbar-release-apk` (Release-signiert)**
-2. **Emulator-Instrumented-Tests** (API 30, x86_64, KVM) → transkribiert `jfk.wav` echt auf einem Emulator
-
-APK-Download: Actions-Run öffnen → gewünschtes Artefakt → `app-debug.apk` bzw. `app-release.apk`.
+`.github/workflows/build.yml` baut bei jedem Push: Unit-Tests + Lint, Debug-APK und
+Release-signiertes APK → Artefakte `whisperbar-debug-apk` / `whisperbar-release-apk`.
 
 **Release-Signierung:** Ein persistenter PKCS12-Keystore liegt als GitHub-Secrets
 `WB_KEYSTORE_B64` + `WB_KEYSTORE_PASSWORD` (nicht im Repo). Die CI dekodiert ihn und
@@ -51,29 +74,30 @@ signiert `assembleRelease`. Derselbe Key signiert jeden Release → Updates sind
 Für lokale Release-Builds: Keystore unter `keystore/whisperbar-release.p12` ablegen und
 `WB_KEYSTORE`/`WB_KEYSTORE_PASSWORD`/`WB_KEY_ALIAS` als Env setzen (fehlt er, bleibt release unsigniert).
 
-### Lokal (Android Studio)
+### Lokal
 ```bash
-git clone --recurse-submodules <repo-url>
+git clone <repo-url>
 cd whisperbar-android
-# Modell einmalig laden:
-curl -L --fail -o app/src/main/assets/models/ggml-base.bin \
-  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
 ./gradlew assembleDebug
 ```
-Voraussetzungen: JDK 17, Android SDK 35, NDK `27.2.12479018`, CMake `3.22.1`.
-
-## Installieren & nutzen (Telefon)
-1. `app-debug.apk` aufs Telefon kopieren, installieren (Installation aus unbekannten Quellen erlauben).
-2. App **WhisperBar** öffnen → 3 Schritte: Mikrofon erlauben → Tastatur aktivieren → als Eingabemethode wählen.
-3. In beliebiger App das Textfeld antippen → zur WhisperBar-Tastatur wechseln → **Mikro halten & sprechen**.
-
-Erstes Diktat lädt kurz das Modell (danach im Speicher). Auf sehr alten Geräten ist `tiny` am schnellsten.
+Voraussetzungen: JDK 17, Android SDK 35. Kein NDK, kein CMake, kein Submodul mehr.
 
 ## Tests
-- **Unit** (`app/src/test/…/TextPolisherTest.kt`): Füllwörter, Groß-Schreibung, Whitespace/Satzzeichen — läuft ohne Gerät.
-- **Instrumented** (`app/src/androidTest/…/WhisperTranscriptionTest.kt`): lädt Modell, transkribiert `jfk.wav`,
-  prüft echten Text — beweist JNI + native lib + Modell auf einem Emulator.
+
+Alle Tests laufen ohne Gerät (`./gradlew testDebugUnitTest`):
+
+| Datei | Deckt ab |
+|---|---|
+| `TextPolisherTest` | Füllwörter, Groß-Schreibung, Whitespace/Satzzeichen |
+| `PolishPlanTest` | Regex-Filter weicht der KI-Entscheidung |
+| `WavEncoderTest` | WAV-Header und PCM-Konvertierung |
+| `AudioUtilsTest` | Stille-Trimmen |
+| `a11y/TextInsertionTest` | Einfügen an Cursor/Auswahl, leeres Feld |
+| `overlay/BubblePositionTest` | Clamping, Abbrechen-Trefferfläche |
+| `overlay/BubbleUiTest` | Timer-Formatierung |
+| `api/RefinePromptTest` | Anweisung für die KI-Glättung |
+| `api/ApiErrorsTest` | Welche Fehler einen zweiten Versuch verdienen |
 
 ## Lizenz / Credits
-MIT (siehe `LICENSE`). Nutzt whisper.cpp (MIT) und das ggml-Whisper-Modell (MIT).
+MIT (siehe `LICENSE`).
 Inspiriert von Wispr Flow und Whisper Bar (Kevin Chromik) — eigenständige, unabhängige Implementierung.

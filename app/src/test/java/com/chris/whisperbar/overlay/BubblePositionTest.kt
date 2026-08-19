@@ -1,6 +1,8 @@
 package com.chris.whisperbar.overlay
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -42,5 +44,40 @@ class BubblePositionTest {
 
     @Test fun bubbleGroesserAlsBildschirmLandetLinksOben() {
         assertEquals(BubblePos(0, 0), BubblePosition.clamp(50, 50, 2000, 3000, screenW, screenH))
+    }
+}
+
+/** JVM-Unit-Tests fuer die Trefferflaeche des Abbrechen-Ziels. */
+class CancelTargetTest {
+
+    private val bw = 168
+    private val bh = 200
+    private val cx = 456
+    private val cy = 2100
+    private val cw = 168
+    private val ch = 168
+    private val radius = 189
+
+    private fun over(bubbleX: Int, bubbleY: Int) =
+        BubblePosition.isOverCancel(bubbleX, bubbleY, bw, bh, cx, cy, cw, ch, radius)
+
+    @Test fun deckungsgleichIstEinTreffer() {
+        assertTrue(over(cx, cy + (ch - bh) / 2))
+    }
+
+    @Test fun knappDanebenIstNochEinTreffer() {
+        // Der Finger verdeckt den Knopf — die Flaeche ist bewusst grosszuegig.
+        assertTrue(over(cx + 100, cy - 100))
+    }
+
+    @Test fun weitEntferntIstKeinTreffer() {
+        assertFalse(over(50, 300))
+    }
+
+    @Test fun genauAmRandDesRadius() {
+        // Mittelpunkte exakt radius auseinander -> zaehlt noch als Treffer.
+        val bubbleY = cy + (ch - bh) / 2
+        assertTrue(over(cx + radius, bubbleY))
+        assertFalse(over(cx + radius + 1, bubbleY))
     }
 }

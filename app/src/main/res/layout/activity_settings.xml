@@ -9,95 +9,13 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <!-- Zugang -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/pref_model"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <Spinner
-            android:id="@+id/spinner_model"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
-
-        <TextView
-            android:id="@+id/model_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textColor="?android:attr/textColorSecondary" />
-
-        <Button
-            android:id="@+id/btn_model_download"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/model_download_btn" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/pref_language"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <Spinner
-            android:id="@+id/spinner_language"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
-
-        <Switch
-            android:id="@+id/switch_fillers"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/pref_remove_fillers" />
-
-        <Switch
-            android:id="@+id/switch_cap"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/pref_auto_cap" />
-
-        <Switch
-            android:id="@+id/switch_space"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/pref_trailing_space" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/pref_model_info"
-            android:textColor="?android:attr/textColorSecondary" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="28dp"
-            android:background="?android:attr/listDivider" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:text="@string/pref_api_title"
             android:textSize="16sp"
             android:textStyle="bold" />
-
-        <Switch
-            android:id="@+id/switch_api"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/pref_api_enable" />
 
         <TextView
             android:layout_width="match_parent"
@@ -141,5 +59,126 @@
             android:text="@string/pref_api_examples"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="12sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            android:background="?android:attr/listDivider" />
+
+        <!-- Erkennung -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/pref_recognition"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/pref_language" />
+
+        <Spinner
+            android:id="@+id/spinner_language"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
+        <EditText
+            android:id="@+id/api_prompt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="@string/pref_api_prompt_hint"
+            android:inputType="textMultiLine|textCapSentences"
+            android:minLines="2"
+            android:gravity="top"
+            android:importantForAutofill="no" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/pref_api_prompt_info"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            android:background="?android:attr/listDivider" />
+
+        <!-- Textqualität -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/pref_quality"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <Switch
+            android:id="@+id/switch_fillers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/pref_remove_fillers" />
+
+        <Switch
+            android:id="@+id/switch_cap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/pref_auto_cap" />
+
+        <Switch
+            android:id="@+id/switch_space"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/pref_trailing_space" />
+
+        <Switch
+            android:id="@+id/switch_llm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/pref_llm_polish" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/pref_llm_polish_info"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp" />
+
+        <Switch
+            android:id="@+id/switch_smart_fillers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/pref_smart_fillers" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/pref_smart_fillers_info"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp" />
+
+        <EditText
+            android:id="@+id/llm_model"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="@string/pref_llm_model_hint"
+            android:inputType="text"
+            android:importantForAutofill="no" />
     </LinearLayout>
 </ScrollView>

@@ -15,7 +15,7 @@ import com.chris.whisperbar.a11y.TextInserterAccessibilityService
 import com.chris.whisperbar.overlay.FloatingMicService
 
 /**
- * Onboarding: (A) klassische Diktat-Tastatur (IME) und (B) — empfohlen — schwebender
+ * Onboarding: API-Key, dann (A) klassische Diktat-Tastatur (IME) und (B) — empfohlen — schwebender
  * Mikro-Button, der ohne Tastatur-Wechsel funktioniert (Overlay + Bedienungshilfe).
  * Bewusst reines Framework (kein AppCompat).
  */
@@ -26,6 +26,9 @@ class SetupActivity : Activity() {
         setContentView(R.layout.activity_setup)
 
         // A) IME-Weg
+        findViewById<Button>(R.id.btn_api).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
         findViewById<Button>(R.id.btn_mic).setOnClickListener {
             requestPermissions(arrayOf(android.Manifest.permission.RECORD_AUDIO), REQ_MIC)
         }
@@ -96,6 +99,8 @@ class SetupActivity : Activity() {
     }
 
     private fun refreshStatus() {
+        setStatus(R.id.status_api, TranscriptionEngine.isConfigured(this))
+
         val micGranted = checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) ==
             PackageManager.PERMISSION_GRANTED
         setStatus(R.id.status_mic, micGranted)

@@ -15,6 +15,34 @@ data class PolishOptions(
 )
 
 /**
+ * Entscheidet, was die Regex-Nachbearbeitung noch tun soll. Rein (ohne Android),
+ * damit JVM-unit-testbar.
+ */
+object PolishPlan {
+
+    /**
+     * Wenn ein Sprachmodell selbst ueber Fuellwoerter entscheidet, darf die feste
+     * Wortliste nicht nochmal daruebergehen — sonst wuerde zweimal gefiltert und die
+     * Entscheidung der KI ("im Zweifel behalten") wieder ausgehebelt. Die restliche
+     * Normalisierung (Whitespace, Satzzeichen, Gross-Schreibung) laeuft weiter.
+     */
+    fun options(
+        removeFillers: Boolean,
+        autoCapitalize: Boolean,
+        language: String,
+        llmPolish: Boolean,
+        smartFillers: Boolean,
+    ): PolishOptions {
+        val aiDecidesFillers = llmPolish && smartFillers
+        return PolishOptions(
+            removeFillers = removeFillers && !aiDecidesFillers,
+            autoCapitalize = autoCapitalize,
+            language = language,
+        )
+    }
+}
+
+/**
  * Wandelt rohe Whisper-Ausgabe in sauberen Text um: Whitespace normalisieren,
  * Fuellwoerter entfernen, Leerzeichen vor Satzzeichen fixen, Saetze gross schreiben.
  *

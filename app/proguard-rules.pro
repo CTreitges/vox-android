@@ -1,6 +1,2 @@
-# JNI-Bindings duerfen nicht umbenannt/entfernt werden — sonst findet der native
-# Code die Java-Methoden nicht mehr.
--keepclasseswithmembernames class * {
-    native <methods>;
-}
--keep class com.chris.whisperbar.WhisperLib { *; }
+# Reflexionsfreier Framework-Code — es gibt derzeit nichts zu schuetzen.
+# (Die frueheren JNI-Keep-Regeln entfielen mit dem On-Device-Modell.)
