@@ -49,7 +49,7 @@
     <!-- Schwebender Mikro-Button -->
     <string name="float_channel">WhisperBar Diktat</string>
     <string name="float_running">WhisperBar-Diktat aktiv</string>
-    <string name="float_running_text">Tippe den schwebenden Knopf zum Diktieren</string>
+    <string name="float_running_text">Knopf antippen zum Diktieren, ziehen zum Verschieben</string>
     <string name="float_stop">Beenden</string>
     <string name="float_no_overlay">Bitte „Über anderen Apps anzeigen" erlauben</string>
     <string name="float_clipboard_fallback">Text kopiert — Bedienungshilfe aktivieren zum automatischen Einfügen</string>

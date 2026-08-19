@@ -23,6 +23,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.ViewConfiguration
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
@@ -125,6 +126,10 @@ class FloatingMicService : Service() {
     private fun addBubble() {
         val v = LayoutInflater.from(this).inflate(R.layout.floating_mic, null)
         micView = v.findViewById(R.id.bubble_mic)
+        // Gemerkte Position wiederherstellen; die Bubble-Groesse steht vor dem Layout
+        // noch nicht fest, deshalb hier mit 0 clampen (haelt sie im Bildschirm) und
+        // beim ersten Ziehen exakt nachziehen.
+        val start = clampToScreen(prefs.floatX, prefs.floatY, 0, 0)
         lp = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -134,15 +139,31 @@ class FloatingMicService : Service() {
             PixelFormat.TRANSLUCENT,
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 24
-            y = 320
+            x = start.x
+            y = start.y
         }
         v.setOnTouchListener(dragTapListener())
         wm.addView(v, lp)
         bubbleView = v
     }
 
+    private fun clampToScreen(x: Int, y: Int, width: Int, height: Int): BubblePos {
+        val dm = resources.displayMetrics
+        return BubblePosition.clamp(x, y, width, height, dm.widthPixels, dm.heightPixels)
+    }
+
+    private fun savePosition() {
+        prefs.floatX = lp.x
+        prefs.floatY = lp.y
+    }
+
     private fun dragTapListener() = object : View.OnTouchListener {
+        // Systemweite Schwelle statt fester Pixelzahl: 12 px sind auf einem dichten
+        // Display nur ~3 dp — dann galt schon ein leichtes Zittern beim Tippen als
+        // Ziehen (Diktat startete nicht), waehrend eine bewusste kleine Korrektur der
+        // Position umgekehrt als Tippen durchging und die Aufnahme startete.
+        private val touchSlop = ViewConfiguration.get(this@FloatingMicService).scaledTouchSlop
+
         var downX = 0f
         var downY = 0f
         var startX = 0
@@ -157,12 +178,15 @@ class FloatingMicService : Service() {
                 MotionEvent.ACTION_MOVE -> {
                     val dx = (e.rawX - downX).toInt()
                     val dy = (e.rawY - downY).toInt()
-                    if (abs(dx) > 12 || abs(dy) > 12) moved = true
-                    lp.x = startX + dx
-                    lp.y = startY + dy
+                    if (abs(dx) > touchSlop || abs(dy) > touchSlop) moved = true
+                    if (!moved) return true // unter der Schwelle: noch nicht verschieben
+                    val p = clampToScreen(startX + dx, startY + dy, view.width, view.height)
+                    lp.x = p.x
+                    lp.y = p.y
                     runCatching { wm.updateViewLayout(bubbleView, lp) }
                 }
-                MotionEvent.ACTION_UP -> if (!moved) onTap()
+                MotionEvent.ACTION_UP -> if (!moved) onTap() else savePosition()
+                MotionEvent.ACTION_CANCEL -> if (moved) savePosition()
             }
             return true
         }

@@ -49,6 +49,15 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_TRAILING_SPACE, true)
         set(v) = sp.edit().putBoolean(KEY_TRAILING_SPACE, v).apply()
 
+    /** Zuletzt gemerkte Position des schwebenden Knopfs (Bildschirm-Pixel). */
+    var floatX: Int
+        get() = sp.getInt(KEY_FLOAT_X, DEFAULT_FLOAT_X)
+        set(v) = sp.edit().putInt(KEY_FLOAT_X, v).apply()
+
+    var floatY: Int
+        get() = sp.getInt(KEY_FLOAT_Y, DEFAULT_FLOAT_Y)
+        set(v) = sp.edit().putInt(KEY_FLOAT_Y, v).apply()
+
     fun polishOptions() = PolishOptions(
         removeFillers = removeFillers,
         autoCapitalize = autoCapitalize,
@@ -68,6 +77,12 @@ class Prefs(context: Context) {
         const val DEFAULT_API_MODEL = "whisper-1"
         private const val KEY_AUTO_CAP = "auto_capitalize"
         private const val KEY_TRAILING_SPACE = "trailing_space"
+        private const val KEY_FLOAT_X = "float_x"
+        private const val KEY_FLOAT_Y = "float_y"
+
+        /** Startposition des schwebenden Knopfs, wenn noch nichts verschoben wurde. */
+        const val DEFAULT_FLOAT_X = 24
+        const val DEFAULT_FLOAT_Y = 320
 
         /** Sprachen fuer die Einstellungs-Auswahl. Erste = Default. */
         val LANGUAGES = listOf(

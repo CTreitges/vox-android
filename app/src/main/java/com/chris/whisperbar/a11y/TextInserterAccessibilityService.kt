@@ -35,34 +35,40 @@ class TextInserterAccessibilityService : AccessibilityService() {
         val node = root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)?.takeIf { it.isEditable }
             ?: return false
 
-        val old = node.text?.toString() ?: ""
-        var selStart = node.textSelectionStart
-        var selEnd = node.textSelectionEnd
-        if (selStart !in 0..old.length || selEnd !in 0..old.length) {
-            selStart = old.length
-            selEnd = old.length
-        }
-        val lo = minOf(selStart, selEnd)
-        val hi = maxOf(selStart, selEnd)
+        val old = currentText(node)
+        val result = TextInsertion.compute(old, node.textSelectionStart, node.textSelectionEnd, text)
 
-        // Fuehrendes Leerzeichen, wenn direkt an ein Wort angefuegt wird.
-        val needsSpace = lo > 0 && !old[lo - 1].isWhitespace() &&
-            text.isNotEmpty() && !text[0].isWhitespace()
-        val ins = if (needsSpace) " $text" else text
-
-        val combined = old.substring(0, lo) + ins + old.substring(hi)
         val setArgs = Bundle().apply {
-            putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, combined)
+            putCharSequence(
+                AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, result.text,
+            )
         }
         if (!node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, setArgs)) return false
 
-        val cursor = lo + ins.length
+        val cursor = result.cursor
         val selArgs = Bundle().apply {
             putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_START_INT, cursor)
             putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, cursor)
         }
         node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, selArgs)
         return true
+    }
+
+    /**
+     * Aktueller Feldinhalt — leer, wenn das Feld nur seinen Platzhalter zeigt.
+     *
+     * WICHTIG: `AccessibilityNodeInfo.getText()` liefert bei einem LEEREN Feld den
+     * Hint-Text (TextView.getTextForAccessibility faellt auf den Hint zurueck). Ohne
+     * diese Pruefung landet der Platzhalter als "vorhandener Text" im Feld und das
+     * Diktat wird daran angehaengt — genau die Symptome "Nachricht ..." (WhatsApp)
+     * oder "Google ..." (Suchleiste) vor dem eigentlichen Text.
+     */
+    private fun currentText(node: AccessibilityNodeInfo): String {
+        val text = node.text?.toString() ?: return ""
+        // isShowingHintText ist der offizielle Weg (API 26+); der Hint-Vergleich faengt
+        // Felder ab, die das Flag nicht setzen, aber trotzdem den Hint als Text melden.
+        if (node.isShowingHintText || text == node.hintText?.toString()) return ""
+        return text
     }
 
     companion object {
