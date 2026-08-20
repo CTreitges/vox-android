@@ -21,6 +21,17 @@ data class PolishOptions(
 object PolishPlan {
 
     /**
+     * Wortgetreu: nur Whitespace und Leerzeichen vor Satzzeichen normalisieren. Fuer
+     * FREMDE Sprachnachrichten — da will man hoeren, was gesagt wurde, nicht eine
+     * aufgeraeumte Fassung davon.
+     */
+    fun verbatim(language: String) = PolishOptions(
+        removeFillers = false,
+        autoCapitalize = false,
+        language = language,
+    )
+
+    /**
      * Wenn ein Sprachmodell selbst ueber Fuellwoerter entscheidet, darf die feste
      * Wortliste nicht nochmal daruebergehen — sonst wuerde zweimal gefiltert und die
      * Entscheidung der KI ("im Zweifel behalten") wieder ausgehebelt. Die restliche

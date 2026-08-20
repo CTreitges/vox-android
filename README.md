@@ -25,6 +25,11 @@ Anbieter, den du einträgst.
   (lokal, ohne Extra-Kosten) — optional zusätzlich **KI-Glättung** für Zeichensetzung, Grammatik
   und Absätze, wahlweise mit **intelligenter Füllwort-Entfernung** (die KI entscheidet selbst,
   statt fester Wortliste).
+- 📩 **Sprachnachrichten aus anderen Apps**: WhisperBar taucht im Teilen-Menü auf. Eine
+  WhatsApp-Sprachnachricht (oder Telegram, Signal, Aufnahme-App, Dateimanager) teilen und
+  den Text lesen, kopieren oder weiterleiten. Mehrere Dateien auf einmal gehen auch.
+  Geteiltes Audio wird **wortgetreu** ausgegeben — bei fremden Nachrichten will man wissen,
+  was gesagt wurde, nicht eine geglättete Fassung.
 - 🏷️ **Kontext-Prompt**: Eigennamen und Fachbegriffe hinterlegen — verbessert die Erkennung, kostet nichts.
 - 🌍 **Mehrsprachig** — Default **Deutsch**, oder auto / en / es / fr / it.
 - 🆓 MIT-lizenziert · APK ~2 MB · kein AndroidX/Compose
@@ -36,6 +41,7 @@ Anbieter, den du einträgst.
 | Aufnahme | `AudioRecorder.kt` — 16 kHz Mono PCM16 → Float, `AudioUtils.trimSilence` |
 | Upload | `WavEncoder.kt` — WAV im Speicher, `api/Http.kt` — HttpURLConnection, typisierte Fehler |
 | Erkennung | `api/ApiTranscriber.kt` — `POST /audio/transcriptions` (multipart, mit `prompt`) |
+| Geteilte Audios | `ShareTranscribeActivity.kt` + `SharedAudioTranscriber`; `AudioDecoder.kt` (MediaCodec → 16 kHz Mono), `AudioConvert.kt`, `AudioChunks.kt` |
 | KI-Glättung | `api/TextRefiner.kt` — optional, `POST /chat/completions`; Anweisung in `RefinePrompt` |
 | Pipeline | `TranscriptionEngine.kt` — Stille schneiden → erkennen → glätten → polieren |
 | Textveredelung | `TextPolisher.kt` + `PolishPlan` — reines Kotlin, JVM-unit-getestet |
@@ -59,6 +65,9 @@ Prompt-Bau) liegt in reinen Kotlin-Objekten und ist damit ohne Emulator testbar.
 4. Entweder Tastatur aktivieren + als Eingabemethode wählen — **oder** (empfohlen) „Über anderen
    Apps anzeigen" + Bedienungshilfe „WhisperBar" aktivieren und den schwebenden Knopf starten.
 
+**Sprachnachricht transkribieren:** in WhatsApp die Nachricht lang antippen → Teilen →
+WhisperBar. Der Text erscheint zum Lesen, Kopieren und Weiterleiten.
+
 **Schwebender Knopf:** antippen = aufnehmen, nochmal antippen = senden, ziehen = verschieben,
 auf das ✕ ziehen = verwerfen. Nach einem Fehler bedeutet ein Tipp „erneut senden".
 
@@ -73,6 +82,13 @@ Release-signiertes APK → Artefakte `whisperbar-debug-apk` / `whisperbar-releas
 signiert `assembleRelease`. Derselbe Key signiert jeden Release → Updates sind installierbar.
 Für lokale Release-Builds: Keystore unter `keystore/whisperbar-release.p12` ablegen und
 `WB_KEYSTORE`/`WB_KEYSTORE_PASSWORD`/`WB_KEY_ALIAS` als Env setzen (fehlt er, bleibt release unsigniert).
+
+**Warum lokal dekodiert wird:** Die Transkriptions-API nennt mp3, mp4, mpeg, mpga, m4a, wav
+und webm als unterstützte Formate — WhatsApp-Sprachnachrichten sind aber Opus im OGG-Container.
+Deshalb wird geteiltes Audio mit Androids eigenen Decodern nach 16 kHz Mono WAV umgewandelt.
+Das deckt alles ab, was das Gerät abspielen kann, und erlaubt das Stückeln langer Aufnahmen
+(die API nimmt höchstens 25 MB pro Datei, also gut 13 Minuten — geschnitten wird bei 5 Minuten
+an einer Sprechpause).
 
 ### Lokal
 ```bash
@@ -97,6 +113,9 @@ Alle Tests laufen ohne Gerät (`./gradlew testDebugUnitTest`):
 | `overlay/BubbleUiTest` | Timer-Formatierung |
 | `api/RefinePromptTest` | Anweisung für die KI-Glättung |
 | `api/ApiErrorsTest` | Welche Fehler einen zweiten Versuch verdienen |
+| `AudioChunksTest` | Stückeln langer Aufnahmen, Schnitt an Sprechpausen |
+| `AudioConvertTest` | Downmix, Resampling, Lautstärke-Profil |
+| `FormatsTest` | Dauer-Formatierung |
 
 ## Lizenz / Credits
 MIT (siehe `LICENSE`).

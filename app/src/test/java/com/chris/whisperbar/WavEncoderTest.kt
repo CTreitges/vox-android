@@ -1,5 +1,6 @@
 package com.chris.whisperbar
 
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -36,5 +37,33 @@ class WavEncoderTest {
         // 1.0 -> 32767 -> little-endian 0xFF 0x7F
         assertEquals(0xFF, wav[44].toInt() and 0xFF)
         assertEquals(0x7F, wav[45].toInt() and 0xFF)
+    }
+}
+
+/** JVM-Unit-Tests fuer den getrennt abrufbaren WAV-Kopf (Streaming langer Aufnahmen). */
+class WavHeaderTest {
+
+    @Test fun kopfHatDieRichtigeLaenge() {
+        assertEquals(WavEncoder.HEADER_SIZE, WavEncoder.header(0).size)
+    }
+
+    @Test fun kopfTraegtRiffUndDatenlaenge() {
+        val h = WavEncoder.header(1000, 16_000)
+        assertEquals("RIFF", String(h, 0, 4, Charsets.US_ASCII))
+        assertEquals("WAVE", String(h, 8, 4, Charsets.US_ASCII))
+        assertEquals("data", String(h, 36, 4, Charsets.US_ASCII))
+        fun le32(at: Int) = (h[at].toInt() and 0xFF) or ((h[at + 1].toInt() and 0xFF) shl 8) or
+            ((h[at + 2].toInt() and 0xFF) shl 16) or ((h[at + 3].toInt() and 0xFF) shl 24)
+        assertEquals(36 + 1000, le32(4))   // RIFF-Groesse
+        assertEquals(1000, le32(40))       // data-Groesse
+        assertEquals(16_000, le32(24))     // Abtastrate
+        assertEquals(32_000, le32(28))     // Byte-Rate = 16000 * 1 * 2
+    }
+
+    @Test fun kopfPlusDatenErgibtGenauDieKodierteDatei() {
+        val samples = floatArrayOf(0f, 0.5f, -0.5f, 1f)
+        val whole = WavEncoder.encode(samples)
+        val parts = WavEncoder.header(WavEncoder.pcmBytes(samples).size) + WavEncoder.pcmBytes(samples)
+        assertArrayEquals(parts, whole)
     }
 }

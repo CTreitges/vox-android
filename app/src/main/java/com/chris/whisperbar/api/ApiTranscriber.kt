@@ -10,7 +10,11 @@ import org.json.JSONObject
  * multipart/form-data). Funktioniert mit OpenAI, Groq und selbst gehosteten
  * Whisper-Servern — Base-URL, Modell und Key sind konfigurierbar.
  *
- * Das aufgenommene Audio wird dabei an den Anbieter gesendet.
+ * Hochgeladen wird immer WAV: die dokumentierten Formate der API sind mp3, mp4, mpeg,
+ * mpga, m4a, wav und webm — ogg/opus (WhatsApp-Sprachnachrichten) ist NICHT dabei.
+ * Deshalb wird geteiltes Audio vorher lokal dekodiert, statt es durchzureichen.
+ *
+ * Das aufgenommene Audio wird an den Anbieter gesendet.
  */
 class ApiTranscriber(
     private val baseUrl: String,
@@ -24,9 +28,11 @@ class ApiTranscriber(
     private val prompt: String = "",
 ) : Transcriber {
 
-    override fun transcribe(samples: FloatArray, language: String): String {
+    override fun transcribe(samples: FloatArray, language: String): String =
+        transcribe(WavUpload.fromSamples(samples, AudioUtils.SAMPLE_RATE), language)
+
+    fun transcribe(upload: WavUpload, language: String): String {
         if (apiKey.isBlank()) throw ApiNotConfiguredException()
-        val wav = WavEncoder.encode(samples, AudioUtils.SAMPLE_RATE)
         val boundary = "----whisperbar${System.nanoTime()}"
 
         val body = Http.post(
@@ -50,7 +56,8 @@ class ApiTranscriber(
                 "Content-Disposition: form-data; name=\"file\"; filename=\"audio.wav\"\r\n".toByteArray(),
             )
             os.write("Content-Type: audio/wav\r\n\r\n".toByteArray())
-            os.write(wav)
+            os.write(WavEncoder.header(upload.pcmByteCount, upload.sampleRate))
+            upload.writePcm(os)
             os.write("\r\n--$boundary--\r\n".toByteArray())
         }
 
