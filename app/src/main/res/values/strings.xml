@@ -99,6 +99,27 @@
     <string name="share_nothing_recognised">(nichts erkannt)</string>
     <string name="share_one_failed">Fehlgeschlagen: %1$s</string>
     <string name="share_unknown_source">Sprachnachricht</string>
+    <string name="share_progress">Datei %1$d von %2$d · Stück %3$d von %4$d · %5$s</string>
+    <string name="share_head_single">%1$s · 1 Datei</string>
+    <string name="share_head_multi">%1$d Dateien · %2$s gesamt</string>
+    <string name="share_section">%1$s · %2$s</string>
+    <string name="share_no_audio_body">Teile eine Audiodatei oder Sprachnachricht mit WhisperBar.</string>
+    <string name="share_all_failed">Transkription fehlgeschlagen</string>
+    <string name="share_not_configured">Kein Zugang eingerichtet</string>
+    <string name="share_not_configured_body">Richte einen Online-Dienst oder ein Offline-Modell ein, dann klappt es.</string>
+    <string name="share_open_setup">Einrichtung öffnen</string>
+    <string name="share_retry_file">Erneut</string>
+    <string name="share_retry_all">Alles erneut</string>
+    <string name="share_hide_fillers">Füllwörter ausblenden</string>
+    <string name="share_hide_fillers_on">ähm, äh … ausgeblendet</string>
+    <string name="share_hide_fillers_off" formatted="false">Wortgetreu, 100 %</string>
+    <string name="share_cd_copy">Text kopieren</string>
+
+    <!-- Allgemein (UX-Spec §6.1) -->
+    <string name="common_close">Schließen</string>
+    <string name="common_retry">Erneut</string>
+    <string name="cd_close">Schließen</string>
+    <string name="err_unknown">Unbekannter Fehler: %1$s</string>
 
     <!-- Offline-Modelle (whisper.cpp): Katalog-Labels, Download-Dienst, Fehler (UX-Spec §6.8, §6.1) -->
     <string name="common_cancel">Abbrechen</string>

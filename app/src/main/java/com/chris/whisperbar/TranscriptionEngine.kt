@@ -106,8 +106,10 @@ data class SharedTranscript(
     val paragraphsVerbatim: List<String>,
     val paragraphsCleaned: List<String>,
     val durationMs: Long,
-    /** Womit erkannt wurde ("OpenAI", "Offline") — fuer den Hinweis-Chip. */
+    /** Womit erkannt wurde ("OpenAI", "Offline · Small") — fuer den Hinweis-Chip. */
     val backendLabel: String,
+    /** In wie viele Stuecke (AudioChunks) die Datei zerlegt wurde — jede Grenze ist ein Absatz. */
+    val chunkCount: Int = 1,
 )
 
 /**
@@ -162,37 +164,51 @@ object SharedAudioTranscriber {
                 searchFrames = CUT_SEARCH_FRAMES,
             )
 
+            // Je Stueck ein Rohtext — die Stueck-Grenzen werden spaeter zu Absatzgrenzen.
             val parts = mutableListOf<String>()
             var detected: String? = null
             for ((i, chunk) in chunks.withIndex()) {
                 if (isCancelled()) throw UnsupportedAudioException("Abgebrochen")
                 onProgress(i, chunks.size, app.getString(R.string.share_sending))
                 val part = backend.transcribe(upload(decoded.pcmFile, chunk), prefs.language)
-                if (part.text.isNotBlank()) parts.add(part.text)
+                parts.add(part.text)
                 if (detected == null) detected = part.detectedLanguage
             }
             onProgress(chunks.size, chunks.size, app.getString(R.string.share_sending))
 
             val language = TranscriptionEngine.effectiveLanguage(prefs.language, detected)
-            val joined = parts.joinToString(" ")
-            val verbatim = TextPolisher.polish(joined, PolishPlan.verbatim(language))
-            val cleaned = TextPolisher.polish(
-                joined,
-                PolishPlan.cleaned(language, prefs.customFillers, prefs.disabledFillers),
-            )
+            // keepLineBreaks: Leerzeilen, die der Erkenner liefert, bleiben Absatzgrenzen (Regel 1).
+            val verbatimOptions = PolishPlan.verbatim(language).copy(keepLineBreaks = true)
+            val cleanedOptions = PolishPlan.cleaned(language, prefs.customFillers, prefs.disabledFillers)
+                .copy(keepLineBreaks = true)
+            val paragraphsVerbatim = paragraphsForChunks(parts.map { TextPolisher.polish(it, verbatimOptions) })
+            val paragraphsCleaned = paragraphsForChunks(parts.map { TextPolisher.polish(it, cleanedOptions) })
             return SharedTranscript(
                 source = name,
-                verbatimText = verbatim,
-                cleanedText = cleaned,
-                paragraphsVerbatim = Paragrapher.split(verbatim),
-                paragraphsCleaned = Paragrapher.split(cleaned),
+                verbatimText = paragraphsVerbatim.joinToString("\n\n"),
+                cleanedText = paragraphsCleaned.joinToString("\n\n"),
+                paragraphsVerbatim = paragraphsVerbatim,
+                paragraphsCleaned = paragraphsCleaned,
                 durationMs = decoded.durationMs,
                 backendLabel = backend.label,
+                chunkCount = chunks.size,
             )
         } finally {
             temp.delete()
         }
     }
+
+    /** Leerzeile im Text = vorhandene Absatzgrenze (Regel 1). */
+    private val BLANK_LINE = Regex("\\n\\s*\\n")
+
+    /**
+     * Absatzregel der Share-Ansicht (UX-Spec §2.9), rein und testbar:
+     * (1) vorhandene Leerzeilen uebernehmen, (2) jede Stueck-Grenze ist ein Absatz,
+     * (3) innerhalb eines Stuecks teilt [Paragrapher] (3 Saetze / 350 Zeichen).
+     * Leere Stuecke (z. B. nur Stille oder nur Fuellwoerter) fallen weg.
+     */
+    fun paragraphsForChunks(chunks: List<String>): List<String> =
+        chunks.flatMap { chunk -> chunk.split(BLANK_LINE).flatMap { block -> Paragrapher.split(block) } }
 
     /** Streamt genau ein Stueck aus der entpackten PCM-Datei in die Verbindung. */
     private fun upload(pcmFile: File, chunk: AudioChunks.Chunk) = WavUpload(
@@ -212,7 +228,7 @@ object SharedAudioTranscriber {
     }
 
     /** Dateiname der geteilten Quelle, sonst ein neutraler Ersatz. */
-    private fun displayName(context: Context, uri: android.net.Uri): String {
+    internal fun displayName(context: Context, uri: android.net.Uri): String {
         runCatching {
             context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
                 ?.use { c ->

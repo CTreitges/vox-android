@@ -63,6 +63,31 @@ class ParagrapherTest {
         assertTrue(paragraphs.last().length > "Tschüss.".length)
     }
 
+    // UX-Spec §2.9: nach 3 Saetzen beginnt ein neuer Absatz …
+    @Test fun hoechstensDreiSaetzeProAbsatz() {
+        val text = (1..7).joinToString(" ") { sentence(it) }
+        val paragraphs = Paragrapher.split(text)
+        assertEquals(listOf(3, 3, 1), paragraphs.map { Paragrapher.sentences(it).size })
+        assertEquals(normalized(text), normalized(paragraphs.joinToString(" ")))
+    }
+
+    // … oder sobald 350 Zeichen erreicht sind: zwei 200-Zeichen-Saetze reichen.
+    @Test fun absatzEndetSobald350ZeichenErreichtSind() {
+        val long = "Wort ".repeat(40).trim() + "."
+        assertEquals(200, long.length)
+        val paragraphs = Paragrapher.split(List(4) { long }.joinToString(" "))
+        assertEquals(listOf(2, 2), paragraphs.map { Paragrapher.sentences(it).size })
+    }
+
+    // Bewusste Ausnahme: ein einzelner kurzer Schlusssatz bleibt nicht allein stehen.
+    @Test fun einzelnerKurzerSchlusssatzWirdAngehaengt() {
+        val text = (1..9).joinToString(" ") { sentence(it) } + " Tschüss."
+        val paragraphs = Paragrapher.split(text)
+        assertEquals(3, paragraphs.size)
+        assertTrue(paragraphs.last().endsWith("Tschüss."))
+        assertEquals(normalized(text), normalized(paragraphs.joinToString(" ")))
+    }
+
     @Test fun ohneSatzzeichenBleibtEinBlock() {
         val words = (1..200).joinToString(" ") { "wort$it" }
         assertEquals(listOf(words), Paragrapher.split(words))
