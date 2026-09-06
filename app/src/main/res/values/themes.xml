@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Framework-Theme (kein AppCompat noetig). -->
-    <style name="AppTheme" parent="@android:style/Theme.Material.Light.DarkActionBar">
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Framework-Theme (kein AppCompat). Fest dunkel: verhindert den weissen Frame vor dem ersten
+         Compose-Frame. Theme.Material.NoActionBar gibt es seit API 21
+         (https://developer.android.com/reference/android/R.style). Die Bildschirm-Titel stehen in den
+         Layouts, deshalb keine ActionBar. Kein Dynamic Color: Compose ueberdeckt das Framework-Theme. -->
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/kb_background</item>
         <item name="android:colorPrimary">@color/accent</item>
         <item name="android:colorAccent">@color/accent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Helle Icons auf dunklem Grund (Statusleiste API 23+, Navigationsleiste API 27+). -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 
     <!-- Tastatur-Utility-Buttons. -->
