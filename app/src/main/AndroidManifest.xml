@@ -6,9 +6,14 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <!-- Modell-Download-Dienst (whisper.cpp-Modelle, 32-574 MB) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- Nachfrage vor Downloads ueber mobile Daten (ConnectivityManager.isActiveNetworkMetered) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
+        android:name=".WhisperBarApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -72,6 +77,11 @@
             android:name=".overlay.FloatingMicService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
+
+        <service
+            android:name=".whisper.ModelDownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <service
             android:name=".a11y.TextInserterAccessibilityService"

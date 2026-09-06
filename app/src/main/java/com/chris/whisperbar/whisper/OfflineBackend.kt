@@ -1,35 +1,49 @@
 package com.chris.whisperbar.whisper
 
 import android.content.Context
+import com.chris.whisperbar.Prefs
 import com.chris.whisperbar.TranscriptResult
 import com.chris.whisperbar.TranscriptionBackend
 import com.chris.whisperbar.api.WavUpload
 
-/** Offline gewaehlt, aber kein Modell auf dem Geraet (oder die Engine fehlt noch). */
-class OfflineNotAvailableException :
-    RuntimeException("Offline-Erkennung nicht verfügbar — Modell in den Einstellungen herunterladen")
-
 /**
- * Platzhalter — WP3 ersetzt: prueft dann, ob das gewaehlte Modell (Prefs.offlineModel)
- * vollstaendig in filesDir/models liegt.
+ * Offline gewaehlt, aber nicht einsatzbereit: kein vollstaendiges Modell, CPU ohne FP16/DotProd
+ * oder die native Bibliothek fehlt. Nicht retryable — IME/Overlay zeigen [message].
  */
+class OfflineNotAvailableException(message: String = MSG_NO_MODEL) : RuntimeException(message) {
+    companion object {
+        const val MSG_NO_MODEL = "Kein Offline-Modell geladen — unter Offline-Modelle laden"
+        const val MSG_UNSUPPORTED = "Offline-Erkennung wird von diesem Gerät nicht unterstützt (CPU ohne FP16/DotProd)"
+        const val MSG_LOAD_FAILED = "Offline-Modell konnte nicht geladen werden — unter Offline-Modelle löschen und neu laden"
+    }
+}
+
+/** whisper_full hat einen Fehler gemeldet (kein Abbruch). */
+class OfflineTranscriptionException(rc: Int) : RuntimeException("Offline-Erkennung fehlgeschlagen (whisper_full=$rc)")
+
 object OfflineStatus {
-    @Suppress("UNUSED_PARAMETER")
-    fun isModelAvailable(context: Context): Boolean = false
+    /** Liegt das in den Einstellungen gewaehlte Modell vollstaendig in filesDir/models? */
+    fun isModelAvailable(context: Context): Boolean {
+        val app = context.applicationContext
+        WhisperEngine.init(app) // idempotent — Sicherheitsnetz, falls WhisperBarApp nicht gelaufen ist
+        return ModelStore(app).isInstalled(Prefs(app).offlineModel)
+    }
 }
 
 /**
- * Platzhalter — WP3 ersetzt ihn durch die whisper.cpp-Anbindung (WhisperEngine/JNI).
- * Parameter sind schon die spaeteren: Modell-ID, Beam-Search vs. Greedy, initial_prompt.
+ * Erkennung auf dem Geraet mit whisper.cpp ueber die prozessweite [WhisperEngine].
+ * @param accurate Beam-Search 5 (genauer, langsamer) statt Greedy
+ * @param initialPrompt Kontext aus den Einstellungen (Eigennamen, Fachbegriffe) — wie `prompt` bei der API
  */
 class OfflineBackend(
-    @Suppress("unused") private val modelId: String,
-    @Suppress("unused") private val accurate: Boolean,
-    @Suppress("unused") private val initialPrompt: String,
+    private val modelId: String,
+    private val accurate: Boolean,
+    private val initialPrompt: String,
 ) : TranscriptionBackend {
 
-    override val label: String = "Offline"
+    override val label: String = "Offline · " + (ModelCatalog.find(modelId)?.label ?: modelId)
 
+    /** Bei "auto" liefert whisper die erkannte Sprache mit ([TranscriptResult.detectedLanguage]). */
     override fun transcribe(upload: WavUpload, language: String): TranscriptResult =
-        throw OfflineNotAvailableException()
+        WhisperEngine.transcribe(modelId, upload.readSamples(), language, initialPrompt, accurate)
 }

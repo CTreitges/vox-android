@@ -99,4 +99,27 @@
     <string name="share_nothing_recognised">(nichts erkannt)</string>
     <string name="share_one_failed">Fehlgeschlagen: %1$s</string>
     <string name="share_unknown_source">Sprachnachricht</string>
+
+    <!-- Offline-Modelle (whisper.cpp): Katalog-Labels, Download-Dienst, Fehler (UX-Spec §6.8, §6.1) -->
+    <string name="common_cancel">Abbrechen</string>
+    <string name="models_title">Offline-Modelle</string>
+    <string name="models_channel">Modell-Downloads</string>
+    <string name="models_notif_title">Modell wird geladen</string>
+    <string name="models_notif_text">%1$s · %2$d %%</string>
+    <string name="models_notif_done">%1$s ist bereit</string>
+    <string name="models_failed">Fehlgeschlagen: %1$s</string>
+    <string name="models_cancel_cd">Download abbrechen</string>
+    <string name="models_recommended">Empfohlen</string>
+    <string name="models_too_big">Für dieses Gerät zu groß</string>
+    <string name="models_tiny">Tiny</string>
+    <string name="models_tiny_sub">32 MB · ~250 MB RAM · nur zum Ausprobieren</string>
+    <string name="models_base">Base</string>
+    <string name="models_base_sub">60 MB · ~355 MB RAM · schnell, kurze Sätze</string>
+    <string name="models_small">Small</string>
+    <string name="models_small_sub">190 MB · ~430 MB RAM · gute Qualität für Deutsch</string>
+    <string name="models_large">Large v3 Turbo</string>
+    <string name="models_large_sub">574 MB · ~1 GB RAM · beste Qualität, langsam, ab 6 GB Gerätespeicher</string>
+    <string name="err_model_checksum">Datei beschädigt — erneut laden</string>
+    <string name="err_download_net">Netzwerkfehler beim Laden</string>
+    <string name="err_storage_full">Nicht genug Speicherplatz</string>
 </resources>

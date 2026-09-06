@@ -3,6 +3,8 @@ package com.chris.whisperbar
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.chris.whisperbar.api.ApiNotConfiguredException
+import com.chris.whisperbar.whisper.ModelCatalog
+import com.chris.whisperbar.whisper.ModelStore
 import com.chris.whisperbar.whisper.OfflineBackend
 import com.chris.whisperbar.whisper.OfflineNotAvailableException
 import com.sun.net.httpserver.HttpServer
@@ -18,6 +20,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.io.RandomAccessFile
 import java.net.InetSocketAddress
 
 /**
@@ -100,16 +103,42 @@ class TranscriptionEngineTest {
         assertTrue(TranscriptionEngine.isConfigured(ctx))
     }
 
-    @Test fun offlineIstNochEinPlatzhalter() {
+    @Test fun offlineOhneModellWirftOfflineNotAvailable() {
         prefs.engine = Engine.OFFLINE
         assertFalse(TranscriptionEngine.isConfigured(ctx))
-        assertTrue(TranscriptionEngine.backend(prefs) is OfflineBackend)
-        assertEquals("Offline", TranscriptionEngine.backend(prefs).label)
+        val backend = TranscriptionEngine.backend(prefs)
+        assertTrue(backend is OfflineBackend)
+        assertEquals("Offline · Small", backend.label)
         try {
             TranscriptionEngine.transcribe(ctx, speech)
             fail("OfflineNotAvailableException erwartet")
         } catch (e: OfflineNotAvailableException) {
-            // erwartet
+            assertEquals(OfflineNotAvailableException.MSG_NO_MODEL, e.message)
+        }
+    }
+
+    @Test fun offlineMitVollstaendigerModellDateiIstKonfiguriert() {
+        prefs.engine = Engine.OFFLINE
+        prefs.offlineModel = "base"
+        val store = ModelStore(ctx)
+        store.ensureDir()
+        // Sparse-Datei in Katalog-Groesse: fuer isInstalled zaehlt nur Laenge + fehlende .part
+        RandomAccessFile(store.file(ModelCatalog.BASE), "rw").use { it.setLength(ModelCatalog.BASE.bytes) }
+        try {
+            assertTrue(TranscriptionEngine.isConfigured(ctx))
+            assertEquals("Offline · Base", TranscriptionEngine.backend(prefs).label)
+            // In der JVM gibt es keine libwhisperbar.so: die Engine meldet "nicht unterstuetzt" statt abzustuerzen.
+            try {
+                TranscriptionEngine.transcribe(ctx, speech)
+                fail("OfflineNotAvailableException erwartet")
+            } catch (e: OfflineNotAvailableException) {
+                assertEquals(OfflineNotAvailableException.MSG_UNSUPPORTED, e.message)
+            }
+            // Teildatei daneben -> nicht mehr einsatzbereit
+            store.partFile(ModelCatalog.BASE).writeBytes(byteArrayOf(1))
+            assertFalse(TranscriptionEngine.isConfigured(ctx))
+        } finally {
+            store.delete(ModelCatalog.BASE)
         }
     }
 
