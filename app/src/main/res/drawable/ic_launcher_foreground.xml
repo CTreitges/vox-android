@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive-Icon-Vordergrund (UX-Spec §4.1): Mikrofon mit Schallwellen.
+     Motiv ca. 60 x 42 dp (x 26,8-81,2 / y 34-76), alle Punkte <= 32 dp vom Zentrum (54,54)
+     = innerhalb der sicheren Zone (Kreis Radius 33). Flach, keine Schatten. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 1 Mikrofon-Kapsel: x 45-63, y 34-64, Radius 9 -->
+    <path
+        android:fillColor="#B4F2E6"
+        android:pathData="M54,34 a9,9 0 0 1 9,9 v12 a9,9 0 0 1 -18,0 v-12 a9,9 0 0 1 9,-9 z" />
+    <!-- 2 Grill: drei Schlitze 8 x 2, Radius 1, x 50-58, Mittellinien y 44 / 49 / 54 -->
+    <path
+        android:fillColor="#0F5B50"
+        android:fillAlpha="0.85"
+        android:pathData="M51,43 h6 a1,1 0 0 1 0,2 h-6 a1,1 0 0 1 0,-2 z M51,48 h6 a1,1 0 0 1 0,2 h-6 a1,1 0 0 1 0,-2 z M51,53 h6 a1,1 0 0 1 0,2 h-6 a1,1 0 0 1 0,-2 z" />
+    <!-- 3 Buegel: Bogen um (54,54), Radius 15, unten herum -->
+    <path
+        android:strokeColor="#B4F2E6"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M39,54 a15,15 0 0 0 30,0" />
+    <!-- 4 Stiel + Fuss -->
+    <path
+        android:strokeColor="#B4F2E6"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M54,69 v7 M46,76 h16" />
+    <!-- 5 Schallwellen innen: R 23 um (54,50), +/-25 Grad -->
+    <path
+        android:strokeColor="#6FD9C7"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:pathData="M74.8,40.3 a23,23 0 0 1 0,19.4 M33.2,40.3 a23,23 0 0 0 0,19.4" />
+    <!-- 5 Schallwellen aussen: R 30, Alpha 0,6 -->
+    <path
+        android:strokeColor="#6FD9C7"
+        android:strokeWidth="3.5"
+        android:strokeAlpha="0.6"
+        android:strokeLineCap="round"
+        android:pathData="M81.2,37.3 a30,30 0 0 1 0,25.4 M26.8,37.3 a30,30 0 0 0 0,25.4" />
+</vector>

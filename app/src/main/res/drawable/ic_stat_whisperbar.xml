@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notification-Small-Icon (UX-Spec §4.3): 24 x 24, reine Alpha-Silhouette Weiss auf transparent,
+     Sicherheitsrand 2 dp (x 5,05-18,95; y 3-18). Farbe kommt aus Notification.Builder.setColor(). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Kapsel x 10-14, y 3-12 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,3 a2,2 0 0 1 2,2 v5 a2,2 0 0 1 -4,0 V5 a2,2 0 0 1 2,-2 z" />
+    <!-- Buegel -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:pathData="M7.5,10 a4.5,4.5 0 0 0 9,0" />
+    <!-- Stiel + Fuss -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.75"
+        android:strokeLineCap="round"
+        android:pathData="M12,14.5 v3.5 M9.5,18 h5" />
+    <!-- Wellen R 7,5 um (12,10), +/-22 Grad -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M18.95,7.2 a7.5,7.5 0 0 1 0,5.6 M5.05,7.2 a7.5,7.5 0 0 0 0,5.6" />
+</vector>

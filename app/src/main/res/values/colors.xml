@@ -1,5 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ============================================================================
+         v3-Design-Tokens (UX-Spec §3.1, fest dunkel). Praefix wb_ = WhisperBar.
+         EINZIGE Farb-Wahrheit: Compose liest diese Werte per colorResource() in
+         darkColorScheme + LocalWbColors; IME/Overlay/Notification nutzen @color/wb_*.
+         Aenderung hier -> WbPalette in ui/theme/Color.kt mit nachziehen (Test prueft das).
+         ============================================================================ -->
+
+    <!-- M3-Rollen -->
+    <color name="wb_background">#0E1116</color>
+    <color name="wb_surface">#0E1116</color>
+    <color name="wb_surfaceContainerLowest">#090B0F</color>
+    <color name="wb_surfaceContainerLow">#161A20</color>
+    <color name="wb_surfaceContainer">#1A1F26</color>
+    <color name="wb_surfaceContainerHigh">#242A32</color>
+    <color name="wb_surfaceContainerHighest">#2E353E</color>
+    <color name="wb_surfaceBright">#343B45</color>
+    <color name="wb_onSurface">#E4E8EE</color>
+    <color name="wb_onSurfaceVariant">#B8C0CC</color>
+    <color name="wb_outline">#8A93A0</color>
+    <color name="wb_outlineVariant">#3A424D</color>
+    <color name="wb_primary">#6FD9C7</color>
+    <color name="wb_onPrimary">#00382F</color>
+    <color name="wb_primaryContainer">#0F5B50</color>
+    <color name="wb_onPrimaryContainer">#B4F2E6</color>
+    <color name="wb_secondary">#A9C4E8</color>
+    <color name="wb_onSecondary">#12304F</color>
+    <color name="wb_secondaryContainer">#2B4665</color>
+    <color name="wb_onSecondaryContainer">#D8E7FA</color>
+    <color name="wb_tertiary">#D7B8FF</color>
+    <color name="wb_onTertiary">#3C1D6A</color>
+    <color name="wb_tertiaryContainer">#54368A</color>
+    <color name="wb_onTertiaryContainer">#EEDCFF</color>
+    <color name="wb_error">#FFB4AB</color>
+    <color name="wb_onError">#690005</color>
+    <color name="wb_errorContainer">#93000A</color>
+    <color name="wb_onErrorContainer">#FFDAD6</color>
+
+    <!-- Zusatz-Tokens (LocalWbColors): Aufnahme, Erfolg, Warnung -->
+    <color name="wb_recording">#FF4D4D</color>
+    <color name="wb_onRecording">#1A0508</color>
+    <color name="wb_recordingContainer">#4A0F12</color>
+    <color name="wb_recordingText">#FF8A80</color>
+    <color name="wb_success">#6FDD8B</color>
+    <color name="wb_onSuccess">#00391A</color>
+    <color name="wb_successContainer">#123D24</color>
+    <color name="wb_onSuccessContainer">#B4F5C4</color>
+    <color name="wb_warning">#FFC85C</color>
+    <color name="wb_onWarning">#3D2C00</color>
+    <color name="wb_warningContainer">#4A3600</color>
+    <color name="wb_onWarningContainer">#FFE3A8</color>
+
+    <!-- Alt-Tokens (v2): IME, Overlay und XML-Layouts haengen noch daran.
+         Bleiben bis zur Migration von IME/Overlay auf wb_* unveraendert. -->
     <color name="kb_background">#1B1E24</color>
     <color name="kb_surface">#2A2E37</color>
     <color name="kb_key">#3A3F4B</color>

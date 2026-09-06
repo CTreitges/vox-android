@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Share-Ziel-Vordergrund (UX-Spec §4.2), Lesart "Sprache -> Text": Mikrofon (Pfade 1-4 aus §4.1)
+     um 8 dp nach links verschoben (Kapsel x 37-55, Buegel um (46,54)), keine Wellen; rechts drei
+     Textzeilen als Balken Hoehe 4, Radius 2. Entferntester Punkt (82,42) -> 30,5 dp vom Zentrum. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 1 Kapsel: x 37-55, y 34-64 -->
+    <path
+        android:fillColor="#B4F2E6"
+        android:pathData="M46,34 a9,9 0 0 1 9,9 v12 a9,9 0 0 1 -18,0 v-12 a9,9 0 0 1 9,-9 z" />
+    <!-- 2 Grill: x 42-50, Mittellinien y 44 / 49 / 54 -->
+    <path
+        android:fillColor="#0F5B50"
+        android:fillAlpha="0.85"
+        android:pathData="M43,43 h6 a1,1 0 0 1 0,2 h-6 a1,1 0 0 1 0,-2 z M43,48 h6 a1,1 0 0 1 0,2 h-6 a1,1 0 0 1 0,-2 z M43,53 h6 a1,1 0 0 1 0,2 h-6 a1,1 0 0 1 0,-2 z" />
+    <!-- 3 Buegel um (46,54), Radius 15 -->
+    <path
+        android:strokeColor="#B4F2E6"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M31,54 a15,15 0 0 0 30,0" />
+    <!-- 4 Stiel x 46 + Fuss x 38-54 -->
+    <path
+        android:strokeColor="#B4F2E6"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M46,69 v7 M38,76 h16" />
+    <!-- Textzeilen: x 62-82 (y 42-46), x 62-78 (y 50-54), x 62-72 (y 58-62) -->
+    <path
+        android:fillColor="#6FD9C7"
+        android:pathData="M64,42 h16 a2,2 0 0 1 0,4 h-16 a2,2 0 0 1 0,-4 z M64,50 h12 a2,2 0 0 1 0,4 h-12 a2,2 0 0 1 0,-4 z M64,58 h6 a2,2 0 0 1 0,4 h-6 a2,2 0 0 1 0,-4 z" />
+</vector>
