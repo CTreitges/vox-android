@@ -1,14 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ablege-Ziel zum Abbrechen: erscheint am unteren Rand, sobald ein laufendes
-     oder fehlgeschlagenes Diktat weggezogen werden kann. -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/cancel_target"
-    android:layout_width="64dp"
-    android:layout_height="64dp"
-    android:background="@drawable/cancel_bg"
-    android:gravity="center"
-    android:text="✕"
-    android:textColor="@color/kb_text"
-    android:textSize="26sp"
-    android:elevation="6dp"
-    android:contentDescription="@string/cd_cancel" />
+<!-- Abbrechen-Ziel (UX-Spec §5.2): 72-dp-Kreis unten mittig, erscheint beim Ziehen in
+     RECORDING/ERROR. Im Magnet-Radius skaliert CancelTarget den Kreis auf 1,12, faerbt ihn
+     wb_errorContainer und wechselt das Label auf "Loslassen zum Verwerfen". -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <FrameLayout
+        android:id="@+id/cancel_target"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:background="@drawable/cancel_fill"
+        android:contentDescription="@string/cd_cancel"
+        android:elevation="6dp"
+        android:outlineAmbientShadowColor="@color/wb_scrim"
+        android:outlineSpotShadowColor="@color/wb_scrim"
+        tools:targetApi="28">
+
+        <View
+            android:id="@+id/cancel_ring"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/cancel_ring"
+            android:importantForAccessibility="no" />
+
+        <ImageView
+            android:id="@+id/cancel_icon"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_close"
+            android:tint="@color/wb_onSurface" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/cancel_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:importantForAccessibility="no"
+        android:text="@string/float_cancel_label"
+        android:textColor="@color/wb_onSurfaceVariant"
+        android:textSize="11sp" />
+</LinearLayout>

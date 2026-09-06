@@ -4,9 +4,24 @@ package com.chris.whisperbar.overlay
 data class BubblePos(val x: Int, val y: Int)
 
 /**
- * Reine (Android-freie) Positions-Logik fuer den schwebenden Knopf — JVM-unit-testbar.
+ * Reine (Android-freie) Positions-Logik und Masse fuer den schwebenden Knopf — JVM-unit-testbar.
  */
 object BubblePosition {
+
+    /** Knopf-Kreis (UX-Spec §5.1). */
+    const val BUBBLE_SIZE_DP = 68
+
+    /** Container um den Knopf: Platz fuer den Puls-Ring (1,35 x 68 = 92). */
+    const val BUBBLE_FRAME_DP = 96
+
+    /** Abbrechen-Ziel (§5.2). */
+    const val CANCEL_SIZE_DP = 72
+
+    /** Unterkante des Abbrechen-Ziels ueber dem unteren Bildschirmrand. */
+    const val CANCEL_MARGIN_DP = 96
+
+    /** Magnet-Radius: Mittelpunkt-Abstand, ab dem der Knopf am Abbrechen-Ziel "haftet". */
+    const val CANCEL_HIT_RADIUS_DP = 56
 
     /**
      * Haelt den Knopf vollstaendig auf dem Bildschirm. Ohne das kann er ueber den Rand

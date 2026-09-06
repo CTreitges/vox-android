@@ -1,10 +1,7 @@
 package com.chris.whisperbar.overlay
 
 import android.Manifest
-import android.app.Notification
-import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -12,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
-import android.content.res.ColorStateList
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
@@ -27,14 +23,11 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
+import com.chris.whisperbar.AppNav
 import com.chris.whisperbar.AudioRecorder
 import com.chris.whisperbar.Prefs
 import com.chris.whisperbar.R
-import com.chris.whisperbar.SetupActivity
 import com.chris.whisperbar.TranscriptionEngine
 import com.chris.whisperbar.a11y.TextInserterAccessibilityService
 import com.chris.whisperbar.api.ApiNotConfiguredException
@@ -43,14 +36,17 @@ import java.util.concurrent.Executors
 import kotlin.math.abs
 
 /**
- * Schwebender Mikro-Knopf (Overlay ueber allen Apps). Tippen startet und beendet das
- * Diktat, der erkannte Text wird per Bedienungshilfe ins fokussierte Feld eingefuegt —
- * Gboard bleibt dabei die aktive Tastatur.
+ * Schwebender Mikro-Knopf (Overlay ueber allen Apps, UX-Spec §5.1/§5.2). Tippen startet und
+ * beendet das Diktat, der erkannte Text wird per Bedienungshilfe ins fokussierte Feld
+ * eingefuegt — Gboard bleibt dabei die aktive Tastatur.
  *
  * Der Knopf zeigt vier Zustaende ([BubbleState]), weil die Transkription ueber das Netz
  * laeuft und spuerbar dauert: bereit, nimmt auf (mit Timer), sendet, fehlgeschlagen.
  * Ein fehlgeschlagenes Diktat bleibt gepuffert und kann per Tippen erneut gesendet
- * werden; Ziehen auf das ✕ am unteren Rand verwirft es.
+ * werden; Ziehen auf das Abbrechen-Ziel am unteren Rand verwirft es.
+ *
+ * Optik: [BubbleVisuals] beschreibt den Zustand, [BubbleRenderer] zeichnet ihn,
+ * [CancelTarget] ist das Abbrechen-Ziel, [BubbleNotification] die Foreground-Notification.
  *
  * Foreground-Service (Typ microphone), damit der Knopf dauerhaft sichtbar bleibt.
  */
@@ -63,24 +59,34 @@ class FloatingMicService : Service() {
     private val main = Handler(Looper.getMainLooper())
 
     private var bubbleView: View? = null
-    private var micView: ImageView? = null
-    private var progressView: ProgressBar? = null
-    private var labelView: TextView? = null
-    private var cancelView: View? = null
+    private var renderer: BubbleRenderer? = null
+    private lateinit var cancelTarget: CancelTarget
     private lateinit var lp: WindowManager.LayoutParams
-    private lateinit var cancelLp: WindowManager.LayoutParams
 
     @Volatile private var state = BubbleState.IDLE
+
+    /** IDLE-Hinweis "Kopiert — einfuegen" (2 s nach dem Clipboard-Fallback). */
+    private var copiedHint = false
 
     /** Audio des letzten fehlgeschlagenen Versuchs — Grundlage fuer den Wiederholen-Tipp. */
     private var pendingSamples: FloatArray? = null
 
     private var recordingStartedAt = 0L
+
+    /** Timer + Blink-Punkt im 500-ms-Takt, auf die Sekundengrenze ausgerichtet. */
     private val tick = object : Runnable {
         override fun run() {
             if (state != BubbleState.RECORDING) return
-            labelView?.text = BubbleUi.formatDuration(SystemClock.elapsedRealtime() - recordingStartedAt)
-            main.postDelayed(this, 250)
+            val elapsed = elapsedMs()
+            renderer?.updateTimer(elapsed)
+            main.postDelayed(this, BubbleUi.DOT_PERIOD_MS - elapsed % BubbleUi.DOT_PERIOD_MS)
+        }
+    }
+
+    private val clearCopiedHint = Runnable {
+        if (state == BubbleState.IDLE && copiedHint) {
+            copiedHint = false
+            render()
         }
     }
 
@@ -90,6 +96,7 @@ class FloatingMicService : Service() {
         super.onCreate()
         prefs = Prefs(this)
         wm = getSystemService(WINDOW_SERVICE) as WindowManager
+        cancelTarget = CancelTarget(this, wm)
         try {
             startAsForeground()
         } catch (e: Exception) {
@@ -117,29 +124,20 @@ class FloatingMicService : Service() {
     // --- Foreground-Notification ---------------------------------------------
 
     private fun startAsForeground() {
-        val nm = getSystemService(NotificationManager::class.java)
-        val channel = NotificationChannel(
-            CHANNEL_ID, getString(R.string.float_channel), NotificationManager.IMPORTANCE_LOW,
-        )
-        nm.createNotificationChannel(channel)
-
-        val stopPi = PendingIntent.getService(
-            this, 1,
-            Intent(this, FloatingMicService::class.java).setAction(ACTION_STOP),
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-        )
-        val notif = Notification.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_mic)
-            .setContentTitle(getString(R.string.float_running))
-            .setContentText(getString(R.string.float_running_text))
-            .addAction(R.drawable.ic_mic, getString(R.string.float_stop), stopPi)
-            .setOngoing(true)
-            .build()
-
+        BubbleNotification.ensureChannel(this)
+        val notif = BubbleNotification.build(this, state)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
+            startForeground(BubbleNotification.ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
         } else {
-            startForeground(NOTIF_ID, notif)
+            startForeground(BubbleNotification.ID, notif)
+        }
+    }
+
+    /** Akzentfarbe der Notification folgt der Aufnahme (wb_recording waehrend RECORDING). */
+    private fun refreshNotification() {
+        runCatching {
+            getSystemService(NotificationManager::class.java)
+                .notify(BubbleNotification.ID, BubbleNotification.build(this, state))
         }
     }
 
@@ -147,9 +145,8 @@ class FloatingMicService : Service() {
 
     private fun addBubble() {
         val v = LayoutInflater.from(this).inflate(R.layout.floating_mic, null)
-        micView = v.findViewById(R.id.bubble_mic)
-        progressView = v.findViewById(R.id.bubble_progress)
-        labelView = v.findViewById(R.id.bubble_label)
+        val r = BubbleRenderer(v) { BubbleAnimators.reduceMotion(this) }
+        renderer = r
         // Gemerkte Position wiederherstellen; die Bubble-Groesse steht vor dem Layout
         // noch nicht fest, deshalb hier mit 0 clampen (haelt sie im Bildschirm) und
         // beim ersten Ziehen exakt nachziehen.
@@ -166,7 +163,10 @@ class FloatingMicService : Service() {
             x = start.x
             y = start.y
         }
-        v.setOnTouchListener(dragTapListener())
+        // Touch-Ziel ist der 68-dp-Kreis; der Klick-Listener bedient TalkBacks Doppeltipp.
+        r.bubble.setOnTouchListener(dragTapListener())
+        r.bubble.setOnClickListener { onTap() }
+        recorder.onAmplitude = { amp -> r.level = amp }
         wm.addView(v, lp)
         bubbleView = v
         applyState(BubbleState.IDLE)
@@ -187,41 +187,24 @@ class FloatingMicService : Service() {
     /** Nur zeigen, wenn es auch etwas zu verwerfen gibt. */
     private fun canDiscard() = state == BubbleState.RECORDING || state == BubbleState.ERROR
 
-    private fun showCancelTarget() {
-        if (cancelView != null) return
-        val v = LayoutInflater.from(this).inflate(R.layout.floating_cancel, null)
-        val dm = resources.displayMetrics
-        val size = (CANCEL_SIZE_DP * dm.density).toInt()
-        cancelLp = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-            PixelFormat.TRANSLUCENT,
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = (dm.widthPixels - size) / 2
-            y = dm.heightPixels - size - (CANCEL_MARGIN_DP * dm.density).toInt()
-        }
-        runCatching { wm.addView(v, cancelLp) }
-        cancelView = v
-    }
-
-    private fun hideCancelTarget() {
-        cancelView?.let { runCatching { wm.removeView(it) } }
-        cancelView = null
-    }
-
     private fun isOverCancelTarget(): Boolean {
-        val cancel = cancelView ?: return false
-        val bubble = bubbleView ?: return false
-        val radius = (CANCEL_HIT_RADIUS_DP * resources.displayMetrics.density).toInt()
+        val cancel = cancelTarget.circleRect() ?: return false
+        val frame = renderer?.frameRect() ?: return false
+        val radius = (BubblePosition.CANCEL_HIT_RADIUS_DP * resources.displayMetrics.density).toInt()
         return BubblePosition.isOverCancel(
-            lp.x, lp.y, bubble.width, bubble.height,
-            cancelLp.x, cancelLp.y, cancel.width, cancel.height,
+            lp.x + frame.left, lp.y + frame.top, frame.width(), frame.height(),
+            cancel.left, cancel.top, cancel.width(), cancel.height(),
             radius,
         )
+    }
+
+    /** Magnet-Optik + Haptik CONFIRM beim Eintritt in den Treffer-Radius. */
+    private fun updateCancelHit() {
+        if (!cancelTarget.isShown) return
+        val over = isOverCancelTarget()
+        if (over == cancelTarget.isHit) return
+        cancelTarget.setHit(over)
+        if (over) renderer?.haptic(BubbleMotion.Haptic.CONFIRM)
     }
 
     private fun dragTapListener() = object : View.OnTouchListener {
@@ -238,6 +221,7 @@ class FloatingMicService : Service() {
         var moved = false
 
         override fun onTouch(view: View, e: MotionEvent): Boolean {
+            val root = bubbleView ?: return false
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     downX = e.rawX; downY = e.rawY; startX = lp.x; startY = lp.y; moved = false
@@ -246,31 +230,33 @@ class FloatingMicService : Service() {
                     val dx = (e.rawX - downX).toInt()
                     val dy = (e.rawY - downY).toInt()
                     if (abs(dx) > touchSlop || abs(dy) > touchSlop) {
-                        if (!moved && canDiscard()) showCancelTarget()
+                        if (!moved && canDiscard()) cancelTarget.show()
                         moved = true
                     }
                     if (!moved) return true // unter der Schwelle: noch nicht verschieben
-                    val p = clampToScreen(startX + dx, startY + dy, view.width, view.height)
+                    val p = clampToScreen(startX + dx, startY + dy, root.width, root.height)
                     lp.x = p.x
                     lp.y = p.y
-                    runCatching { wm.updateViewLayout(bubbleView, lp) }
+                    runCatching { wm.updateViewLayout(root, lp) }
+                    updateCancelHit()
                 }
                 MotionEvent.ACTION_UP -> {
                     if (!moved) {
                         onTap()
-                    } else if (isOverCancelTarget()) {
-                        hideCancelTarget()
-                        // Der Knopf soll nach dem Verwerfen nicht ueber dem ✕ liegen
+                    } else if (cancelTarget.isHit) {
+                        renderer?.haptic(BubbleMotion.Haptic.REJECT)
+                        cancelTarget.hide()
+                        // Der Knopf soll nach dem Verwerfen nicht ueber dem Ziel liegen
                         // bleiben — zurueck an die gemerkte Position.
                         restorePosition()
                         discard()
                     } else {
-                        hideCancelTarget()
+                        cancelTarget.hide()
                         savePosition()
                     }
                 }
                 MotionEvent.ACTION_CANCEL -> {
-                    hideCancelTarget()
+                    cancelTarget.hide()
                     if (moved) savePosition()
                 }
             }
@@ -294,34 +280,28 @@ class FloatingMicService : Service() {
 
     // --- Zustands-Anzeige ----------------------------------------------------
 
-    private fun applyState(next: BubbleState) {
-        state = next
-        main.removeCallbacks(tick)
-        micView?.backgroundTintList = when (next) {
-            BubbleState.IDLE -> null
-            BubbleState.RECORDING -> ColorStateList.valueOf(getColor(R.color.recording))
-            BubbleState.SENDING -> ColorStateList.valueOf(getColor(R.color.accent_pressed))
-            BubbleState.ERROR -> ColorStateList.valueOf(getColor(R.color.recording))
-        }
-        micView?.alpha = if (next == BubbleState.SENDING) 0.35f else 1f
-        progressView?.visibility = if (next == BubbleState.SENDING) View.VISIBLE else View.GONE
+    private fun elapsedMs() = SystemClock.elapsedRealtime() - recordingStartedAt
 
-        when (next) {
-            BubbleState.IDLE -> labelView?.visibility = View.GONE
-            BubbleState.RECORDING -> {
-                labelView?.text = BubbleUi.formatDuration(0)
-                labelView?.visibility = View.VISIBLE
-                main.post(tick)
-            }
-            BubbleState.SENDING -> {
-                labelView?.setText(R.string.float_sending)
-                labelView?.visibility = View.VISIBLE
-            }
-            BubbleState.ERROR -> {
-                labelView?.setText(R.string.float_retry_hint)
-                labelView?.visibility = View.VISIBLE
-            }
-        }
+    private fun render() {
+        val visual = BubbleVisuals.visualFor(state, copiedHint, BubbleAnimators.reduceMotion(this))
+        renderer?.render(visual, elapsedMs())
+    }
+
+    /**
+     * Zustand setzen und zeichnen. [copied] zeigt in IDLE fuer 2 s "Kopiert — einfuegen";
+     * TalkBack bekommt nur echte Wechsel angesagt.
+     */
+    private fun applyState(next: BubbleState, copied: Boolean = false) {
+        val previous = state
+        state = next
+        copiedHint = copied
+        main.removeCallbacks(tick)
+        main.removeCallbacks(clearCopiedHint)
+        render()
+        if (previous != next) renderer?.announce()
+        if (next == BubbleState.RECORDING) main.post(tick)
+        if (copied) main.postDelayed(clearCopiedHint, BubbleMotion.COPIED_HINT_MS)
+        if ((previous == BubbleState.RECORDING) != (next == BubbleState.RECORDING)) refreshNotification()
     }
 
     // --- Aufnahme + Transkription -------------------------------------------
@@ -329,18 +309,19 @@ class FloatingMicService : Service() {
     private fun startRec() {
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             toast(getString(R.string.kb_need_permission))
-            openSetup()
+            startActivity(AppNav.setup(this, SETUP_STEP_MIC))
             return
         }
         if (!TranscriptionEngine.isConfigured(this)) {
-            toast(getString(R.string.api_not_configured))
-            openSetup()
+            toast(getString(R.string.float_not_configured))
+            startActivity(AppNav.setup(this))
             return
         }
         if (recorder.start()) {
             recordingStartedAt = SystemClock.elapsedRealtime()
             pendingSamples = null
             applyState(BubbleState.RECORDING)
+            renderer?.haptic(BubbleMotion.Haptic.CONFIRM)
         } else {
             toast(getString(R.string.kb_error))
         }
@@ -349,6 +330,7 @@ class FloatingMicService : Service() {
     private fun stopRec() {
         if (state != BubbleState.RECORDING) return
         applyState(BubbleState.SENDING)
+        renderer?.haptic(BubbleMotion.Haptic.CONTEXT_CLICK)
         io.submit {
             val samples = recorder.stop()
             // Sehr kurze Aufnahmen (< 0,3 s) verwerfen — meist versehentliche Taps.
@@ -367,6 +349,7 @@ class FloatingMicService : Service() {
             return
         }
         applyState(BubbleState.SENDING)
+        renderer?.haptic(BubbleMotion.Haptic.CONTEXT_CLICK)
         io.submit { send(samples) }
     }
 
@@ -385,17 +368,20 @@ class FloatingMicService : Service() {
             val out = if (prefs.trailingSpace && text.isNotEmpty()) "$text " else text
             pendingSamples = null
             main.post {
-                if (out.isNotBlank()) {
-                    if (!TextInserterAccessibilityService.tryInsert(out)) fallbackClipboard(out)
+                var copied = false
+                if (out.isNotBlank() && !TextInserterAccessibilityService.tryInsert(out)) {
+                    fallbackClipboard(out)
+                    copied = true
                 }
-                applyState(BubbleState.IDLE)
+                applyState(BubbleState.IDLE, copied = copied)
+                renderer?.flashSuccess()
             }
         } catch (e: ApiNotConfiguredException) {
             pendingSamples = null
             main.post {
-                toast(getString(R.string.api_not_configured))
+                toast(getString(R.string.float_not_configured))
                 applyState(BubbleState.IDLE)
-                openSetup()
+                startActivity(AppNav.setup(this))
             }
         } catch (e: Exception) {
             Log.e(TAG, "Transkription fehlgeschlagen", e)
@@ -406,6 +392,8 @@ class FloatingMicService : Service() {
             main.post {
                 toast(e.message ?: getString(R.string.kb_error))
                 applyState(if (retryable) BubbleState.ERROR else BubbleState.IDLE)
+                renderer?.shake()
+                renderer?.haptic(BubbleMotion.Haptic.REJECT)
             }
         }
     }
@@ -418,10 +406,6 @@ class FloatingMicService : Service() {
         toast(getString(R.string.float_clipboard_fallback))
     }
 
-    private fun openSetup() = startActivity(
-        Intent(this, SetupActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-    )
-
     private fun toast(msg: String) = main.post {
         Toast.makeText(applicationContext, msg, Toast.LENGTH_SHORT).show()
     }
@@ -429,7 +413,10 @@ class FloatingMicService : Service() {
     override fun onDestroy() {
         isRunning = false
         main.removeCallbacks(tick)
-        hideCancelTarget()
+        main.removeCallbacks(clearCopiedHint)
+        cancelTarget.hide()
+        renderer?.release()
+        renderer = null
         runCatching { bubbleView?.let { wm.removeView(it) } }
         bubbleView = null
         if (recorder.isRecording) recorder.cancel()
@@ -439,11 +426,9 @@ class FloatingMicService : Service() {
 
     companion object {
         private const val TAG = "FloatingMic"
-        private const val NOTIF_ID = 42
-        private const val CHANNEL_ID = "whisperbar_float"
-        private const val CANCEL_SIZE_DP = 64
-        private const val CANCEL_MARGIN_DP = 96
-        private const val CANCEL_HIT_RADIUS_DP = 72
+
+        /** Assistenten-Schritt "Mikrofon erlauben" (UX-Spec §2.2). */
+        private const val SETUP_STEP_MIC = 3
         const val ACTION_STOP = "com.chris.whisperbar.STOP_FLOAT"
 
         /** Ob der schwebende Knopf aktuell laeuft (fuer die Setup-Statusanzeige). */

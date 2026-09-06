@@ -51,16 +51,8 @@
     <color name="wb_warningContainer">#4A3600</color>
     <color name="wb_onWarningContainer">#FFE3A8</color>
 
-    <!-- Alt-Tokens (v2): IME, Overlay und XML-Layouts haengen noch daran.
-         Bleiben bis zur Migration von IME/Overlay auf wb_* unveraendert. -->
-    <color name="kb_background">#1B1E24</color>
-    <color name="kb_surface">#2A2E37</color>
-    <color name="kb_key">#3A3F4B</color>
-    <color name="kb_key_pressed">#4B5160</color>
-    <color name="kb_text">#ECEFF4</color>
-    <color name="kb_text_dim">#9AA0AD</color>
-    <color name="accent">#4C8DFF</color>
-    <color name="accent_pressed">#2F6FE0</color>
-    <color name="recording">#FF4C4C</color>
-    <color name="launcher_bg">#4C8DFF</color>
+    <!-- Abgeleitet (kein Spec-Token): M3-Rolle "scrim" in 40 % — Verlauf hinter dem
+         Abbrechen-Ziel (§5.2 "#00000000 -> #66000000") und Schattenfarbe des Knopfs
+         (§5.1 "Schwarz 40 %"). Hier statt als Hex-Literal in den Drawables (V1.5). -->
+    <color name="wb_scrim">#66000000</color>
 </resources>
