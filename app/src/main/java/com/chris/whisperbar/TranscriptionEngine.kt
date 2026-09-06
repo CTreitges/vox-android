@@ -3,9 +3,11 @@ package com.chris.whisperbar
 import android.content.Context
 import android.provider.OpenableColumns
 import com.chris.whisperbar.api.ApiNotConfiguredException
-import com.chris.whisperbar.api.ApiTranscriber
 import com.chris.whisperbar.api.TextRefiner
 import com.chris.whisperbar.api.WavUpload
+import com.chris.whisperbar.whisper.OfflineBackend
+import com.chris.whisperbar.whisper.OfflineNotAvailableException
+import com.chris.whisperbar.whisper.OfflineStatus
 import java.io.File
 import java.io.RandomAccessFile
 
@@ -13,42 +15,68 @@ import java.io.RandomAccessFile
  * Einziger Weg vom Audio zum fertigen Text. Reihenfolge:
  *
  *  1. Stille am Anfang/Ende wegschneiden (kleinerer Upload)
- *  2. Transkription ueber die konfigurierte OpenAI-kompatible API
- *  3. optional: Sprachmodell glaettet Zeichensetzung/Grammatik
+ *  2. Erkennung ueber das gewaehlte Backend (Anbieter-API oder offline)
+ *  3. optional: Sprachmodell bearbeitet den Text (Modus aus den Einstellungen)
  *  4. Nachbearbeitung (Fuellwoerter, Gross-Schreibung, Whitespace)
  *
  * Blockierend — immer aus einem Hintergrund-Thread aufrufen.
  */
 object TranscriptionEngine {
 
-    /** Ob ueberhaupt diktiert werden kann (API-Key hinterlegt). */
+    /** Ob ueberhaupt diktiert werden kann (Zugang vollstaendig bzw. Offline-Modell da). */
     fun isConfigured(context: Context): Boolean =
-        Prefs(context.applicationContext).apiKey.isNotBlank()
+        isConfigured(context.applicationContext, Prefs(context.applicationContext))
+
+    private fun isConfigured(app: Context, prefs: Prefs): Boolean = when (prefs.engine) {
+        Engine.ONLINE -> prefs.sttAccess().let {
+            SetupState.sttComplete(it.baseUrl, it.apiKey, it.provider.needsKey)
+        }
+        Engine.OFFLINE -> OfflineStatus.isModelAvailable(app)
+        null -> false // noch keine Engine gewaehlt
+    }
 
     /**
-     * @throws ApiNotConfiguredException wenn kein API-Key gesetzt ist.
+     * @throws ApiNotConfiguredException wenn keine Engine gewaehlt oder der Zugang unvollstaendig ist.
+     * @throws OfflineNotAvailableException wenn offline gewaehlt ist, aber kein Modell da.
+     */
+    internal fun requireConfigured(app: Context, prefs: Prefs) {
+        if (isConfigured(app, prefs)) return
+        throw when (prefs.engine) {
+            Engine.OFFLINE -> OfflineNotAvailableException()
+            Engine.ONLINE, null -> ApiNotConfiguredException()
+        }
+    }
+
+    internal fun backend(prefs: Prefs): TranscriptionBackend = when (prefs.engine) {
+        Engine.ONLINE -> OnlineBackend(prefs.sttAccess(), prefs.apiPrompt)
+        Engine.OFFLINE -> OfflineBackend(prefs.offlineModel, prefs.offlineAccurate, prefs.apiPrompt)
+        null -> throw ApiNotConfiguredException()
+    }
+
+    /** Bei "auto" die vom Erkenner gemeldete Sprache nehmen — sonst bleibt "auto". */
+    internal fun effectiveLanguage(configured: String, detected: String?): String =
+        if (configured == "auto" && !detected.isNullOrBlank()) detected else configured
+
+    /**
+     * @throws ApiNotConfiguredException wenn keine Engine gewaehlt oder der Zugang unvollstaendig ist.
+     * @throws OfflineNotAvailableException wenn offline gewaehlt ist, aber kein Modell da.
      * @throws com.chris.whisperbar.api.ApiNetworkException bei Netzproblemen.
      * @throws com.chris.whisperbar.api.ApiHttpException bei Fehlerstatus der API.
      */
     fun transcribe(context: Context, samples: FloatArray): String {
-        val prefs = Prefs(context.applicationContext)
-        if (prefs.apiKey.isBlank()) throw ApiNotConfiguredException()
+        val app = context.applicationContext
+        val prefs = Prefs(app)
+        requireConfigured(app, prefs)
 
-        val language = prefs.language
         val trimmed = AudioUtils.trimSilence(samples)
-
-        val raw = ApiTranscriber(
-            baseUrl = prefs.apiBaseUrl,
-            apiKey = prefs.apiKey,
-            model = prefs.apiModel,
-            prompt = prefs.apiPrompt,
-        ).transcribe(trimmed, language)
-
+        val result = backend(prefs).transcribe(WavUpload.fromSamples(trimmed), prefs.language)
+        val raw = result.text
         if (raw.isBlank()) return ""
 
-        val refined = if (prefs.llmPolish) {
-            TextRefiner(prefs.apiBaseUrl, prefs.apiKey, prefs.llmModel)
-                .refine(raw, language, prefs.smartFillers)
+        val language = effectiveLanguage(prefs.language, result.detectedLanguage)
+        val mode = prefs.refineMode
+        val refined = if (mode != RefineMode.OFF) {
+            TextRefiner(prefs.llmAccess()).refine(raw, language, mode, prefs.smartFillers)
         } else {
             raw
         }
@@ -57,21 +85,29 @@ object TranscriptionEngine {
             removeFillers = prefs.removeFillers,
             autoCapitalize = prefs.autoCapitalize,
             language = language,
-            llmPolish = prefs.llmPolish,
+            refineMode = mode,
             smartFillers = prefs.smartFillers,
+            customFillers = prefs.customFillers,
+            disabledFillers = prefs.disabledFillers,
         )
         return TextPolisher.polish(refined, options)
     }
 }
 
 /**
- * Ergebnis einer geteilten Audiodatei.
+ * Ergebnis einer geteilten Audiodatei — in zwei Fassungen, zwischen denen die
+ * Share-Ansicht umschaltet: wortgetreu und ohne Fuellwoerter.
  */
 data class SharedTranscript(
     /** Anzeigename der Quelle (Dateiname), fuer die Ueberschrift in der Ergebnis-Ansicht. */
     val source: String,
-    val text: String,
+    val verbatimText: String,
+    val cleanedText: String,
+    val paragraphsVerbatim: List<String>,
+    val paragraphsCleaned: List<String>,
     val durationMs: Long,
+    /** Womit erkannt wurde ("OpenAI", "Offline") — fuer den Hinweis-Chip. */
+    val backendLabel: String,
 )
 
 /**
@@ -79,8 +115,9 @@ data class SharedTranscript(
  * (WhatsApp-Sprachnachricht, Aufnahme-App, Dateimanager …).
  *
  * Bewusst getrennt von [TranscriptionEngine]: geteiltes Audio wird WORTGETREU
- * ausgegeben — keine Fuellwort-Entfernung, keine KI-Glaettung. Bei einer fremden
- * Sprachnachricht will man wissen, was gesagt wurde, nicht eine geglaettete Fassung.
+ * ausgegeben — keine KI-Glaettung; die Fuellwort-freie Fassung ist ein Umschalter in
+ * der Ansicht, kein Ersatz. Bei einer fremden Sprachnachricht will man wissen, was
+ * gesagt wurde, nicht eine geglaettete Fassung.
  */
 object SharedAudioTranscriber {
 
@@ -93,7 +130,8 @@ object SharedAudioTranscriber {
     /**
      * @param onProgress (Schritt, Gesamtschritte, Beschriftung) — Gesamtschritte ist erst
      *   nach dem Entpacken bekannt und kann sich einmal erhoehen.
-     * @throws ApiNotConfiguredException wenn kein API-Key gesetzt ist.
+     * @throws ApiNotConfiguredException wenn der Anbieter-Zugang unvollstaendig ist.
+     * @throws OfflineNotAvailableException wenn offline gewaehlt ist, aber kein Modell da.
      * @throws UnsupportedAudioException wenn die Datei nicht decodiert werden kann.
      */
     fun transcribe(
@@ -104,7 +142,8 @@ object SharedAudioTranscriber {
     ): SharedTranscript {
         val app = context.applicationContext
         val prefs = Prefs(app)
-        if (prefs.apiKey.isBlank()) throw ApiNotConfiguredException()
+        TranscriptionEngine.requireConfigured(app, prefs)
+        val backend = TranscriptionEngine.backend(prefs)
 
         val name = displayName(app, uri)
         val temp = File.createTempFile("shared-", ".pcm", app.cacheDir)
@@ -123,30 +162,32 @@ object SharedAudioTranscriber {
                 searchFrames = CUT_SEARCH_FRAMES,
             )
 
-            val transcriber = ApiTranscriber(
-                baseUrl = prefs.apiBaseUrl,
-                apiKey = prefs.apiKey,
-                model = prefs.apiModel,
-                prompt = prefs.apiPrompt,
-            )
-
             val parts = mutableListOf<String>()
+            var detected: String? = null
             for ((i, chunk) in chunks.withIndex()) {
                 if (isCancelled()) throw UnsupportedAudioException("Abgebrochen")
                 onProgress(i, chunks.size, app.getString(R.string.share_sending))
-                val part = transcriber.transcribe(
-                    upload(decoded.pcmFile, chunk),
-                    prefs.language,
-                )
-                if (part.isNotBlank()) parts.add(part)
+                val part = backend.transcribe(upload(decoded.pcmFile, chunk), prefs.language)
+                if (part.text.isNotBlank()) parts.add(part.text)
+                if (detected == null) detected = part.detectedLanguage
             }
             onProgress(chunks.size, chunks.size, app.getString(R.string.share_sending))
 
+            val language = TranscriptionEngine.effectiveLanguage(prefs.language, detected)
             val joined = parts.joinToString(" ")
+            val verbatim = TextPolisher.polish(joined, PolishPlan.verbatim(language))
+            val cleaned = TextPolisher.polish(
+                joined,
+                PolishPlan.cleaned(language, prefs.customFillers, prefs.disabledFillers),
+            )
             return SharedTranscript(
                 source = name,
-                text = TextPolisher.polish(joined, PolishPlan.verbatim(prefs.language)),
+                verbatimText = verbatim,
+                cleanedText = cleaned,
+                paragraphsVerbatim = Paragrapher.split(verbatim),
+                paragraphsCleaned = Paragrapher.split(cleaned),
                 durationMs = decoded.durationMs,
+                backendLabel = backend.label,
             )
         } finally {
             temp.delete()

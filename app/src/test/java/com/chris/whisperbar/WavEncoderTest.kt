@@ -67,3 +67,19 @@ class WavHeaderTest {
         assertArrayEquals(parts, whole)
     }
 }
+
+/** JVM-Unit-Tests fuer den Rueckweg PCM16 -> Float (Offline-Erkennung liest Uploads zurueck). */
+class WavSamplesTest {
+
+    @Test fun vollausschlagUndNull() {
+        val s = WavEncoder.samples(byteArrayOf(0xFF.toByte(), 0x7F, 0, 0, 0, 0x80.toByte()))
+        assertEquals(3, s.size)
+        assertEquals(32767f / 32768f, s[0], 1e-6f)
+        assertEquals(0f, s[1], 0f)
+        assertEquals(-1f, s[2], 0f)
+    }
+
+    @Test fun ungeradeByteanzahlIgnoriertDenRest() {
+        assertEquals(1, WavEncoder.samples(byteArrayOf(1, 0, 5)).size)
+    }
+}

@@ -35,7 +35,7 @@
     <string name="cd_cancel">Diktat verwerfen</string>
 
     <!-- API -->
-    <string name="api_not_configured">Kein API-Key hinterlegt — in den Einstellungen eintragen</string>
+    <string name="api_not_configured">Anbieter nicht eingerichtet — Base-URL und API-Key in den Einstellungen prüfen</string>
 
     <!-- Settings -->
     <string name="pref_recognition">Erkennung</string>
@@ -79,10 +79,10 @@
     <string name="pref_api_privacy">Achtung: Dein Audio wird zur Erkennung an den eingetragenen Anbieter gesendet.</string>
     <string name="pref_api_url_hint">Base-URL (z. B. https://api.openai.com/v1)</string>
     <string name="pref_api_key_hint">API-Key</string>
-    <string name="pref_api_model_hint">Modell (z. B. gpt-4o-transcribe)</string>
+    <string name="pref_api_model_hint">Modell (z. B. gpt-transcribe)</string>
     <string name="pref_api_prompt_hint">Kontext: Namen, Fachbegriffe, Schreibweisen</string>
     <string name="pref_api_prompt_info">Wird als Prompt mitgeschickt und hilft der Erkennung bei Eigennamen und Fachwörtern. Kostet nichts extra.</string>
-    <string name="pref_api_examples">Beispiele: OpenAI gpt-4o-transcribe oder whisper-1 · Groq (Base-URL https://api.groq.com/openai/v1, Modell whisper-large-v3-turbo). Der Key wird nur lokal auf dem Gerät gespeichert.</string>
+    <string name="pref_api_examples">Beispiele: OpenAI gpt-transcribe · Groq (Base-URL https://api.groq.com/openai/v1, Modell whisper-large-v3-turbo) · eigener Server (http://SERVER:8000/v1, Key optional). Der Key wird nur lokal auf dem Gerät gespeichert.</string>
 
     <!-- Geteilte Audios (Teilen-Menü aus WhatsApp & Co.) -->
     <string name="share_label">Mit WhisperBar transkribieren</string>

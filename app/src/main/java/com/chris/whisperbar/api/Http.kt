@@ -13,7 +13,7 @@ import java.net.URL
 internal object Http {
 
     const val CONNECT_TIMEOUT_MS = 15_000
-    const val READ_TIMEOUT_MS = 90_000
+    const val DEFAULT_READ_TIMEOUT_MS = 90_000
 
     fun endpoint(baseUrl: String, path: String): String =
         baseUrl.trim().trimEnd('/') + path
@@ -21,6 +21,9 @@ internal object Http {
     /**
      * Fuehrt den Request aus und liefert den Antwort-Body.
      *
+     * @param apiKey leer = kein Authorization-Header. Eigene Server (Ollama, whisper.cpp)
+     *   brauchen keinen Key; ein leeres "Bearer " werten manche als ungueltig.
+     * @param readTimeoutMs CPU-Server brauchen fuer lange Stuecke Minuten (eigener Server: 600 s).
      * @param write schreibt den Request-Body.
      * @throws ApiNetworkException wenn die Verbindung scheitert.
      * @throws ApiHttpException bei Status != 2xx.
@@ -29,16 +32,18 @@ internal object Http {
         url: String,
         apiKey: String,
         contentType: String,
+        readTimeoutMs: Int = DEFAULT_READ_TIMEOUT_MS,
         write: (java.io.OutputStream) -> Unit,
     ): String {
         val conn = try {
-            (URL(url).openConnection() as HttpURLConnection).apply {
+            (URL(url).openConnection() as? HttpURLConnection
+                ?: throw IOException("Keine http(s)-URL: $url")).apply {
                 requestMethod = "POST"
                 doOutput = true
                 connectTimeout = CONNECT_TIMEOUT_MS
-                readTimeout = READ_TIMEOUT_MS
+                readTimeout = readTimeoutMs
                 instanceFollowRedirects = true
-                setRequestProperty("Authorization", "Bearer $apiKey")
+                if (apiKey.isNotBlank()) setRequestProperty("Authorization", "Bearer $apiKey")
                 setRequestProperty("Content-Type", contentType)
             }
         } catch (e: IOException) {

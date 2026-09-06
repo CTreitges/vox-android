@@ -152,7 +152,7 @@ class ShareTranscribeActivity : Activity() {
                 if (sb.isNotEmpty()) sb.append("\n\n")
                 sb.append("— ${t.source} · ${Formats.duration(t.durationMs)} —\n")
             }
-            sb.append(t.text.ifBlank { getString(R.string.share_nothing_recognised) })
+            sb.append(textOf(t).ifBlank { getString(R.string.share_nothing_recognised) })
         }
         for (f in failures) {
             if (sb.isNotEmpty()) sb.append("\n\n")
@@ -171,9 +171,12 @@ class ShareTranscribeActivity : Activity() {
 
     // --- Aktionen -------------------------------------------------------------
 
+    /** Vorerst die Fassung ohne Fuellwoerter, absatzweise — der Umschalter kommt mit dem Compose-UI. */
+    private fun textOf(t: SharedTranscript): String = t.paragraphsCleaned.joinToString("\n\n")
+
     /** Nur der reine Text, ohne die Ueberschriften der Ergebnis-Ansicht. */
     private fun plainText(): String =
-        results.joinToString("\n\n") { it.text }.ifBlank { resultView.text.toString() }
+        results.joinToString("\n\n") { textOf(it) }.ifBlank { resultView.text.toString() }
 
     private fun copyToClipboard() {
         val text = plainText()

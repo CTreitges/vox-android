@@ -28,12 +28,14 @@ class SettingsActivity : Activity() {
 
     override fun onPause() {
         super.onPause()
-        // Textfelder persistieren (Leereingabe -> Defaults).
-        prefs.apiBaseUrl = field(R.id.api_url).ifBlank { Prefs.DEFAULT_API_URL }
+        // Textfelder roh persistieren (leer -> Anbieter-Default, siehe AccessResolver).
+        prefs.apiBaseUrl = field(R.id.api_url)
         prefs.apiKey = field(R.id.api_key)
-        prefs.apiModel = field(R.id.api_model).ifBlank { Prefs.DEFAULT_API_MODEL }
+        prefs.apiModel = field(R.id.api_model)
         prefs.apiPrompt = field(R.id.api_prompt)
-        prefs.llmModel = field(R.id.llm_model).ifBlank { Prefs.DEFAULT_LLM_MODEL }
+        prefs.llmModel = field(R.id.llm_model)
+        // Uebergang bis zum Compose-Setup (WP4): wer hier einen Key eintraegt, will online.
+        if (prefs.engine == null && prefs.apiKey.isNotBlank()) prefs.engine = Engine.ONLINE
     }
 
     private fun field(id: Int) = findViewById<EditText>(id).text.toString().trim()
@@ -41,11 +43,13 @@ class SettingsActivity : Activity() {
     // --- API ----------------------------------------------------------------
 
     private fun setupApiSection() {
-        findViewById<EditText>(R.id.api_url).setText(prefs.apiBaseUrl)
-        findViewById<EditText>(R.id.api_key).setText(prefs.apiKey)
-        findViewById<EditText>(R.id.api_model).setText(prefs.apiModel)
+        // Aufgeloeste Werte anzeigen (Anbieter-Defaults statt leerer Felder).
+        val stt = prefs.sttAccess()
+        findViewById<EditText>(R.id.api_url).setText(stt.baseUrl)
+        findViewById<EditText>(R.id.api_key).setText(stt.apiKey)
+        findViewById<EditText>(R.id.api_model).setText(stt.model)
         findViewById<EditText>(R.id.api_prompt).setText(prefs.apiPrompt)
-        findViewById<EditText>(R.id.llm_model).setText(prefs.llmModel)
+        findViewById<EditText>(R.id.llm_model).setText(prefs.llmAccess().model)
     }
 
     // --- Sprache + Schalter -------------------------------------------------
@@ -83,12 +87,13 @@ class SettingsActivity : Activity() {
             setOnCheckedChangeListener { _, checked -> prefs.smartFillers = checked }
         }
         findViewById<Switch>(R.id.switch_llm).apply {
-            isChecked = prefs.llmPolish
+            // Der alte Schalter bildet nur OFF/POLISH ab; die weiteren Modi kommen mit dem Compose-UI.
+            isChecked = prefs.refineMode != RefineMode.OFF
             // Die KI-Fuellwortentscheidung haengt an der Veredelung — ohne sie gibt es
             // keinen zweiten Aufruf, in dem sie stattfinden koennte.
             smart.isEnabled = isChecked
             setOnCheckedChangeListener { _, checked ->
-                prefs.llmPolish = checked
+                prefs.refineMode = if (checked) RefineMode.POLISH else RefineMode.OFF
                 smart.isEnabled = checked
             }
         }

@@ -42,6 +42,17 @@ object WavEncoder {
         return pcm
     }
 
+    /** Umkehrung von [pcmBytes]: little-endian PCM16 als Float [-1,1]. */
+    fun samples(pcm: ByteArray): FloatArray {
+        val out = FloatArray(pcm.size / 2)
+        for (i in out.indices) {
+            val lo = pcm[i * 2].toInt() and 0xFF
+            val hi = pcm[i * 2 + 1].toInt() // Vorzeichen erhalten
+            out[i] = ((hi shl 8) or lo) / 32768f
+        }
+        return out
+    }
+
     fun encode(samples: FloatArray, sampleRate: Int = AudioUtils.SAMPLE_RATE): ByteArray {
         val pcm = pcmBytes(samples)
         val head = header(pcm.size, sampleRate)
