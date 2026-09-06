@@ -5,7 +5,7 @@
          (https://developer.android.com/reference/android/R.style). Die Bildschirm-Titel stehen in den
          Layouts, deshalb keine ActionBar. Kein Dynamic Color: Compose ueberdeckt das Framework-Theme. -->
     <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
-        <item name="android:windowBackground">@color/kb_background</item>
+        <item name="android:windowBackground">@color/wb_background</item>
         <item name="android:colorPrimary">@color/accent</item>
         <item name="android:colorAccent">@color/accent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
