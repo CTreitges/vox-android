@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="@string/pref_api_privacy"
-            android:textColor="@color/recording"
+            android:textColor="@color/wb_warning"
             android:textSize="12sp" />
 
         <EditText

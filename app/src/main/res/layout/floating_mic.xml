@@ -1,48 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Schwebender Diktat-Knopf. Der Timer haengt unter dem Kreis und wird nur
-     waehrend der Aufnahme eingeblendet, der Spinner nur waehrend der Uebertragung. -->
+<!-- Schwebender Diktat-Knopf (UX-Spec §5.1). Ebenen hinten -> vorn im 96-dp-Container:
+     pulse_ring (84, nur RECORDING) · state_ring (72, 2 dp) · bubble_progress (76, Sende-Bogen,
+     nur SENDING) · bubble (68, Fuellung + Icon 28, einziges fokussierbares Element).
+     Darunter die Label-Pille (22 dp), 4 dp unter dem Kreis (Container-Rand 14 dp minus 10). -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    android:padding="4dp">
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:importantForAccessibility="no">
 
     <FrameLayout
-        android:layout_width="56dp"
-        android:layout_height="56dp">
+        android:id="@+id/bubble_frame"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:clipChildren="false"
+        android:importantForAccessibility="no">
+
+        <View
+            android:id="@+id/pulse_ring"
+            android:layout_width="84dp"
+            android:layout_height="84dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bubble_pulse_ring"
+            android:elevation="8dp"
+            android:importantForAccessibility="no"
+            android:visibility="invisible" />
+
+        <View
+            android:id="@+id/state_ring"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bubble_ring_idle"
+            android:elevation="8dp"
+            android:importantForAccessibility="no" />
 
         <ImageView
-            android:id="@+id/bubble_mic"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@drawable/bubble_bg"
-            android:contentDescription="@string/cd_mic"
-            android:padding="13dp"
-            android:elevation="6dp"
-            android:src="@drawable/ic_mic" />
-
-        <ProgressBar
             android:id="@+id/bubble_progress"
-            style="?android:attr/progressBarStyleSmall"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="76dp"
+            android:layout_height="76dp"
             android:layout_gravity="center"
-            android:elevation="7dp"
-            android:indeterminateTint="@color/kb_text"
+            android:contentDescription="@null"
+            android:elevation="8dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/bubble_progress_arc"
             android:visibility="gone" />
+
+        <!-- Touch-Ziel und TalkBack-Element: der ganze 68-dp-Kreis. Elevation 8 dp mit
+             ovalem Outline (BubbleRenderer) fuer den Schatten in wb_scrim. -->
+        <FrameLayout
+            android:id="@+id/bubble"
+            android:layout_width="68dp"
+            android:layout_height="68dp"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/cd_bubble_idle"
+            android:elevation="8dp"
+            android:outlineAmbientShadowColor="@color/wb_scrim"
+            android:outlineSpotShadowColor="@color/wb_scrim"
+            tools:targetApi="28">
+
+            <!-- Zwei Fuell-Ebenen fuer den 200-ms-Farb-Crossfade: hinten die alte, vorn die neue. -->
+            <View
+                android:id="@+id/bubble_fill_back"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0"
+                android:background="@drawable/bubble_fill_idle"
+                android:importantForAccessibility="no" />
+
+            <View
+                android:id="@+id/bubble_fill"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.96"
+                android:background="@drawable/bubble_fill_idle"
+                android:importantForAccessibility="no" />
+
+            <ImageView
+                android:id="@+id/bubble_icon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_mic"
+                android:tint="@color/wb_primary" />
+        </FrameLayout>
     </FrameLayout>
 
     <TextView
         android:id="@+id/bubble_label"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
+        android:layout_height="22dp"
+        android:layout_marginTop="-10dp"
         android:background="@drawable/label_bg"
-        android:paddingHorizontal="6dp"
-        android:paddingVertical="1dp"
-        android:elevation="6dp"
-        android:textColor="@color/kb_text"
-        android:textSize="11sp"
+        android:fontFeatureSettings="tnum"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:paddingHorizontal="10dp"
+        android:textColor="@color/wb_recordingText"
+        android:textSize="12sp"
         android:visibility="gone" />
 </LinearLayout>

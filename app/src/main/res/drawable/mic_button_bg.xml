@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true">
-        <shape android:shape="oval">
-            <solid android:color="@color/accent_pressed" />
-        </shape>
-    </item>
-    <item>
-        <shape android:shape="oval">
-            <solid android:color="@color/accent" />
-        </shape>
-    </item>
-</selector>
+<!-- Fuellung der 88-dp-Mikro-Taste (UX-Spec §5.3) als Level-List. Level = BubbleVisual.Fill.ordinal
+     (ImeMetrics.micFillLevel): 0 SURFACE, 1 RECORDING, 2 PRIMARY_CONTAINER, 3 ERROR_CONTAINER.
+     Ringe (statisch/Puls/Bogen) liegen als eigene Views dahinter — wie beim Knopf. -->
+<level-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:minLevel="0" android:maxLevel="0" android:drawable="@drawable/bubble_fill_idle_high" />
+    <item android:minLevel="1" android:maxLevel="1" android:drawable="@drawable/bubble_fill_recording" />
+    <item android:minLevel="2" android:maxLevel="2" android:drawable="@drawable/bubble_fill_sending" />
+    <item android:minLevel="3" android:maxLevel="3" android:drawable="@drawable/bubble_fill_error" />
+</level-list>

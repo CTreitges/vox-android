@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true">
-        <shape android:shape="rectangle">
-            <solid android:color="@color/kb_key_pressed" />
-            <corners android:radius="8dp" />
-        </shape>
-    </item>
+<!-- Tasten der Diktier-Tastatur (UX-Spec §5.3): Radius 12, Fuellung wb_surfaceContainerHigh,
+     gedrueckt wb_surfaceContainerHighest, Ripple wb_onSurface @ 12 %. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/key_ripple">
     <item>
-        <shape android:shape="rectangle">
-            <solid android:color="@color/kb_key" />
-            <corners android:radius="8dp" />
-        </shape>
+        <selector>
+            <item android:state_pressed="true">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/wb_surfaceContainerHighest" />
+                    <corners android:radius="12dp" />
+                </shape>
+            </item>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/wb_surfaceContainerHigh" />
+                    <corners android:radius="12dp" />
+                </shape>
+            </item>
+        </selector>
     </item>
-</selector>
+</ripple>

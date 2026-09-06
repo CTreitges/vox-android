@@ -24,15 +24,24 @@
     <string name="status_done">✓ erledigt</string>
     <string name="status_open">✗ offen</string>
 
-    <!-- Keyboard -->
+    <!-- Diktier-Tastatur (V2, UX-Spec §6.12) -->
     <string name="kb_hint_hold">Halte das Mikrofon gedrückt und sprich</string>
     <string name="kb_listening">Höre zu … loslassen zum Beenden</string>
     <string name="kb_transcribing">Wird übertragen …</string>
     <string name="kb_need_permission">Mikrofon-Berechtigung fehlt — tippe zum Einrichten</string>
-    <string name="kb_error">Fehler bei der Erkennung</string>
+    <string name="kb_not_configured">Kein Zugang eingerichtet — tippe zum Einrichten</string>
+    <string name="kb_error">Fehler bei der Erkennung — erneut versuchen</string>
     <string name="kb_space">Leer</string>
-    <string name="cd_mic">Diktat-Mikrofon</string>
+    <string name="cd_mic">Diktat-Mikrofon — halten zum Sprechen</string>
     <string name="cd_cancel">Diktat verwerfen</string>
+    <string name="cd_kb_switch">Eingabemethode wechseln</string>
+    <string name="cd_kb_comma">Komma</string>
+    <string name="cd_kb_space">Leerzeichen</string>
+    <string name="cd_kb_period">Punkt</string>
+    <string name="cd_kb_backspace">Löschen</string>
+    <string name="cd_kb_enter">Eingabe</string>
+    <string name="cd_kb_retry">Erneut senden</string>
+    <string name="cd_kb_settings">WhisperBar-Einstellungen</string>
 
     <!-- API -->
     <string name="api_not_configured">Anbieter nicht eingerichtet — Base-URL und API-Key in den Einstellungen prüfen</string>
@@ -50,16 +59,24 @@
     <string name="pref_smart_fillers_info">Statt fester Wortliste entscheidet die KI selbst, welche Füllwörter, Versprecher und Wiederholungen weg können. Braucht das Glätten oben.</string>
     <string name="pref_llm_model_hint">Modell zum Glätten (z. B. gpt-4o-mini)</string>
 
-    <!-- Schwebender Mikro-Button -->
+    <!-- Schwebender Knopf (V1) und Notification (N1), UX-Spec §6.11 -->
     <string name="float_channel">WhisperBar Diktat</string>
     <string name="float_running">WhisperBar-Diktat aktiv</string>
     <string name="float_running_text">Knopf antippen zum Diktieren, ziehen zum Verschieben</string>
     <string name="float_stop">Beenden</string>
     <string name="float_no_overlay">Bitte „Über anderen Apps anzeigen" erlauben</string>
     <string name="float_clipboard_fallback">Text kopiert — Bedienungshilfe aktivieren zum automatischen Einfügen</string>
+    <string name="float_copied_short">Kopiert — einfügen</string>
     <string name="float_sending">sendet …</string>
     <string name="float_retry_hint">tippen = erneut</string>
     <string name="float_discarded">Diktat verworfen</string>
+    <string name="float_cancel_label">Verwerfen</string>
+    <string name="float_cancel_release">Loslassen zum Verwerfen</string>
+    <string name="float_not_configured">Kein Zugang eingerichtet — in WhisperBar einrichten</string>
+    <string name="cd_bubble_idle">Diktat starten</string>
+    <string name="cd_bubble_recording">Aufnahme läuft, %1$s — antippen zum Beenden</string>
+    <string name="cd_bubble_sending">Wird übertragen</string>
+    <string name="cd_bubble_error">Fehler — antippen für erneuten Versuch</string>
 
     <!-- Bedienungshilfe -->
     <string name="a11y_label">WhisperBar Text-Einfügen</string>

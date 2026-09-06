@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Puls-Ring waehrend der Aufnahme (UX-Spec §5.4): Alpha 0,45 -> 0, Skalierung 1 -> 1,35
+     macht BubbleAnimators.pulse(). Groesse kommt von der View (84 dp Knopf, 104 dp IME). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@android:color/transparent" />
+    <stroke android:width="4dp" android:color="@color/wb_recording" />
+</shape>
