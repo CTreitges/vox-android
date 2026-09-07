@@ -27,6 +27,11 @@ Inspiriert von [Wispr Flow](https://wisprflow.ai/) — eigenständige, unabhäng
 
 Alles Weitere — Anbieter und Keys, Textverbesserung, Offline-Modelle, eigener Server, Datenschutz, Fehlerbehebung — in [docs/ANLEITUNG.md](docs/ANLEITUNG.md).
 
+
+### Installation über F-Droid
+
+Eigenes Repository (signiert mit dem Release-Key): `https://ctreitges.de/fdroid/repo` — Fingerprint `f07ab6293f13c3d637aaa24eb048f2df9bc55013fa3d92e065d72e4b00fe89d0`. Auf dem Handy: https://ctreitges.de/fdroid/ öffnen und „Repo mit einem Tipp hinzufügen". Details in der [Anleitung](docs/ANLEITUNG.md).
+
 ## Architektur
 
 ```

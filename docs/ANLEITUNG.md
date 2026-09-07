@@ -58,14 +58,24 @@ Vox wird nicht über den Play Store verteilt, sondern als APK-Datei über die Gi
 - Android 8.0 oder neuer.
 - Für den **Offline-Modus** zusätzlich: ein 64-Bit-ARM-Gerät (arm64-v8a), dessen Prozessor FP16-Vektorrechnung und DotProd beherrscht (praktisch alle Geräte ab etwa 2018, siehe [Kapitel 9](#9-offline-modus)). Auf anderen Geräten steht nur der Online-Modus zur Verfügung — Vox zeigt das im Assistenten als „Auf diesem Gerät nicht verfügbar" an.
 
-### 2.2 APK installieren
+### 2.2 Installation über F-Droid (eigenes Repository, empfohlen für Updates)
+
+Vox liegt in einem eigenen F-Droid-Repository. Damit bekommst du Updates wie aus einem App-Store — signiert mit demselben Entwickler-Schlüssel wie die GitHub-Releases.
+
+1. F-Droid-Client installieren (https://f-droid.org).
+2. Auf dem Handy diese Seite öffnen und auf „Repo mit einem Tipp hinzufügen" tippen: https://ctreitges.de/fdroid/ — oder im F-Droid-Client unter *Einstellungen → Paketquellen → +* eintragen:
+   - Adresse: `https://ctreitges.de/fdroid/repo`
+   - Fingerprint: `f07ab6293f13c3d637aaa24eb048f2df9bc55013fa3d92e065d72e4b00fe89d0`
+3. Nach dem Aktualisieren der Paketquellen erscheint „Vox"; installieren wie jede andere App. Updates meldet der F-Droid-Client automatisch (das Repo gleicht sich stündlich mit den GitHub-Releases ab).
+
+### 2.3 APK installieren
 
 1. Auf der Releases-Seite des Projekts das Release **3.1.0** öffnen und die APK-Datei auf das Telefon laden (direkt im Browser des Telefons ist am einfachsten).
 2. Die heruntergeladene Datei antippen. Android fragt beim ersten Mal, ob der Browser (bzw. der Dateimanager) **unbekannte Apps installieren** darf — das Wording heißt je nach Hersteller „Unbekannte Apps installieren", „Aus dieser Quelle zulassen" oder „Unbekannte Quellen". Erlauben, zurück, erneut „Installieren" antippen.
 3. Google Play Protect prüft die App ggf. beim Installieren. Das ist normal für Apps außerhalb des Play Stores.
 4. Nach der Installation **Vox** öffnen — der Einrichtungs-Assistent startet ([Kapitel 3](#3-erste-einrichtung--der-assistent-schritt-für-schritt)).
 
-### 2.3 Updates
+### 2.4 Updates
 
 - **Ab 3.1.0 — neuer Name, neue Paket-ID `com.chris.vox`:** Vox wird als neue App installiert; die vorherige Version deinstallieren und API-Key/Einstellungen einmal neu eingeben. Signaturschlüssel unverändert.
 - Eine neue Version wird einfach **über die alte installiert** (APK herunterladen, antippen, „Aktualisieren"). Alle Einstellungen, der API-Key und heruntergeladene Offline-Modelle bleiben erhalten.
