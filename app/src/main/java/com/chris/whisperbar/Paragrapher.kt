@@ -4,21 +4,24 @@ package com.chris.whisperbar
  * Teilt einen langen Transkript-Text heuristisch in Absaetze — fuer geteilte
  * Sprachnachrichten, die als ein Block kaum lesbar sind. Rein (ohne Android).
  *
- * Grundsaetze: nie mitten im Satz trennen, Woerter nie anfassen (die Absaetze mit
- * Leerzeichen zusammengefuegt ergeben wieder den Eingabetext), Absatzwechsel bevorzugt
- * vor Diskursmarkern ("Also", "Ausserdem", "Dann", "Okay" …). Konservativ: lieber
- * ein Absatz zu wenig als ein Schnitt an der falschen Stelle.
+ * Absatzregel (UX-Spec §2.9, verbindlich): innerhalb eines Stuecks beginnt nach 3 Saetzen
+ * oder sobald 350 Zeichen erreicht sind ein neuer Absatz. Dazu: nie mitten im Satz trennen,
+ * Woerter nie anfassen (die Absaetze mit Leerzeichen zusammengefuegt ergeben wieder den
+ * Eingabetext), Absatzwechsel bevorzugt vor Diskursmarkern ("Also", "Ausserdem", "Dann",
+ * "Okay" …). Leerzeilen im Eingabetext und Stueck-Grenzen behandelt der Aufrufer
+ * ([SharedAudioTranscriber.paragraphsForChunks]).
  */
 object Paragrapher {
 
-    /** Ab hier darf ein Absatz enden. */
-    private const val MIN_CHARS = 280
+    /** Nach so vielen Saetzen beginnt ein neuer Absatz (Spec: 3). */
+    private const val MAX_SENTENCES = 3
 
-    /** Ab hier soll er enden, sobald der naechste Satz nicht mehr passt. */
-    private const val MAX_CHARS = 420
+    /** Sobald ein Absatz so viele Zeichen erreicht hat, beginnt der naechste (Spec: 350). */
+    private const val MAX_CHARS = 350
 
+    /** Ein Diskursmarker darf frueher trennen — aber erst ab so vielen Saetzen/Zeichen (keine Mini-Absaetze). */
     private const val MIN_SENTENCES = 2
-    private const val MAX_SENTENCES = 4
+    private const val MIN_CHARS = 120
 
     /** Ein so kurzer letzter Einzelsatz ("Tschuess.") haengt sich an den vorigen Absatz. */
     private const val SHORT_TAIL_CHARS = 60
@@ -51,9 +54,9 @@ object Paragrapher {
         var currentChars = 0
 
         for (s in sentences) {
-            if (current.size >= MIN_SENTENCES && currentChars >= MIN_CHARS &&
-                (startsWithMarker(s) || current.size >= MAX_SENTENCES || currentChars + 1 + s.length > MAX_CHARS)
-            ) {
+            val full = current.size >= MAX_SENTENCES || currentChars >= MAX_CHARS
+            val marker = current.size >= MIN_SENTENCES && currentChars >= MIN_CHARS && startsWithMarker(s)
+            if (full || marker) {
                 paragraphs.add(current)
                 current = mutableListOf()
                 currentChars = 0
@@ -63,7 +66,8 @@ object Paragrapher {
         }
         paragraphs.add(current)
 
-        // Ein kurzer Einzelsatz am Ende ("Tschuess.") wirkt als eigener Absatz verloren.
+        // Ein kurzer Einzelsatz am Ende ("Tschuess.") wirkt als eigener Absatz verloren —
+        // bewusste Ausnahme von der 3-Saetze-Regel.
         if (paragraphs.size > 1) {
             val tail = paragraphs.last()
             if (tail.size == 1 && tail[0].length < SHORT_TAIL_CHARS) {
