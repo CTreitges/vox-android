@@ -8,7 +8,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-KT = ROOT / "app/src/main/java/com/chris/vox/whisper/WhisperLib.kt"
+KT = ROOT / "app/src/main/java/com/chris/whisperloom/whisper/WhisperLib.kt"
 CPP = ROOT / "app/src/main/cpp/whisper_jni.cpp"
 
 

@@ -1,4 +1,4 @@
-Vox tippt für dich: Antippen, sprechen, fertig – der erkannte Text landet direkt im aktiven Textfeld, egal in welcher App.
+WhisperLoom tippt für dich: Antippen, sprechen, fertig – der erkannte Text landet direkt im aktiven Textfeld, egal in welcher App.
 
 Zwei Wege zum Diktat:
 • Schwebender Mikro-Knopf über allen Apps (Gboard bleibt deine Tastatur). Antippen startet die Aufnahme, erneut antippen fügt den Text ein, aufs ✕ ziehen verwirft.
@@ -12,6 +12,6 @@ Text nach Bedarf:
 • Füllwörter entfernen (Liste selbst anpassbar), automatische Groß-Schreibung.
 • Optionale Textverbesserung per Sprachmodell in drei Stufen: Glätten, Verschönern, Zusammenfassen – mit eigenem oder dem Erkennungs-Zugang.
 
-Sprachnachrichten abtippen: In WhatsApp, Telegram oder Signal eine Nachricht teilen → Vox. Der Text erscheint gut lesbar in Absätzen, wahlweise wortgetreu oder ohne Füllwörter, zum Kopieren und Weitergeben.
+Sprachnachrichten abtippen: In WhatsApp, Telegram oder Signal eine Nachricht teilen → WhisperLoom. Der Text erscheint gut lesbar in Absätzen, wahlweise wortgetreu oder ohne Füllwörter, zum Kopieren und Weitergeben.
 
 Datenschutz: Dein API-Key bleibt auf dem Gerät. Online geht nur das Audio an den von dir gewählten Anbieter, offline verlässt nichts das Gerät. Keine Konten, keine Werbung, kein Tracking.

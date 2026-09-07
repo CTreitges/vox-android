@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Label-Pille unter dem Knopf (UX-Spec §5.1): Hoehe 22, Radius 11, Grund
-     vox_surfaceContainerLow; die 92 % Deckkraft setzt BubbleRenderer per Drawable-Alpha. -->
+     loom_surfaceContainerLow; die 92 % Deckkraft setzt BubbleRenderer per Drawable-Alpha. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/vox_surfaceContainerLow" />
+    <solid android:color="@color/loom_surfaceContainerLow" />
     <corners android:radius="11dp" />
 </shape>

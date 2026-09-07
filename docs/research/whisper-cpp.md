@@ -1,4 +1,4 @@
-# whisper.cpp On-Device-Erkennung für Vox — Wiederherstellung technisch abgesichert
+# whisper.cpp On-Device-Erkennung für WhisperLoom — Wiederherstellung technisch abgesichert
 
 Stand der Recherche: 2026-09-06 · Alt-Stand: Tag `offline-v1`
 Alle Versions-/Größen-/API-Angaben stammen aus live abgefragten Quellen (GitHub-API, Raw-Dateien, Hugging-Face-API, Google-SDK-Repository-XML, developer.android.com). Unsicheres ist als **[grob]** oder **[unsicher]** markiert.
@@ -27,7 +27,7 @@ Alle Versions-/Größen-/API-Angaben stammen aus live abgefragten Quellen (GitHu
 Gelesen via `git show offline-v1:<pfad>`:
 
 - **Submodul** `whisper.cpp` @ `f049fff95a089aa9969deb009cdd4892b3e74916` — das ist **exakt der Release-Commit `v1.9.1`** („release : v1.9.1 (#3892)“, 2026-06-19). Quelle: GitHub-Tags-API `ggml-org/whisper.cpp`.
-- **`app/src/main/cpp/CMakeLists.txt`**: `add_subdirectory(whisper.cpp)` mit `WHISPER_BUILD_TESTS/EXAMPLES/SERVER=OFF`, `WHISPER_SDL2/CURL=OFF`, `GGML_OPENMP=OFF`, `GGML_NATIVE=OFF`, `BUILD_SHARED_LIBS=OFF`; Target `vox` (SHARED) linkt `log android whisper`. Solide Grundlage — bleibt.
+- **`app/src/main/cpp/CMakeLists.txt`**: `add_subdirectory(whisper.cpp)` mit `WHISPER_BUILD_TESTS/EXAMPLES/SERVER=OFF`, `WHISPER_SDL2/CURL=OFF`, `GGML_OPENMP=OFF`, `GGML_NATIVE=OFF`, `BUILD_SHARED_LIBS=OFF`; Target `whisperloom` (SHARED) linkt `log android whisper`. Solide Grundlage — bleibt.
 - **`whisper_jni.cpp`**: Asset-Streaming-Loader (`whisper_model_loader`), `whisper_init_with_params`, `whisper_init_from_file_with_params`, `whisper_context_default_params` (`use_gpu=false`), `whisper_full_default_params(WHISPER_SAMPLING_GREEDY)`, `whisper_full`, `whisper_full_n_segments`, `whisper_full_get_segment_text`, `whisper_print_system_info`. Kein `initial_prompt`, kein Beam-Search, kein Abbruch.
 - **`WhisperContext.kt`**: Single-Thread-Executor „whisper-worker“, `threads = availableProcessors().coerceIn(2, 6)`. **`WhisperEngine.kt`**: prozessweites Singleton, lädt bei Modellwechsel neu. **`WhisperModel.kt`**: Enum SMALL/BASE/TINY (q5_1) mit Byte-Größen (stimmen weiterhin exakt mit HF, s. §5), Download ohne Resume, SMALL als APK-Asset gebündelt (190 MB APK).
 - **`build.gradle.kts`**: `ndkVersion 27.2.12479018`, CMake `3.22.1`, `abiFilters arm64-v8a + x86_64`, `noCompress += "bin"`, `useLegacyPackaging=false`.
@@ -63,7 +63,7 @@ Quelle: <https://raw.githubusercontent.com/ggml-org/whisper.cpp/v1.9.3/include/w
 ### 2.3 Relevante Änderungen seit v1.9.1
 
 **v1.9.2** (<https://github.com/ggml-org/whisper.cpp/releases/tag/v1.9.2>):
-- #3913 „Improved inference performance of Android example project“ — reiner Build-Fix: `-DCMAKE_BUILD_TYPE=Release` auch für AGP-Debug-Builds, weil AGP-Debug den Native-Build unoptimiert lässt („causing a critical performance issue“). **Für Vox übernehmen (§8.3).**
+- #3913 „Improved inference performance of Android example project“ — reiner Build-Fix: `-DCMAKE_BUILD_TYPE=Release` auch für AGP-Debug-Builds, weil AGP-Debug den Native-Build unoptimiert lässt („causing a critical performance issue“). **Für WhisperLoom übernehmen (§8.3).**
 - #3910/#3916 VAD: Token-Zeiten auf Original-Zeitachse, VAD-Segmente exponiert. #3907/#3963 VAD-CLI-Argument-Fixes.
 - #3921 „Remove leading space from txt output“ (nur CLI-Textausgabe; `whisper_full_get_segment_text` liefert weiterhin führendes Leerzeichen → `trim()` in Kotlin bleibt nötig).
 
@@ -102,7 +102,7 @@ Quellen: <https://developer.android.com/build/releases/past-releases/agp-8-7-0-r
 
 - „NDK version r28 and higher compile 16 KB-aligned by default.“ Für r27 und älter: `-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384` (CMake: `target_link_options(... PRIVATE "-Wl,-z,max-page-size=16384" "-Wl,-z,common-page-size=16384")`).
 - APK-Seite: „you need to upgrade to Android Gradle Plugin (AGP) version 8.5.1 or higher“ → AGP 8.7.3 ok; `useLegacyPackaging = false` beibehalten (unkomprimierte, zip-alignte .so).
-- Play-Anforderung laut Seite (Stand Abruf): „all apps targeting Android 15 (API level 35) and higher must support 16 KB memory page sizes on 64-bit devices on Google Play. Starting February 1, 2027, if your app updates don't support 16 KB memory page sizes, you won't be able to release these updates.“ Vox wird sideloaded, aber Pixel-Geräte mit 16-KB-Kernel existieren → trotzdem einhalten.
+- Play-Anforderung laut Seite (Stand Abruf): „all apps targeting Android 15 (API level 35) and higher must support 16 KB memory page sizes on 64-bit devices on Google Play. Starting February 1, 2027, if your app updates don't support 16 KB memory page sizes, you won't be able to release these updates.“ WhisperLoom wird sideloaded, aber Pixel-Geräte mit 16-KB-Kernel existieren → trotzdem einhalten.
 - Prüfung: `zipalign -v -c -P 16 4 app.apk` (build-tools ≥35) bzw. `check_elf_alignment.sh`. Eigene Messung am fremden Prebuilt (§3.5): alle `PT_LOAD` mit `align=16384`.
 - **Linker-Flags trotz r28 mitgeben?** Ja, unschädlich redundant; sichert den r27d-Fallback ab (Snippet §8.2).
 Quelle: <https://developer.android.com/guide/practices/page-sizes>
@@ -126,7 +126,7 @@ Anforderungen: whisper.cpp `cmake_minimum_required(3.5)`, ggml `3.14...3.28`, ND
 - `whisper.rn` (android/src/main/CMakeLists.txt): `rnwhisper_v8fp16_va_2` (`-march=armv8.2-a+fp16`), `rnwhisper_v8` (`-march=armv8-a`), generic.
 - llama.cpp `docs/build.md` (Android arm64-v8a): `-DGGML_NATIVE=OFF -DGGML_OPENMP=OFF -DGGML_LLAMAFILE=OFF`, „`GGML_LLAMAFILE=OFF` avoids the llamafile backend, which is not supported on Android“, „`GGML_OPENMP=OFF` avoids adding an OpenMP runtime dependency“, globales `-march` nur bewusst („raise the baseline instruction set“). KleidiAI wird dort empfohlen — für uns **nicht**: KleidiAI-Kernel decken Q4_0/Q8_0/F16/BF16 ab, nicht Q5_1, und der Build lädt zur Configure-Zeit ein Tarball (Netz in CI, MD5-gepinnt v1.24.0, ggml-cpu/CMakeLists Z.586–588).
 
-**Entscheidung für Vox (einfachster sicherer Weg):**
+**Entscheidung für WhisperLoom (einfachster sicherer Weg):**
 - **Eine** `.so`, `-DGGML_CPU_ARM_ARCH=armv8.2-a+fp16+dotprod`. **Kein `+i8mm`**: I8MM ist Armv8.6 (erst Cortex-A710/X2, Snapdragon 8 Gen 1, Dimensity 9000, 2022+); ggml nutzt es v. a. in Q4_0-Repack/GEMM-Pfaden, Gewinn für Q5_1 gering, SIGILL-Risiko auf 2018–2021-Geräten hoch (vgl. Termux-SIGILL-Bericht <https://github.com/ggml-org/whisper.cpp/issues/967>).
 - **Laufzeit-Guard in Kotlin** statt zweiter Bibliothek: `System.loadLibrary` nur, wenn `/proc/cpuinfo` `Features` sowohl `fphp` (HWCAP_FPHP) als auch `asimddp` (HWCAP_ASIMDDP) enthält (Kernel-Namen: `arch/arm64/kernel/cpuinfo.c` Z.60/71; Doku `Documentation/arch/arm64/elf_hwcaps.rst`). Sonst: On-Device nicht verfügbar → API-Modus. Betroffen sind nur Armv8.0-Geräte (Cortex-A53/A57/A72/A73, z. B. Snapdragon 835/660, Kirin 970) — für eine Diktier-App mit `small`-Modell wären die ohnehin zu langsam.
 - **Späterer Upgrade-Pfad** (nicht jetzt, YAGNI): `GGML_BACKEND_DL=ON` + `BUILD_SHARED_LIBS=ON` + `GGML_CPU_ALL_VARIANTS=ON` erzeugt die 7 Android-Varianten (ggml/src/CMakeLists Z.416–424) mit Laufzeit-Scoring; erfordert `useLegacyPackaging=true` (Extraktion nach `nativeLibraryDir`) und `ggml_backend_load_all_from_path()`. Deutlich mehr Build-Komplexität und ~7× ggml-cpu-Größe.
@@ -137,7 +137,7 @@ Quellen: <https://raw.githubusercontent.com/ggml-org/whisper.cpp/v1.9.3/ggml/src
 ### 3.5 Warum nur `arm64-v8a` und erwartete `.so`-Größe
 
 - Reale Zielgeräte sind ausnahmslos arm64; `armeabi-v7a` wird von whisper.cpp nur mit vfpv4-Fallback und praktisch unbrauchbarer Geschwindigkeit bedient; `x86_64` nur für Emulator. Der alte x86_64-Emulator-Test kann bleiben, wenn CI-Instrumented-Tests gewünscht sind — dann `abiFilters` um `x86_64` erweitern und `GGML_CPU_ARM_ARCH` per `if(ANDROID_ABI STREQUAL "arm64-v8a")` scoped setzen (Snippet §8.1 tut das). Für das Release-APK reicht arm64 (Prebuilt-Anbieter: „`arm64-v8a` (covers >90% of modern Android devices)“).
-- **Größe gemessen**: `dev.ffmpegkit-maintained:whisper-android:1.0.0` (whisper.cpp @ `51c6961`, Release-Assets 2026-07-05): `jni/arm64-v8a/libwhisper.so` = **1 524 520 Bytes**, gestrippt (kein `.symtab`/`.debug_info`), `PT_LOAD align=16384`, gebaut mit „Android clang version 18.0.3 (based on r522817c)“ = NDK r27; STL als `libc++_shared.so` (1 292 904 B) separat. Für Vox mit `c++_static` und ggf. `-flto`: **[grob] 2–2,5 MB** im APK (unkomprimiert). Quelle: <https://github.com/ffmpegkit-maintained/whisper/releases/tag/v1.0.0>
+- **Größe gemessen**: `dev.ffmpegkit-maintained:whisper-android:1.0.0` (whisper.cpp @ `51c6961`, Release-Assets 2026-07-05): `jni/arm64-v8a/libwhisper.so` = **1 524 520 Bytes**, gestrippt (kein `.symtab`/`.debug_info`), `PT_LOAD align=16384`, gebaut mit „Android clang version 18.0.3 (based on r522817c)“ = NDK r27; STL als `libc++_shared.so` (1 292 904 B) separat. Für WhisperLoom mit `c++_static` und ggf. `-flto`: **[grob] 2–2,5 MB** im APK (unkomprimiert). Quelle: <https://github.com/ffmpegkit-maintained/whisper/releases/tag/v1.0.0>
 
 ---
 
@@ -234,7 +234,7 @@ Quellen: <https://developer.android.com/develop/background-work/services/fgs/ser
 ## 7. Kontext-Lebenszyklus & Speicher
 
 - **Thread-Sicherheit**: whisper.h Z.45–46: „The following interface is thread-safe as long as the sample whisper_context is not used by multiple threads concurrently.“ → Alt-Design beibehalten: ein `Executors.newSingleThreadExecutor("whisper-worker")` pro Kontext; Laden, `whisper_full`, Segment-Auslesen und `whisper_free` laufen ausschließlich dort. Der `abort_callback` darf dagegen von jedem Thread gesetzt werden (`std::atomic<bool>`).
-- **Ein Kontext prozessweit**: IME (`VoxInputMethodService`), `FloatingMicService` und `ShareTranscribeActivity` laufen im selben App-Prozess → `WhisperEngine`-Singleton wie im Alt-Stand (`synchronized(lock)`, `ensureLoaded`), sonst läge das Modell doppelt im RAM.
+- **Ein Kontext prozessweit**: IME (`WhisperLoomInputMethodService`), `FloatingMicService` und `ShareTranscribeActivity` laufen im selben App-Prozess → `WhisperEngine`-Singleton wie im Alt-Stand (`synchronized(lock)`, `ensureLoaded`), sonst läge das Modell doppelt im RAM.
 - **Modellwechsel**: `release()` des alten Kontexts **vor** `create` des neuen (Peak sonst Summe beider; bei small→turbo ~1,4 GB).
 - **Speicherdruck**: small ~430 MB, turbo ~1,0 GB (§5). IME-Prozesse sind LMK-Kandidaten, wenn sie im Hintergrund groß sind → `onTrimMemory(TRIM_MEMORY_RUNNING_CRITICAL / UI_HIDDEN)` im Application/Service: Kontext freigeben, beim nächsten Diktat neu laden (Ladezeit small ~1–3 s von Flash, **[grob]**). Optional „Modell im Speicher halten“-Schalter. Mindest-RAM-Check vor Turbo-Download: `ActivityManager.MemoryInfo.totalMem ≥ 6 GB`.
 - **Kurze Eingaben**: whisper warnt bei < 100 ms („input is too short“, whisper.cpp Z.6884); `WhisperContext.transcribe` gibt bei `samples.isEmpty()` bereits `""` zurück — zusätzlich bei < 0,5 s nach trimSilence auf 1 s mit Stille auffüllen (Empfehlung der Warnung) oder abbrechen.
@@ -249,7 +249,7 @@ Quellen: <https://developer.android.com/develop/background-work/services/fgs/ser
 
 ```cmake
 cmake_minimum_required(VERSION 3.22)
-project(vox CXX C)
+project(whisperloom CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -271,7 +271,7 @@ set(GGML_NATIVE            OFF CACHE BOOL "" FORCE)  # Cross-Compile
 set(GGML_LLAMAFILE         OFF CACHE BOOL "" FORCE)  # "not supported on Android" (llama.cpp docs/build.md)
 set(GGML_CPU_KLEIDIAI      OFF CACHE BOOL "" FORCE)  # deckt Q5_1 nicht ab, laedt Tarball zur Configure-Zeit
 set(GGML_BACKEND_DL        OFF CACHE BOOL "" FORCE)
-set(BUILD_SHARED_LIBS      OFF CACHE BOOL "" FORCE)  # whisper+ggml statisch in libvox.so
+set(BUILD_SHARED_LIBS      OFF CACHE BOOL "" FORCE)  # whisper+ggml statisch in libwhisperloom.so
 
 # Ziel-ISA: Armv8.2 + FP16-Vektorarithmetik + DotProd (Cortex-A55/A75 und neuer, 2018+).
 # Kein +i8mm (Armv8.6, SIGILL auf 2018-2021-SoCs). Kotlin prueft /proc/cpuinfo auf "fphp" und "asimddp".
@@ -282,11 +282,11 @@ endif()
 add_subdirectory(${WHISPER_DIR} ${CMAKE_CURRENT_BINARY_DIR}/whisper.cpp EXCLUDE_FROM_ALL)
 
 find_library(LOG_LIB log)
-add_library(vox SHARED whisper_jni.cpp)
-target_link_libraries(vox PRIVATE ${LOG_LIB} android whisper)
+add_library(whisperloom SHARED whisper_jni.cpp)
+target_link_libraries(whisperloom PRIVATE ${LOG_LIB} android whisper)
 
 # Groesse/Geschwindigkeit wie examples/whisper.android (v1.9.3)
-foreach(t vox whisper ggml ggml-base ggml-cpu)
+foreach(t whisperloom whisper ggml ggml-base ggml-cpu)
     if(TARGET ${t})
         target_compile_options(${t} PRIVATE
             $<$<NOT:$<CONFIG:Debug>>:-O3>
@@ -294,7 +294,7 @@ foreach(t vox whisper ggml ggml-base ggml-cpu)
             -ffunction-sections -fdata-sections)
     endif()
 endforeach()
-target_link_options(vox PRIVATE
+target_link_options(whisperloom PRIVATE
     -Wl,--gc-sections
     -Wl,--exclude-libs,ALL
     # 16-KB-Page-Size: ab NDK r28 Default, fuer NDK r27 (LTS-Fallback) Pflicht; redundant unschaedlich.
@@ -334,7 +334,7 @@ Hinweise: Die ggml-Target-Namen (`ggml`, `ggml-base`, `ggml-cpu`) sind in ggml/s
 +}
 
  JNIEXPORT jlong JNICALL
- Java_com_chris_vox_WhisperLib_initContext(
+ Java_com_chris_whisperloom_WhisperLib_initContext(
 -        JNIEnv *env, jobject thiz, jstring model_path_str) {
 +        JNIEnv *env, jobject thiz, jstring model_path_str, jboolean flash_attn) {
      (void) thiz;
@@ -351,7 +351,7 @@ Hinweise: Die ggml-Target-Namen (`ggml`, `ggml-base`, `ggml-cpu`) sind in ggml/s
 
 -JNIEXPORT void JNICALL
 +JNIEXPORT jint JNICALL
- Java_com_chris_vox_WhisperLib_fullTranscribe(
+ Java_com_chris_whisperloom_WhisperLib_fullTranscribe(
          JNIEnv *env, jobject thiz, jlong context_ptr,
 -        jint num_threads, jstring language_str, jfloatArray audio_data) {
 +        jint num_threads, jstring language_str, jstring initial_prompt_str,
@@ -406,18 +406,18 @@ Hinweise: Die ggml-Target-Namen (`ggml`, `ggml-base`, `ggml-cpu`) sind in ggml/s
  }
 +
 +JNIEXPORT void JNICALL
-+Java_com_chris_vox_WhisperLib_requestAbort(JNIEnv *, jobject) { g_abort.store(true); }
++Java_com_chris_whisperloom_WhisperLib_requestAbort(JNIEnv *, jobject) { g_abort.store(true); }
 +
 +// Erkannte Sprache (bei language="auto"), z. B. "de" — fuer TextPolisher.
 +JNIEXPORT jstring JNICALL
-+Java_com_chris_vox_WhisperLib_getDetectedLanguage(JNIEnv *env, jobject, jlong context_ptr) {
++Java_com_chris_whisperloom_WhisperLib_getDetectedLanguage(JNIEnv *env, jobject, jlong context_ptr) {
 +    const int id = whisper_full_lang_id((struct whisper_context *) context_ptr);
 +    return env->NewStringUTF(id >= 0 ? whisper_lang_str(id) : "");
 +}
 +
 +// Optional fuer Debug-Menue: Timings (Encoder/Decoder-ms) nach logcat.
 +JNIEXPORT void JNICALL
-+Java_com_chris_vox_WhisperLib_printTimings(JNIEnv *, jobject, jlong context_ptr) {
++Java_com_chris_whisperloom_WhisperLib_printTimings(JNIEnv *, jobject, jlong context_ptr) {
 +    whisper_print_timings((struct whisper_context *) context_ptr);
 +}
 ```
@@ -433,7 +433,7 @@ internal object WhisperLib {
         val feat = runCatching { File("/proc/cpuinfo").readText() }.getOrDefault("")
         abi && feat.contains("fphp") && feat.contains("asimddp")
     }
-    init { if (supported) System.loadLibrary("vox") }
+    init { if (supported) System.loadLibrary("whisperloom") }
 
     external fun initContext(modelPath: String, flashAttn: Boolean): Long
     external fun freeContext(ctx: Long)
@@ -453,7 +453,7 @@ Thread-Anzahl (aus `examples/whisper.android/.../WhisperCpuConfig.kt` übernomme
 
 ```kotlin
 android {
-    namespace = "com.chris.vox"
+    namespace = "com.chris.whisperloom"
     compileSdk = 35
     ndkVersion = "28.2.13676358"          // r28c: 16-KB-Alignment Default, stable
 

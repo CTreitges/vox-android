@@ -1,7 +1,7 @@
-// JNI-Bruecke zwischen Kotlin (com.chris.vox.whisper.WhisperLib) und whisper.cpp (v1.9.3).
+// JNI-Bruecke zwischen Kotlin (com.chris.whisperloom.whisper.WhisperLib) und whisper.cpp (v1.9.3).
 //
 // Die Symbolnamen MUESSEN exakt zu Paket + Objektname der Kotlin-Seite passen:
-//   Java_com_chris_vox_whisper_WhisperLib_<methode>
+//   Java_com_chris_whisperloom_whisper_WhisperLib_<methode>
 // Lokal gibt es kein NDK — tools/check_jni_symbols.py und JniSymbolsTest gleichen beide Seiten ab.
 //
 // Kein Asset-Loader mehr: Modelle liegen ausschliesslich als Datei in filesDir/models (Download).
@@ -11,7 +11,7 @@
 #include <cstdint>
 #include "whisper.h"
 
-#define TAG "VoxJNI"
+#define TAG "WhisperLoomJNI"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, TAG, __VA_ARGS__)
 
@@ -49,7 +49,7 @@ static struct whisper_context *to_ctx(jlong ptr) {
 extern "C" {
 
 JNIEXPORT jlong JNICALL
-Java_com_chris_vox_whisper_WhisperLib_initContext(
+Java_com_chris_whisperloom_whisper_WhisperLib_initContext(
         JNIEnv *env, jobject thiz, jstring model_path_str, jboolean flash_attn) {
     (void) thiz;
     whisper_log_set(log_cb, nullptr);
@@ -64,7 +64,7 @@ Java_com_chris_vox_whisper_WhisperLib_initContext(
 }
 
 JNIEXPORT void JNICALL
-Java_com_chris_vox_whisper_WhisperLib_freeContext(
+Java_com_chris_whisperloom_whisper_WhisperLib_freeContext(
         JNIEnv *env, jobject thiz, jlong context_ptr) {
     (void) env; (void) thiz;
     whisper_free(to_ctx(context_ptr));
@@ -72,7 +72,7 @@ Java_com_chris_vox_whisper_WhisperLib_freeContext(
 
 // Rueckgabe: 0 = ok, sonst whisper_full-Fehlercode (auch nach requestAbort).
 JNIEXPORT jint JNICALL
-Java_com_chris_vox_whisper_WhisperLib_fullTranscribe(
+Java_com_chris_whisperloom_whisper_WhisperLib_fullTranscribe(
         JNIEnv *env, jobject thiz, jlong context_ptr,
         jint num_threads, jstring language_str, jstring initial_prompt_str,
         jint beam_size, jboolean suppress_nst, jfloatArray audio_data) {
@@ -123,20 +123,20 @@ Java_com_chris_vox_whisper_WhisperLib_fullTranscribe(
 }
 
 JNIEXPORT void JNICALL
-Java_com_chris_vox_whisper_WhisperLib_requestAbort(JNIEnv *env, jobject thiz) {
+Java_com_chris_whisperloom_whisper_WhisperLib_requestAbort(JNIEnv *env, jobject thiz) {
     (void) env; (void) thiz;
     g_abort.store(true);
 }
 
 JNIEXPORT jint JNICALL
-Java_com_chris_vox_whisper_WhisperLib_getTextSegmentCount(
+Java_com_chris_whisperloom_whisper_WhisperLib_getTextSegmentCount(
         JNIEnv *env, jobject thiz, jlong context_ptr) {
     (void) env; (void) thiz;
     return whisper_full_n_segments(to_ctx(context_ptr));
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_chris_vox_whisper_WhisperLib_getTextSegment(
+Java_com_chris_whisperloom_whisper_WhisperLib_getTextSegment(
         JNIEnv *env, jobject thiz, jlong context_ptr, jint index) {
     (void) thiz;
     const char *text = whisper_full_get_segment_text(to_ctx(context_ptr), index);
@@ -145,7 +145,7 @@ Java_com_chris_vox_whisper_WhisperLib_getTextSegment(
 
 // Erkannte Sprache des letzten Laufs (bei language="auto"), z. B. "de" — fuer TextPolisher.
 JNIEXPORT jstring JNICALL
-Java_com_chris_vox_whisper_WhisperLib_getDetectedLanguage(
+Java_com_chris_whisperloom_whisper_WhisperLib_getDetectedLanguage(
         JNIEnv *env, jobject thiz, jlong context_ptr) {
     (void) thiz;
     const int id = whisper_full_lang_id(to_ctx(context_ptr));
@@ -154,14 +154,14 @@ Java_com_chris_vox_whisper_WhisperLib_getDetectedLanguage(
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_chris_vox_whisper_WhisperLib_getSystemInfo(JNIEnv *env, jobject thiz) {
+Java_com_chris_whisperloom_whisper_WhisperLib_getSystemInfo(JNIEnv *env, jobject thiz) {
     (void) thiz;
     return env->NewStringUTF(whisper_print_system_info());
 }
 
 // Fuer Messungen auf dem Geraet: Encoder-/Decoder-Zeiten nach logcat (ueber log_cb).
 JNIEXPORT void JNICALL
-Java_com_chris_vox_whisper_WhisperLib_printTimings(
+Java_com_chris_whisperloom_whisper_WhisperLib_printTimings(
         JNIEnv *env, jobject thiz, jlong context_ptr) {
     (void) env; (void) thiz;
     whisper_print_timings(to_ctx(context_ptr));

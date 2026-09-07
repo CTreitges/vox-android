@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Tutorial-Illustration Seite 1: Handy mit fokussiertem Textfeld, schwebender Mikro-Knopf im
      Aufnahme-Zustand (Puls-Ringe, Timer-Label) und Pfeil vom Knopf ins Feld.
-     Flach und schematisch im Stil des App-Icons; nur @color/vox_*-Farben, kein Text
+     Flach und schematisch im Stil des App-Icons; nur @color/loom_*-Farben, kein Text
      (Bildbeschreibung: tutorial_img_* in strings.xml). Erzeugt mit scratchpad/gen_tutorial_ill.py.
      VectorRaster bewusst ignoriert: Illustration in Seitengroesse, kein Icon. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
@@ -12,61 +12,61 @@
     android:viewportHeight="240"
     tools:ignore="VectorRaster">
     <path
-        android:fillColor="@color/vox_surfaceContainerHigh"
+        android:fillColor="@color/loom_surfaceContainerHigh"
         android:pathData="M97,14 h126 a22,22 0 0 1 22,22 v226 h-170 v-226 a22,22 0 0 1 22,-22 z" />
     <path
-        android:fillColor="@color/vox_surfaceContainerLow"
+        android:fillColor="@color/loom_surfaceContainerLow"
         android:pathData="M97,20 h126 a16,16 0 0 1 16,16 v226 h-158 v-226 a16,16 0 0 1 16,-16 z" />
     <path
-        android:fillColor="@color/vox_outlineVariant"
+        android:fillColor="@color/loom_outlineVariant"
         android:pathData="M157.5,25 a2.5,2.5 0 1 0 5,0 a2.5,2.5 0 1 0 -5,0 z" />
     <path
-        android:fillColor="@color/vox_surfaceContainer"
+        android:fillColor="@color/loom_surfaceContainer"
         android:pathData="M81,34 h158 v24 h-158 z" />
     <path
-        android:fillColor="@color/vox_onSurfaceVariant"
+        android:fillColor="@color/loom_onSurfaceVariant"
         android:pathData="M98,43 h54 a3,3 0 0 1 3,3 v0 a3,3 0 0 1 -3,3 h-54 a3,3 0 0 1 -3,-3 v0 a3,3 0 0 1 3,-3 z" />
     <path
-        android:fillColor="@color/vox_outlineVariant"
+        android:fillColor="@color/loom_outlineVariant"
         android:pathData="M98,74 h104 a3,3 0 0 1 3,3 v0 a3,3 0 0 1 -3,3 h-104 a3,3 0 0 1 -3,-3 v0 a3,3 0 0 1 3,-3 z" />
     <path
-        android:fillColor="@color/vox_outlineVariant"
+        android:fillColor="@color/loom_outlineVariant"
         android:pathData="M98,86 h84 a3,3 0 0 1 3,3 v0 a3,3 0 0 1 -3,3 h-84 a3,3 0 0 1 -3,-3 v0 a3,3 0 0 1 3,-3 z" />
     <path
-        android:fillColor="@color/vox_outlineVariant"
+        android:fillColor="@color/loom_outlineVariant"
         android:pathData="M98,98 h49 a3,3 0 0 1 3,3 v0 a3,3 0 0 1 -3,3 h-49 a3,3 0 0 1 -3,-3 v0 a3,3 0 0 1 3,-3 z" />
     <path
-        android:fillColor="@color/vox_surfaceContainerHigh"
-        android:strokeColor="@color/vox_primary"
+        android:fillColor="@color/loom_surfaceContainerHigh"
+        android:strokeColor="@color/loom_primary"
         android:strokeWidth="2"
         android:pathData="M101,196 h118 a10,10 0 0 1 10,10 v16 a10,10 0 0 1 -10,10 h-118 a10,10 0 0 1 -10,-10 v-16 a10,10 0 0 1 10,-10 z" />
     <path
-        android:fillColor="@color/vox_onSurface"
+        android:fillColor="@color/loom_onSurface"
         android:pathData="M106,211 h64 a3,3 0 0 1 3,3 v0 a3,3 0 0 1 -3,3 h-64 a3,3 0 0 1 -3,-3 v0 a3,3 0 0 1 3,-3 z" />
     <path
-        android:fillColor="@color/vox_primary"
+        android:fillColor="@color/loom_primary"
         android:pathData="M178,204 h2 v20 h-2 z" />
     <path
-        android:strokeColor="@color/vox_primary"
+        android:strokeColor="@color/loom_primary"
         android:strokeWidth="4"
         android:strokeLineCap="round"
         android:pathData="M210,150 Q205,168 200,183" />
     <path
-        android:fillColor="@color/vox_primary"
+        android:fillColor="@color/loom_primary"
         android:pathData="M196.84,192.49 L194.31,181.1 L205.69,184.9 z" />
     <path
-        android:strokeColor="@color/vox_recording"
+        android:strokeColor="@color/loom_recording"
         android:strokeWidth="3"
         android:strokeAlpha="0.2"
         android:pathData="M184,118 a52,52 0 1 0 104,0 a52,52 0 1 0 -104,0 z" />
     <path
-        android:strokeColor="@color/vox_recording"
+        android:strokeColor="@color/loom_recording"
         android:strokeWidth="3"
         android:strokeAlpha="0.45"
         android:pathData="M194,118 a42,42 0 1 0 84,0 a42,42 0 1 0 -84,0 z" />
     <path
-        android:fillColor="@color/vox_recordingContainer"
-        android:strokeColor="@color/vox_recording"
+        android:fillColor="@color/loom_recordingContainer"
+        android:strokeColor="@color/loom_recording"
         android:strokeWidth="3"
         android:pathData="M206,118 a30,30 0 1 0 60,0 a30,30 0 1 0 -60,0 z" />
     <group
@@ -75,13 +75,13 @@
         android:scaleX="0.03"
         android:scaleY="0.03">
         <path
-            android:fillColor="@color/vox_recordingText"
+            android:fillColor="@color/loom_recordingText"
             android:pathData="M480,560Q430,560 395,525Q360,490 360,440L360,200Q360,150 395,115Q430,80 480,80Q530,80 565,115Q600,150 600,200L600,440Q600,490 565,525Q530,560 480,560ZM480,320Q480,320 480,320Q480,320 480,320L480,320Q480,320 480,320Q480,320 480,320Q480,320 480,320Q480,320 480,320L480,320Q480,320 480,320Q480,320 480,320ZM440,800L440,717Q348,704 282.5,639Q217,574 203,481Q201,464 212,452Q223,440 240,440Q257,440 268.5,451.5Q280,463 284,480Q298,550 353.5,595Q409,640 480,640Q552,640 607,594.5Q662,549 676,480Q680,463 691.5,451.5Q703,440 720,440Q737,440 748,452Q759,464 757,481Q743,572 678,638Q613,704 520,717L520,800Q520,817 508.5,828.5Q497,840 480,840Q463,840 451.5,828.5Q440,817 440,800ZM480,480Q497,480 508.5,468.5Q520,457 520,440L520,200Q520,183 508.5,171.5Q497,160 480,160Q463,160 451.5,171.5Q440,183 440,200L440,440Q440,457 451.5,468.5Q463,480 480,480Z" />
     </group>
     <path
-        android:fillColor="@color/vox_recording"
+        android:fillColor="@color/loom_recording"
         android:pathData="M222.5,162 a3.5,3.5 0 1 0 7,0 a3.5,3.5 0 1 0 -7,0 z" />
     <path
-        android:fillColor="@color/vox_recordingText"
+        android:fillColor="@color/loom_recordingText"
         android:pathData="M236,159 h16 a3,3 0 0 1 3,3 v0 a3,3 0 0 1 -3,3 h-16 a3,3 0 0 1 -3,-3 v0 a3,3 0 0 1 3,-3 z" />
 </vector>

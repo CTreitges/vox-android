@@ -4,11 +4,11 @@
      kuenftig ignoriert wird. -->
 <data-extraction-rules>
     <cloud-backup>
-        <exclude domain="sharedpref" path="vox.xml" />
+        <exclude domain="sharedpref" path="whisperloom.xml" />
         <exclude domain="file" path="models" />
     </cloud-backup>
     <device-transfer>
-        <exclude domain="sharedpref" path="vox.xml" />
+        <exclude domain="sharedpref" path="whisperloom.xml" />
         <exclude domain="file" path="models" />
     </device-transfer>
 </data-extraction-rules>

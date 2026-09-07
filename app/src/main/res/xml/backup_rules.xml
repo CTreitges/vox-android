@@ -2,6 +2,6 @@
 <!-- Android < 12 (fullBackupContent): die Einstellungen enthalten API-Keys im Klartext und bleiben
      auf dem Geraet (Zusage "Dein Key bleibt auf dem Geraet"). Modelle sind fuers Backup ohnehin zu gross. -->
 <full-backup-content>
-    <exclude domain="sharedpref" path="vox.xml" />
+    <exclude domain="sharedpref" path="whisperloom.xml" />
     <exclude domain="file" path="models" />
 </full-backup-content>

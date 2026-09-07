@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Abbrechen-Ziel (UX-Spec §5.2): 72-dp-Kreis unten mittig, erscheint beim Ziehen in
      RECORDING/ERROR. Im Magnet-Radius skaliert CancelTarget den Kreis auf 1,12, faerbt ihn
-     vox_errorContainer und wechselt das Label auf "Loslassen zum Verwerfen". -->
+     loom_errorContainer und wechselt das Label auf "Loslassen zum Verwerfen". -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
@@ -18,8 +18,8 @@
         android:background="@drawable/cancel_fill"
         android:contentDescription="@string/cd_cancel"
         android:elevation="6dp"
-        android:outlineAmbientShadowColor="@color/vox_scrim"
-        android:outlineSpotShadowColor="@color/vox_scrim"
+        android:outlineAmbientShadowColor="@color/loom_scrim"
+        android:outlineSpotShadowColor="@color/loom_scrim"
         tools:targetApi="28">
 
         <View
@@ -37,7 +37,7 @@
             android:contentDescription="@null"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_close"
-            android:tint="@color/vox_onSurface" />
+            android:tint="@color/loom_onSurface" />
     </FrameLayout>
 
     <TextView
@@ -47,6 +47,6 @@
         android:layout_marginTop="6dp"
         android:importantForAccessibility="no"
         android:text="@string/float_cancel_label"
-        android:textColor="@color/vox_onSurfaceVariant"
+        android:textColor="@color/loom_onSurfaceVariant"
         android:textSize="11sp" />
 </LinearLayout>

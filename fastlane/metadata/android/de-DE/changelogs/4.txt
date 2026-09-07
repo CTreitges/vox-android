@@ -1,4 +1,4 @@
-Vox 3.1.0 – neuer Name, neue Paket-ID (als neue App installieren, Einstellungen einmal neu eingeben).
+Version 3.1.0 – neuer Name, neue Paket-ID (als neue App installieren, Einstellungen einmal neu eingeben).
 • Komplett neue Oberfläche mit Einrichtungs-Assistent
 • Offline-Erkennung mit whisper.cpp, Modelle per Download
 • Anbieter-Katalog (OpenAI, Groq, Mistral, …) und eigener Server

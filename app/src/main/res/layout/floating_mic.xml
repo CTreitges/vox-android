@@ -51,7 +51,7 @@
             android:visibility="gone" />
 
         <!-- Touch-Ziel und TalkBack-Element: der ganze 68-dp-Kreis. Elevation 8 dp mit
-             ovalem Outline (BubbleRenderer) fuer den Schatten in vox_scrim. -->
+             ovalem Outline (BubbleRenderer) fuer den Schatten in loom_scrim. -->
         <FrameLayout
             android:id="@+id/bubble"
             android:layout_width="68dp"
@@ -61,8 +61,8 @@
             android:focusable="true"
             android:contentDescription="@string/cd_bubble_idle"
             android:elevation="8dp"
-            android:outlineAmbientShadowColor="@color/vox_scrim"
-            android:outlineSpotShadowColor="@color/vox_scrim"
+            android:outlineAmbientShadowColor="@color/loom_scrim"
+            android:outlineSpotShadowColor="@color/loom_scrim"
             tools:targetApi="28">
 
             <!-- Zwei Fuell-Ebenen fuer den 200-ms-Farb-Crossfade: hinten die alte, vorn die neue. -->
@@ -90,7 +90,7 @@
                 android:contentDescription="@null"
                 android:importantForAccessibility="no"
                 android:src="@drawable/ic_mic"
-                android:tint="@color/vox_primary" />
+                android:tint="@color/loom_primary" />
         </FrameLayout>
     </FrameLayout>
 
@@ -104,7 +104,7 @@
         android:gravity="center"
         android:importantForAccessibility="no"
         android:paddingHorizontal="10dp"
-        android:textColor="@color/vox_recordingText"
+        android:textColor="@color/loom_recordingText"
         android:textSize="12sp"
         android:visibility="gone" />
 </LinearLayout>

@@ -2,5 +2,5 @@
 <!-- Knopf-Fuellung, Zustand ERROR (UX-Spec §5.1). -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
-    <solid android:color="@color/vox_errorContainer" />
+    <solid android:color="@color/loom_errorContainer" />
 </shape>

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(vox CXX C)
+project(whisperloom CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -24,7 +24,7 @@ set(GGML_NATIVE            OFF CACHE BOOL "" FORCE)  # Cross-Compile: kein -marc
 set(GGML_LLAMAFILE         OFF CACHE BOOL "" FORCE)  # "not supported on Android" (llama.cpp docs/build.md)
 set(GGML_CPU_KLEIDIAI      OFF CACHE BOOL "" FORCE)  # deckt Q5_1 nicht ab, laedt Tarball zur Configure-Zeit
 set(GGML_BACKEND_DL        OFF CACHE BOOL "" FORCE)
-set(BUILD_SHARED_LIBS      OFF CACHE BOOL "" FORCE)  # whisper+ggml statisch in libvox.so
+set(BUILD_SHARED_LIBS      OFF CACHE BOOL "" FORCE)  # whisper+ggml statisch in libwhisperloom.so
 
 # Ziel-ISA: Armv8.2 + FP16-Vektorarithmetik + DotProd (Cortex-A55/A75 und neuer, ab 2018).
 # Kein +i8mm (Armv8.6, SIGILL auf 2018-2021-SoCs). Kotlin (OfflineSupport) prueft /proc/cpuinfo
@@ -34,17 +34,17 @@ if(ANDROID_ABI STREQUAL "arm64-v8a")
 endif()
 
 # Baut die Targets `whisper` und `ggml*` (statisch) mit whisper.cpps eigenem, gepflegtem CMake.
-# EXCLUDE_FROM_ALL: nur das, was libvox tatsaechlich linkt.
+# EXCLUDE_FROM_ALL: nur das, was libwhisperloom tatsaechlich linkt.
 add_subdirectory(${WHISPER_DIR} ${CMAKE_CURRENT_BINARY_DIR}/whisper.cpp EXCLUDE_FROM_ALL)
 
 find_library(LOG_LIB log)
 
-add_library(vox SHARED whisper_jni.cpp)
+add_library(whisperloom SHARED whisper_jni.cpp)
 # `whisper` propagiert seine PUBLIC-Includes (whisper.h) und ggml transitiv.
-target_link_libraries(vox PRIVATE ${LOG_LIB} android whisper)
+target_link_libraries(whisperloom PRIVATE ${LOG_LIB} android whisper)
 
 # Groesse/Geschwindigkeit wie examples/whisper.android (v1.9.3)
-foreach(t vox whisper ggml ggml-base ggml-cpu)
+foreach(t whisperloom whisper ggml ggml-base ggml-cpu)
     if(TARGET ${t})
         target_compile_options(${t} PRIVATE
             $<$<NOT:$<CONFIG:Debug>>:-O3>
@@ -52,7 +52,7 @@ foreach(t vox whisper ggml ggml-base ggml-cpu)
             -ffunction-sections -fdata-sections)
     endif()
 endforeach()
-target_link_options(vox PRIVATE
+target_link_options(whisperloom PRIVATE
     -Wl,--gc-sections
     -Wl,--exclude-libs,ALL
     # 16-KB-Page-Size: ab NDK r28 Default, fuer NDK r27 (LTS-Fallback) Pflicht; redundant unschaedlich.

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Sende-Bogen der IME-Mikro-Taste (UX-Spec §5.3): 96 dp um die 88-dp-Taste, 270 Grad,
-     Stroke 3 dp vox_primary. Start oben (48,1.5), im Uhrzeigersinn bis links (1.5,48). -->
+     Stroke 3 dp loom_primary. Start oben (48,1.5), im Uhrzeigersinn bis links (1.5,48). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="96dp"
     android:height="96dp"
     android:viewportWidth="96"
     android:viewportHeight="96">
     <path
-        android:strokeColor="@color/vox_primary"
+        android:strokeColor="@color/loom_primary"
         android:strokeWidth="3"
         android:strokeLineCap="round"
         android:pathData="M48,1.5 A46.5,46.5 0 1 1 1.5,48" />

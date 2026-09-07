@@ -1,0 +1,3 @@
+WhisperLoom 3.2.0 – new name and package ID com.chris.whisperloom: install as a new app, uninstall the previous version, re-enter settings once (signing key unchanged).
+• Illustrated tutorial after setup (button, keyboard, transcribing voice messages, result); replay it under Help
+• The floating button now starts after the tutorial instead of on top of it

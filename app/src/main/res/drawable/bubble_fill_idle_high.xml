@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- IDLE-Fuellung der IME-Mikro-Taste (UX-Spec §5.3): vox_surfaceContainerHigh (eine Stufe heller
-     als der Knopf, weil die Tastatur selbst schon auf vox_background liegt). -->
+<!-- IDLE-Fuellung der IME-Mikro-Taste (UX-Spec §5.3): loom_surfaceContainerHigh (eine Stufe heller
+     als der Knopf, weil die Tastatur selbst schon auf loom_background liegt). -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
-    <solid android:color="@color/vox_surfaceContainerHigh" />
+    <solid android:color="@color/loom_surfaceContainerHigh" />
 </shape>

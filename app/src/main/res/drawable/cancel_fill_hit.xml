@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Abbrechen-Ziel, Knopf im Magnet-Radius: vox_errorContainer. -->
+<!-- Abbrechen-Ziel, Knopf im Magnet-Radius: loom_errorContainer. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
-    <solid android:color="@color/vox_errorContainer" />
+    <solid android:color="@color/loom_errorContainer" />
 </shape>

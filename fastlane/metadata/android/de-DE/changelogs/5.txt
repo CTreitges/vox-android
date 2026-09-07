@@ -1,0 +1,3 @@
+WhisperLoom 3.2.0 – neuer Name, neue Paket-ID com.chris.whisperloom: als neue App installieren, vorherige Version deinstallieren, Einstellungen einmal neu eingeben (Signaturschlüssel unverändert).
+• Bebildertes Tutorial nach der Einrichtung (Knopf, Tastatur, Sprachnachrichten abtippen, Ergebnis); erneut unter Anleitung & Hilfe
+• Der schwebende Knopf startet nach dem Tutorial, nicht mehr darüber

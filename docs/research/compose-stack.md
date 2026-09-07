@@ -1,4 +1,4 @@
-# Vox-Android — Build-Konfiguration für Jetpack Compose + Material 3
+# WhisperLoom-Android — Build-Konfiguration für Jetpack Compose + Material 3
 
 Stand: 2026-09-06 · Read-only-Recherche, nichts gebaut, nichts verändert.
 Alle Versions-/Datumsangaben stammen aus den unten verlinkten Quellen (abgerufen 2026-09-06). Wo etwas nicht belegbar war, steht **[unsicher]**.
@@ -26,11 +26,11 @@ Alle Versions-/Datumsangaben stammen aus den unten verlinkten Quellen (abgerufen
 - `settings.gradle.kts`: `pluginManagement { google(); mavenCentral(); gradlePluginPortal() }`, `FAIL_ON_PROJECT_REPOS`, nur `:app`.
 - `gradle/wrapper/gradle-wrapper.properties`: `gradle-8.9-bin.zip`.
 - `gradle.properties`: `-Xmx4g`, caching, parallel, `android.useAndroidX=true`, `android.nonTransitiveRClass=true`.
-- `app/build.gradle.kts`: compileSdk/targetSdk 35, minSdk 26, `kotlinOptions { jvmTarget = "17" }`, `isMinifyEnabled=false` in beiden BuildTypes, Release-Signing aus `VOX_KEYSTORE*`-Env (PKCS12), einzige Dependency `junit:junit:4.13.2`.
+- `app/build.gradle.kts`: compileSdk/targetSdk 35, minSdk 26, `kotlinOptions { jvmTarget = "17" }`, `isMinifyEnabled=false` in beiden BuildTypes, Release-Signing aus `WHISPERLOOM_KEYSTORE*`-Env (PKCS12), einzige Dependency `junit:junit:4.13.2`.
 - Activities erben direkt von `android.app.Activity`; Manifest-Theme `@style/AppTheme` = `@android:style/Theme.Material.Light.DarkActionBar`.
 - `proguard-rules.pro`: leer (Kommentar).
 - CI `.github/workflows/build.yml`: `actions/setup-java@v4` (temurin 17), `android-actions/setup-android@v3`, `testDebugUnitTest lintDebug`, `assembleDebug`, `assembleRelease` mit Keystore aus Secret.
-- Unit-Tests: 7 reine JUnit-Tests unter `app/src/test/java/com/chris/vox/`.
+- Unit-Tests: 7 reine JUnit-Tests unter `app/src/test/java/com/chris/whisperloom/`.
 
 ---
 
@@ -112,7 +112,7 @@ Quelle: [kotlinlang.org/docs/gradle-configure-project](https://kotlinlang.org/do
 
 **SDK-Pakete in CI:** Platform 37 und Build-Tools 36.0.0 werden von Gradle automatisch nachgeladen, "as long as the corresponding SDK license agreements have already been accepted" ([studio/intro/update](https://developer.android.com/studio/intro/update)); `android-actions/setup-android@v3` akzeptiert Lizenzen — bestehender Workflow sollte reichen **[nicht getestet]**.
 
-**targetSdk:** bleibt 35. Google-Play-Pflicht (API 36 ab 2026-08-31, [Play target-sdk](https://developer.android.com/google/play/requirements/target-sdk)) gilt nur für Play-Distribution; Vox wird als APK aus GitHub Actions verteilt. Ein targetSdk-36-Sprung ist ein eigenes Thema (Verhaltensänderungen), nicht Teil des Compose-Umbaus.
+**targetSdk:** bleibt 35. Google-Play-Pflicht (API 36 ab 2026-08-31, [Play target-sdk](https://developer.android.com/google/play/requirements/target-sdk)) gilt nur für Play-Distribution; WhisperLoom wird als APK aus GitHub Actions verteilt. Ein targetSdk-36-Sprung ist ein eigenes Thema (Verhaltensänderungen), nicht Teil des Compose-Umbaus.
 
 ---
 
@@ -167,7 +167,7 @@ Bausteine:
 
 Framework-Themes `Theme.Material.NoActionBar` / `Theme.DeviceDefault.NoActionBar` existieren seit API 21 ([R.style](https://developer.android.com/reference/android/R.style); Seite lud nur Index, Existenz ist API-Standard). `Theme.Material.NoActionBar` ist die bessere Wahl gegenüber `DeviceDefault` (OEM-Skins färben DeviceDefault um; für Compose irrelevant, aber der Window-Hintergrund/Fensterrahmen bleibt vorhersagbar).
 
-**Hinweis Scope:** IME (`VoxInputMethodService`) und Overlay (`FloatingMicService`) bleiben View-basiert — Compose in einem `InputMethodService`/`WindowManager`-Overlay erfordert manuelle `LifecycleOwner`/`SavedStateRegistryOwner`/`ViewTreeLifecycleOwner`-Verkabelung an der `ComposeView`; das ist ein eigenes Thema und nicht Teil dieser Konfiguration.
+**Hinweis Scope:** IME (`WhisperLoomInputMethodService`) und Overlay (`FloatingMicService`) bleiben View-basiert — Compose in einem `InputMethodService`/`WindowManager`-Overlay erfordert manuelle `LifecycleOwner`/`SavedStateRegistryOwner`/`ViewTreeLifecycleOwner`-Verkabelung an der `ComposeView`; das ist ein eigenes Thema und nicht Teil dieser Konfiguration.
 
 ---
 
@@ -246,7 +246,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Vox"
+rootProject.name = "WhisperLoom"
 include(":app")
 ```
 
@@ -282,13 +282,13 @@ plugins {
 }
 
 android {
-    namespace = "com.chris.vox"
+    namespace = "com.chris.whisperloom"
     // Compose 1.12 (BOM 2026.08.00) verlangt compileSdk 37 + AGP >= 9.2.0:
     // https://developer.android.com/jetpack/androidx/releases/compose-ui#1.12.0-alpha01
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.chris.vox"
+        applicationId = "com.chris.whisperloom"
         minSdk = 26
         targetSdk = 35
         versionCode = 3
@@ -305,15 +305,15 @@ android {
 
     signingConfigs {
         create("release") {
-            val ksPath = System.getenv("VOX_KEYSTORE") ?: "keystore/vox-release.p12"
+            val ksPath = System.getenv("WHISPERLOOM_KEYSTORE") ?: "keystore/whisperloom-release.p12"
             val ks = file(ksPath)
             if (ks.exists()) {
                 storeFile = ks
                 storeType = "PKCS12"
-                storePassword = System.getenv("VOX_KEYSTORE_PASSWORD") ?: ""
-                keyAlias = System.getenv("VOX_KEY_ALIAS") ?: "vox"
-                keyPassword = System.getenv("VOX_KEY_PASSWORD")
-                    ?: System.getenv("VOX_KEYSTORE_PASSWORD") ?: ""
+                storePassword = System.getenv("WHISPERLOOM_KEYSTORE_PASSWORD") ?: ""
+                keyAlias = System.getenv("WHISPERLOOM_KEY_ALIAS") ?: "whisperloom"
+                keyPassword = System.getenv("WHISPERLOOM_KEY_PASSWORD")
+                    ?: System.getenv("WHISPERLOOM_KEYSTORE_PASSWORD") ?: ""
             }
         }
     }
@@ -327,7 +327,7 @@ android {
             // https://developer.android.com/build/shrink-code
             isMinifyEnabled = true
             isShrinkResources = true
-            val ks = file(System.getenv("VOX_KEYSTORE") ?: "keystore/vox-release.p12")
+            val ks = file(System.getenv("WHISPERLOOM_KEYSTORE") ?: "keystore/whisperloom-release.p12")
             if (ks.exists()) signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -446,7 +446,7 @@ Keine Manifest-Einträge für Compose nötig. `ui-test-manifest` merged seine `C
 
 ### 7.9 `ui/theme/Theme.kt`
 ```kotlin
-package com.chris.vox.ui.theme
+package com.chris.whisperloom.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -467,7 +467,7 @@ private val OnDarkDim = Color(0xFF9AA0AD)
 
 // Fest dunkel, KEIN dynamicDarkColorScheme (Entscheidung: Dynamic Color = nein).
 // https://developer.android.com/develop/ui/compose/designsystems/material3
-private val VoxColors = darkColorScheme(
+private val LoomColors = darkColorScheme(
     primary = Accent,
     onPrimary = Color.White,
     primaryContainer = AccentPressed,
@@ -486,10 +486,10 @@ private val VoxColors = darkColorScheme(
 )
 
 @Composable
-fun VoxTheme(content: @Composable () -> Unit) {
+fun WhisperLoomTheme(content: @Composable () -> Unit) {
     // isSystemInDarkTheme() bewusst ignoriert: App ist immer dunkel.
     MaterialTheme(
-        colorScheme = VoxColors,
+        colorScheme = LoomColors,
         typography = Typography(),
         content = content,
     )
@@ -498,7 +498,7 @@ fun VoxTheme(content: @Composable () -> Unit) {
 
 ### 7.10 Activity-Grundgerüst (z. B. `SettingsActivity`)
 ```kotlin
-package com.chris.vox
+package com.chris.whisperloom
 
 import android.graphics.Color
 import android.os.Bundle
@@ -506,7 +506,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.chris.vox.ui.theme.VoxTheme
+import com.chris.whisperloom.ui.theme.WhisperLoomTheme
 
 class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -518,7 +518,7 @@ class SettingsActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
         setContent {
-            VoxTheme {
+            WhisperLoomTheme {
                 SettingsScreen(prefs = Prefs(this))
             }
         }
@@ -527,16 +527,16 @@ class SettingsActivity : ComponentActivity() {
 ```
 Innen `Scaffold { innerPadding -> … }` bzw. `Modifier.safeDrawingPadding()` verwenden, damit Inhalte nicht unter die Systemleisten rutschen.
 
-### 7.11 Beispiel-Robolectric-Compose-Test — `app/src/test/java/com/chris/vox/ui/SettingsScreenTest.kt`
+### 7.11 Beispiel-Robolectric-Compose-Test — `app/src/test/java/com/chris/whisperloom/ui/SettingsScreenTest.kt`
 ```kotlin
-package com.chris.vox.ui
+package com.chris.whisperloom.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.chris.vox.ui.theme.VoxTheme
+import com.chris.whisperloom.ui.theme.WhisperLoomTheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -555,7 +555,7 @@ class SettingsScreenTest {
     @Test
     fun togglingLlmPolishShowsModelField() {
         compose.setContent {
-            VoxTheme {
+            WhisperLoomTheme {
                 SettingsScreen(state = fakeSettings(llmPolish = false), onEvent = {})
             }
         }
@@ -576,7 +576,7 @@ class SettingsScreenTest {
       - name: R8-Mapping sichern
         uses: actions/upload-artifact@v4
         with:
-          name: vox-release-mapping
+          name: whisperloom-release-mapping
           path: app/build/outputs/mapping/release/mapping.txt
           if-no-files-found: warn
 ```
@@ -592,7 +592,7 @@ class SettingsScreenTest {
    → `assembleDebug`; Lint auf "requires compileSdk" prüfen.
 3. Robolectric-Test aus 7.11 → `testDebugUnitTest` auf dem aarch64-VPS.
 4. Release mit R8 → `assembleRelease`, APK-Größe messen, APK auf Gerät installieren; IME-Service, Accessibility-Service, Overlay und Share-Intent durchspielen (AP6: kein "fertig" ohne Gerätetest).
-5. Vor Release-Tag: `git log`/`git diff` gegen Build-Stand (CLAUDE.md §7, Vox-Lesson 2026-08-20).
+5. Vor Release-Tag: `git log`/`git diff` gegen Build-Stand (CLAUDE.md §7, WhisperLoom-Lesson 2026-08-20).
 
 ---
 

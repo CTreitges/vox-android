@@ -1,6 +1,6 @@
 > **Stand 2026-09-06, Grundlage der v3-Implementierung; Abweichungen siehe CHANGELOG/Code.** Unveränderte Kopie der verbindlichen UX-Spezifikation (Arbeitsstand `research/ux-spec.md`); Fundstellen-Verweise auf `research/*.md` meinen die Reports unter `docs/research/`.
 
-# Vox v3 — Verbindliche UX-Spezifikation
+# WhisperLoom v3 — Verbindliche UX-Spezifikation
 
 Stand: 2026-09-06 · Autor: Lead-Design/Compose-Architektur · Gültig für Branch `v3-redesign`.
 Diese Datei ist die **einzige Vorlage** für die Implementierungs-Agenten. Wo die drei Entwürfe (A „Fokus", B „Dashboard", C „Assistent") Alternativen offen ließen, ist hier **entschieden**. Abweichungen nur mit ausdrücklicher Freigabe des Nutzers.
@@ -24,8 +24,8 @@ Diese Datei ist die **einzige Vorlage** für die Implementierungs-Agenten. Wo di
 - Stack: AGP 9.4.0 · Gradle 9.6.1 · JDK 17 · compileSdk 37 · targetSdk 35 · minSdk 26 · Compose BOM **2026.08.00** (ui 1.12.0, **material3 1.4.0**) · activity-compose 1.13.0 · lifecycle-runtime-compose 2.11.0. Quelle: https://developer.android.com/develop/ui/compose/bom/bom-mapping
 - **Keine** Navigation-Lib, **keine** `material-icons-*`-Artefakte, **keine** Expressive-APIs (`@ExperimentalMaterial3ExpressiveApi`). Nur stabile material3-1.4.0-Komponenten: `Scaffold`, `TopAppBar`/`LargeTopAppBar`, `ElevatedCard`/`OutlinedCard`, `ListItem`, `Switch`, `RadioButton`, `SingleChoiceSegmentedButtonRow`+`SegmentedButton`, `ExposedDropdownMenuBox`, `Button`/`FilledTonalButton`/`OutlinedButton`/`TextButton`/`IconButton`, `LinearProgressIndicator(progress = { })`, `CircularProgressIndicator`, `ModalBottomSheet`, `AlertDialog`, `AssistChip`/`FilterChip`/`InputChip`, `OutlinedTextField`, `Snackbar`, `HorizontalDivider`, `FlowRow` (foundation).
 - Navigation: `MainActivity` (einzige Compose-Activity) mit `sealed class Screen` + `rememberSaveable` + `BackHandler`. `ShareTranscribeActivity` bleibt als Intent-Ziel (Compose-Inhalt, `excludeFromRecents`). `SetupActivity` und `SettingsActivity` entfallen; `xml/method.xml` `settingsActivity` → `MainActivity` mit Extra `route=settings`.
-- Theme: fest dunkel (`darkColorScheme` aus §3), **kein** Dynamic Color, `enableEdgeToEdge(SystemBarStyle.dark(TRANSPARENT), SystemBarStyle.dark(TRANSPARENT))`, Manifest-Theme `Theme.Material.NoActionBar` mit `windowBackground = @color/vox_background`.
-- Eine Farb-Wahrheit: alle Hex-Werte in `res/values/colors.xml` (Präfix `vox_`), Compose hebt sie per `colorResource()` in `darkColorScheme` + `LocalVoxColors` (CompositionLocal für `recording`, `success`, `warning` + Container). IME/Overlay/Notification lesen dieselben `@color/vox_*`.
+- Theme: fest dunkel (`darkColorScheme` aus §3), **kein** Dynamic Color, `enableEdgeToEdge(SystemBarStyle.dark(TRANSPARENT), SystemBarStyle.dark(TRANSPARENT))`, Manifest-Theme `Theme.Material.NoActionBar` mit `windowBackground = @color/loom_background`.
+- Eine Farb-Wahrheit: alle Hex-Werte in `res/values/colors.xml` (Präfix `loom_`), Compose hebt sie per `colorResource()` in `darkColorScheme` + `LocalLoomColors` (CompositionLocal für `recording`, `success`, `warning` + Container). IME/Overlay/Notification lesen dieselben `@color/loom_*`.
 - Icons: Material Symbols Rounded (Weight 400, Fill 0, 24 dp) von https://fonts.google.com/icons als `res/drawable/ic_<name>.xml` eingecheckt; Compose per `painterResource`. Liste in §3.3.
 
 ---
@@ -46,7 +46,7 @@ Diese Datei ist die **einzige Vorlage** für die Implementierungs-Agenten. Wo di
 | E3 | Knopf & Tastatur | Compose | Knopf-Status/Start/Position · Berechtigungen · Tastatur · Probierfeld |
 | E4 | Offline-Modelle | Compose | Liste · Download · Löschen · Auswahl · Engine-Schalter |
 | E5 | Hilfe & Anleitung | Compose | Anleitung · API-Keys · Eigener Server · Offline · Datenschutz · Probleme |
-| E6 | Über Vox | `ModalBottomSheet` | Version, Lizenzen, Quellcode |
+| E6 | Über WhisperLoom | `ModalBottomSheet` | Version, Lizenzen, Quellcode |
 | S | **Transkription** (Share-Ziel) | Compose in `ShareTranscribeActivity` | geteilte Sprachnachrichten |
 | B1 | Sheet „Wo bekomme ich einen Key?" | `ModalBottomSheet` | Schritte + Link je Anbieter |
 | B2 | Sheet „Eigenes Modell" | `ModalBottomSheet` | Freitext Modell-ID |
@@ -118,7 +118,7 @@ Notation: Reihenfolge von oben nach unten; Texte sind die finalen Strings (Keys 
 ```
 Scaffold
 ├─ TopAppBar (klein, 64 dp, containerColor background)
-│    title  "Vox"                              titleLarge · onSurface
+│    title  "WhisperLoom"                              titleLarge · onSurface
 │    actions: IconButton ic_help      cd home_cd_help      → E5
 │             IconButton ic_settings  cd home_cd_settings  → E
 ├─ [Padding 20 / Abstand 16]
@@ -165,8 +165,8 @@ Scaffold
 │    └─ home_row_models "Offline-Modelle"   (nur wenn ≥ 1 Modell installiert ODER engine == offline)
 │          "{n} geladen · {MB} MB belegt" | "Keins geladen"                                           → E4
 ├─ INFO-KARTE  OutlinedCard  Row: Icon ic_voicemail 24 tertiary · Text bodyMedium home_share_hint
-│    "Sprachnachrichten abtippen: in WhatsApp lange drücken → Teilen → Vox."  · TextButton common_more "Mehr" → E5 Abschnitt 1
-└─ FOOTER  Text bodySmall outline, zentriert: home_version "Vox %1$s"  ·  TextButton(bodySmall) home_rerun_setup "Einrichtung erneut öffnen" → W Schritt 1 (Zurück = Home)
+│    "Sprachnachrichten abtippen: in WhatsApp lange drücken → Teilen → WhisperLoom."  · TextButton common_more "Mehr" → E5 Abschnitt 1
+└─ FOOTER  Text bodySmall outline, zentriert: home_version "WhisperLoom %1$s"  ·  TextButton(bodySmall) home_rerun_setup "Einrichtung erneut öffnen" → W Schritt 1 (Zurück = Home)
 ```
 
 Zustände H: kein Lade-/Leerzustand (alles synchron aus Prefs/System; Service-Status via `FloatingMicService.isRunning`). PENDING max. 500 ms nach Tipp (bestehendes `postDelayed(500)`-Verhalten). Fehler: Service-Start scheitert (Overlay entzogen) → Snackbar `home_snack_overlay_lost` mit Aktion `home_snack_fix` → W Schritt 4.
@@ -207,12 +207,12 @@ Rückkehr aus Systemdialogen/-einstellungen: `onResume` → Status aller Schritt
 **W1 Willkommen** (nur `welcomeSeen == false`; kein Fortschritt, kein Chip):
 - Hero: App-Icon-Motiv (Vordergrund-Vektor aus §4.1) 96 dp in primaryContainer-Kreis 120 dp.
 - headlineMedium `welcome_title` „Diktiere in jede App."
-- bodyLarge `welcome_body` „Vox nimmt auf, erkennt den Text über deinen eigenen Zugang oder ein Offline-Modell und tippt ihn ins aktuelle Feld. In ein paar Schritten ist alles bereit."
+- bodyLarge `welcome_body` „WhisperLoom nimmt auf, erkennt den Text über deinen eigenen Zugang oder ein Offline-Modell und tippt ihn ins aktuelle Feld. In ein paar Schritten ist alles bereit."
 - Drei rahmenlose `ListItem` (Icon 24 primary + bodyMedium): `welcome_point_1` „Online oder offline — du entscheidest" (ic_cloud) · `welcome_point_2` „Dein Key bleibt auf dem Gerät" (ic_lock) · `welcome_point_3` „Dauert etwa zwei Minuten" (ic_schedule).
 - Bottom: Button `welcome_start` „Los geht's" → setzt `welcomeSeen = true`, → Schritt 1.
 
 **Schritt 1 — Erkennungsweg** (Icon ic_graphic_eq; Pflicht):
-- Titel `setup_s1_title` „Wie soll Vox Sprache erkennen?"; Text `setup_s1_body` „Du kannst später jederzeit wechseln."
+- Titel `setup_s1_title` „Wie soll WhisperLoom Sprache erkennen?"; Text `setup_s1_body` „Du kannst später jederzeit wechseln."
 - Zwei auswählbare `OutlinedCard` untereinander (Radio-Semantik `selectableGroup`, Rahmen 2 dp primary bei Auswahl sonst 1 dp outlineVariant, Padding 20, Höhe wrap ≥ 96):
   - **Online** — Icon ic_cloud 28 primary · titleMedium `setup_s1_online` „Online-Dienst" · bodyMedium onSurfaceVariant `setup_s1_online_body` „Beste Qualität, schnell. Audio wird an den gewählten Anbieter gesendet. Braucht einen API-Key (bei Groq kostenlos)." · labelMedium primary `setup_s1_recommended` „Empfohlen".
   - **Offline** — Icon ic_offline_bolt 28 tertiary · `setup_s1_offline` „Offline auf dem Gerät" · `setup_s1_offline_body` „Alles bleibt auf dem Gerät. Modell einmalig laden (32–574 MB), Erkennung dauert einige Sekunden." · Wenn Gerät ungeeignet (`/proc/cpuinfo` ohne `fphp`+`asimddp` oder RAM < 3 GB, Quelle `whisper-cpp.md §3`): Karte `enabled=false`, Chip warning `setup_s1_offline_unavailable` „Auf diesem Gerät nicht verfügbar".
@@ -240,15 +240,15 @@ Rückkehr aus Systemdialogen/-einstellungen: `onResume` → Status aller Schritt
 - Dauerhaft verweigert (`shouldShowRequestPermissionRationale == false` nach mind. einer Ablehnung): Text wird `setup_s3_denied` „Du hast das Mikrofon abgelehnt. Bitte in den App-Einstellungen erlauben.", Hauptaktion `setup_open_app_settings` „App-Einstellungen öffnen" (`ACTION_APPLICATION_DETAILS_SETTINGS`).
 
 **Schritt 4 — Über anderen Apps anzeigen** (ic_layers; Pflicht mit Alternative):
-- Titel `setup_s4_title` „Über anderen Apps anzeigen"; Text `setup_s4_body` „Der schwebende Mikro-Knopf liegt über anderen Apps. Dafür braucht Android deine Erlaubnis — du landest gleich in den Systemeinstellungen: dort „Vox" einschalten und zurück."
-- Aufklappbare `OutlinedCard` (TextButton `setup_more_info` „Was passiert dabei?" → AnimatedVisibility) mit 3 nummerierten Zeilen `setup_s4_step_1..3` („Systemeinstellung öffnet sich", „Schalter „Über anderen Apps anzeigen" einschalten", „Zurück-Taste — Vox prüft automatisch").
+- Titel `setup_s4_title` „Über anderen Apps anzeigen"; Text `setup_s4_body` „Der schwebende Mikro-Knopf liegt über anderen Apps. Dafür braucht Android deine Erlaubnis — du landest gleich in den Systemeinstellungen: dort „WhisperLoom" einschalten und zurück."
+- Aufklappbare `OutlinedCard` (TextButton `setup_more_info` „Was passiert dabei?" → AnimatedVisibility) mit 3 nummerierten Zeilen `setup_s4_step_1..3` („Systemeinstellung öffnet sich", „Schalter „Über anderen Apps anzeigen" einschalten", „Zurück-Taste — WhisperLoom prüft automatisch").
 - Hauptaktion: `setup_s4_btn` „Einstellung öffnen" → `ACTION_MANAGE_OVERLAY_PERMISSION` mit `package:`-URI. Rückkehr: `onResume` prüft `canDrawOverlays()`.
 - Alternative: TextButton `setup_s4_keyboard_only` „Nur Tastatur nutzen" → `overlaySkipped = true`, Chip „Übersprungen", Schritt 7 (Tastatur) wird Pflicht (Chip „Fehlt noch", kein Überspringen dort). Hinweis bodySmall `setup_s4_keyboard_only_hint` „Ohne diesen Schritt funktioniert nur die Tastatur-Variante."
 
 **Schritt 5 — Bedienungshilfe** (ic_accessibility_new; empfohlen):
 - Titel `setup_s5_title` „Text automatisch einfügen"; Text `a11y_description` (bestehend).
 - Info-Karte secondaryContainer/onSecondaryContainer, Icon ic_info: `setup_s5_fallback` „Ohne diesen Schritt landet der Text in der Zwischenablage — du fügst ihn dann selbst ein."
-- Aufklappbar „Was passiert dabei?": `setup_s5_step_1..3` („Bedienungshilfe-Einstellungen öffnen sich", „Installierte Apps → Vox → Ein", „Bei „Eingeschränkte Einstellung": App-Info → ⋮ → Eingeschränkte Einstellungen zulassen, dann erneut"). Der dritte Punkt betrifft Sideload-Installationen ab Android 13 — im Gerätetest prüfen.
+- Aufklappbar „Was passiert dabei?": `setup_s5_step_1..3` („Bedienungshilfe-Einstellungen öffnen sich", „Installierte Apps → WhisperLoom → Ein", „Bei „Eingeschränkte Einstellung": App-Info → ⋮ → Eingeschränkte Einstellungen zulassen, dann erneut"). Der dritte Punkt betrifft Sideload-Installationen ab Android 13 — im Gerätetest prüfen.
 - Hauptaktion: `setup_s5_btn` „Bedienungshilfe aktivieren" → `ACTION_ACCESSIBILITY_SETTINGS`; Rückkehr prüft `TextInserterAccessibilityService.isRunning()`. TextButton `setup_skip`.
 
 **Schritt 6 — Benachrichtigungen** (nur API ≥ 33; ic_notifications; empfohlen):
@@ -256,7 +256,7 @@ Rückkehr aus Systemdialogen/-einstellungen: `onResume` → Status aller Schritt
 - Hauptaktion: `setup_s6_btn` „Benachrichtigungen erlauben" → `POST_NOTIFICATIONS`; dauerhaft verweigert → `setup_open_app_settings`. TextButton `setup_skip`.
 
 **Schritt 7 — Diktat-Tastatur** (ic_keyboard; optional, Pflicht wenn `overlaySkipped`):
-- Titel `setup_s7_title` „Diktat-Tastatur"; Text `setup_s7_body` „Alternative zum Knopf: die Vox-Tastatur mit Halten-zum-Sprechen. Zwei Schritte: aktivieren, dann auswählen."
+- Titel `setup_s7_title` „Diktat-Tastatur"; Text `setup_s7_body` „Alternative zum Knopf: die WhisperLoom-Tastatur mit Halten-zum-Sprechen. Zwei Schritte: aktivieren, dann auswählen."
 - Zwei `ListItem` mit Leading Status-Icon + Trailing FilledTonalButton: `setup_s7_enable` „1 · Tastatur aktivieren" → `setup_s7_enable_btn` „Aktivieren" (`ACTION_INPUT_METHOD_SETTINGS`); `setup_s7_select` „2 · Tastatur auswählen" → `setup_s7_select_btn` „Auswählen" (`InputMethodManager.showInputMethodPicker()`), `enabled` erst wenn 1 erledigt.
 - `OutlinedTextField` `setup_try_hint` (bestehend „Zum Diktieren hierher tippen …"), `minLines 2`.
 - TextButton `setup_skip` (entfällt bei `overlaySkipped`). Erledigt = IME aktiviert (Auswahl ist nicht prüfbar-pflichtig).
@@ -278,7 +278,7 @@ LazyColumn — ListItem je Gruppe (Leading: Icon 24 in 40-dp-Kreis surfaceContai
 ├─ ic_touch_app          settings_group_button      "Knopf & Tastatur" "Knopf läuft · Tastatur aktiv" | "Knopf aus · Tastatur nicht aktiviert" → E3
 ├─ ic_download_for_offline settings_group_models    "Offline-Modelle"  "{n} geladen · {MB} MB belegt" | settings_models_none "Keins geladen" → E4
 ├─ ic_help               settings_group_help        "Anleitung & Hilfe" settings_help_sub "Anleitung, API-Keys, Datenschutz" → E5
-└─ ic_info               settings_group_about       "Über Vox"  "Version {v}" → E6 (Sheet: Version, Lizenzen whisper.cpp MIT/Compose Apache 2.0, Link GitHub-Repo, Button common_close)
+└─ ic_info               settings_group_about       "Über WhisperLoom"  "Version {v}" → E6 (Sheet: Version, Lizenzen whisper.cpp MIT/Compose Apache 2.0, Link GitHub-Repo, Button common_close)
 ```
 
 Keine Switches auf Hub-Ebene. Kein Lade-/Leerzustand.
@@ -350,7 +350,7 @@ Column(padding 20, gap 16)
 │    perm_a11y "Bedienungshilfe"  Supporting perm_a11y_sub "Empfohlen — fügt Text direkt ein" → Button perm_open
 │    perm_notif "Benachrichtigungen" (nur API ≥ 33) → Button perm_allow
 ├─ ElevatedCard button_card_keyboard "Diktier-Tastatur"
-│    bodyMedium button_keyboard_intro "Alternative zum Knopf: Vox als Tastatur mit Halten-zum-Sprechen. Nützlich, wenn eine App kein Overlay erlaubt."
+│    bodyMedium button_keyboard_intro "Alternative zum Knopf: WhisperLoom als Tastatur mit Halten-zum-Sprechen. Nützlich, wenn eine App kein Overlay erlaubt."
 │    ListItem setup_s7_enable / setup_s7_select mit Status + Buttons (wie Schritt 7)
 │    OutlinedTextField setup_try_hint minLines 3
 └─ OutlinedCard button_card_howto "Kurzanleitung": 3 Zeilen help_dictate_1..3 + help_dictate_4 "Rot = Fehler, antippen = erneut"
@@ -391,14 +391,14 @@ Modell-Daten (Dateinamen, Bytes, SHA-256, URL-Schema `https://huggingface.co/gge
 
 `LargeTopAppBar` `help_title` „Anleitung & Hilfe". `LazyColumn` mit aufklappbaren `ElevatedCard`-Abschnitten (Kopfzeile: Icon 24 primary · titleMedium · Trailing ic_expand_more, rotiert 180° bei offen; `AnimatedVisibility`); Abschnitt 1 initial offen; Deep-Link `section` öffnet einen bestimmten. Links als `ListItem` mit Trailing ic_open_in_new (cd `cd_open_link`), `ACTION_VIEW`; kein Browser (`ActivityNotFoundException`) → Snackbar `err_no_browser` „Kein Browser gefunden" mit Aktion `common_copy_link` „Link kopieren".
 
-1. `help_s1_title` „So funktioniert's" (ic_touch_app) — drei `ListItem`: Knopf (`help_s1_bubble` „Schwebender Knopf: antippen = Aufnahme, nochmal = fertig & einfügen, auf ✕ ziehen = verwerfen, rot = Fehler, antippen = erneut."), Tastatur (`help_s1_keyboard` „Diktier-Tastatur: Mikrofon gedrückt halten, sprechen, loslassen."), Teilen (`help_s1_share` „Sprachnachrichten: in WhatsApp lange drücken → Teilen → Vox. Der Text erscheint in Absätzen, du kannst ihn kopieren oder weitergeben.").
+1. `help_s1_title` „So funktioniert's" (ic_touch_app) — drei `ListItem`: Knopf (`help_s1_bubble` „Schwebender Knopf: antippen = Aufnahme, nochmal = fertig & einfügen, auf ✕ ziehen = verwerfen, rot = Fehler, antippen = erneut."), Tastatur (`help_s1_keyboard` „Diktier-Tastatur: Mikrofon gedrückt halten, sprechen, loslassen."), Teilen (`help_s1_share` „Sprachnachrichten: in WhatsApp lange drücken → Teilen → WhisperLoom. Der Text erscheint in Absätzen, du kannst ihn kopieren oder weitergeben.").
 2. `help_s2_title` „Einrichtung Schritt für Schritt" (ic_checklist) — 7 Zeilen mit Ziffern-Badge, je TextButton `common_open` „Öffnen" → W Schritt n.
 3. `help_s3_title` „API-Key bekommen" (ic_key) — bodyMedium `help_s3_intro` „Ein API-Key ist ein persönlicher Zugangsschlüssel. Du bezahlst nur, was du nutzt — ein Diktat kostet meist unter einem Cent." Je Anbieter `ListItem`: Headline Name, Supporting Kurzschritte + Preisniveau (Texte `help_key_openai` … `help_key_deepseek`, §6), Trailing open_in_new → Key-URL (§8.2). Fußnote `help_prices_note` „Preise Stand 09/2026, ohne Gewähr."
 4. `help_s4_title` „Eigener Server" (ic_dns) — `help_s4_body` „Jeder OpenAI-kompatible Server funktioniert: Endpunkte /v1/audio/transcriptions (Erkennung) und /v1/chat/completions (Textverbesserung). Unter Erkennung → Anbieter „Eigener Server" Base-URL eintragen, Key nur wenn der Server einen verlangt. Empfohlene Server: speaches, whisper.cpp-server, LocalAI; für Textverbesserung Ollama. http:// nur im eigenen Netz oder per VPN — sonst https."
 5. `help_s5_title` „Offline-Modus" (ic_offline_bolt) — `help_s5_body` „Ein Offline-Modell erkennt Sprache direkt auf dem Gerät. Es wird einmalig geladen (32–574 MB) und liegt im App-Speicher; löschen kannst du es unter Offline-Modelle. Small ist für Deutsch die beste Balance. Die Erkennung dauert je Modell 2–10 Sekunden."
-6. `help_s6_title` „Datenschutz" (ic_lock) — zwei Karten nebeneinander (auf schmalen Geräten untereinander): `help_s6_online` „Online: Audio und Kontext-Prompt gehen an den gewählten Anbieter. Bei Textverbesserung geht der erkannte Text an das Sprachmodell. Dein Key bleibt auf dem Gerät. Vox speichert keine Aufnahmen." · `help_s6_offline` „Offline: Nichts verlässt das Gerät — nur der Modell-Download geht ins Netz." · Zeile `help_s6_a11y` „Die Bedienungshilfe liest nichts mit und speichert nichts; sie fügt nur den diktierten Text ein."
+6. `help_s6_title` „Datenschutz" (ic_lock) — zwei Karten nebeneinander (auf schmalen Geräten untereinander): `help_s6_online` „Online: Audio und Kontext-Prompt gehen an den gewählten Anbieter. Bei Textverbesserung geht der erkannte Text an das Sprachmodell. Dein Key bleibt auf dem Gerät. WhisperLoom speichert keine Aufnahmen." · `help_s6_offline` „Offline: Nichts verlässt das Gerät — nur der Modell-Download geht ins Netz." · Zeile `help_s6_a11y` „Die Bedienungshilfe liest nichts mit und speichert nichts; sie fügt nur den diktierten Text ein."
 7. `help_s7_title` „Wenn etwas nicht klappt" (ic_build) — Akkordeon-Einträge, jeder mit Button zum passenden Ziel: `help_p1` „Knopf erscheint nicht" (→ Schritt 4; Text: Overlay-Recht + Akku-Optimierung ausschalten), `help_p2` „Text landet nur in der Zwischenablage" (→ Schritt 5), `help_p3` „Key ungültig (401) / Limit (429)" (→ E1; Text: Key neu erzeugen, Guthaben prüfen), `help_p4` „Eingeschränkte Einstellung" (→ App-Info), `help_p5` „Offline zu langsam" (→ E4; kleineres Modell).
-8. Fußzeile bodySmall outline: `home_version` „Vox %1$s" · `about_license` „whisper.cpp (MIT) · Jetpack Compose (Apache 2.0)" · Link `about_source` „Quellcode auf GitHub".
+8. Fußzeile bodySmall outline: `home_version` „WhisperLoom %1$s" · `about_license` „whisper.cpp (MIT) · Jetpack Compose (Apache 2.0)" · Link `about_source` „Quellcode auf GitHub".
 
 Zustände E5: statisch; kein Lade-/Leerzustand.
 
@@ -426,7 +426,7 @@ Scaffold (ShareTranscribeActivity, Compose, excludeFromRecents)
 ```
 
 Globale Zustände (zentrierte Karte, Icon 48 dp, titleMedium, bodyMedium, Buttons 56 dp):
-- **KEINE DATEI** (kein Audio-URI): ic_music_off outline · `share_no_audio` (bestehend) · `share_no_audio_body` „Teile eine Audiodatei oder Sprachnachricht mit Vox." · Button `common_close`.
+- **KEINE DATEI** (kein Audio-URI): ic_music_off outline · `share_no_audio` (bestehend) · `share_no_audio_body` „Teile eine Audiodatei oder Sprachnachricht mit WhisperLoom." · Button `common_close`.
 - **KEIN ZUGANG** (`ApiNotConfiguredException` / `recognitionReady == false`): ic_key warning · `share_not_configured` „Kein Zugang eingerichtet" · `share_not_configured_body` „Richte einen Online-Dienst oder ein Offline-Modell ein, dann klappt es." · Button `share_open_setup` „Einrichtung öffnen" (→ MainActivity route=setup) · TextButton `common_close`.
 - **FEHLER GESAMT** (alle Dateien fehlgeschlagen): ic_error error · `share_all_failed` „Transkription fehlgeschlagen" · Grund (`share_one_failed`) · Button `common_retry` · TextButton `common_close`.
 - **LADEN**: Kopf + Fortschritt + Skeleton; keine Aktionsleiste. Abbruch bei Schließen (bestehendes `cancelled`).
@@ -441,7 +441,7 @@ Globale Zustände (zentrierte Karte, Icon 48 dp, titleMedium, bodyMedium, Button
 
 ## 3. Farb-Tokens, Typografie, Ikonografie
 
-### 3.1 Farbschema (fest dunkel; `res/values/colors.xml` mit Präfix `vox_`, Compose `darkColorScheme` + `LocalVoxColors`)
+### 3.1 Farbschema (fest dunkel; `res/values/colors.xml` mit Präfix `loom_`, Compose `darkColorScheme` + `LocalLoomColors`)
 
 Akzent **Aurora-Türkis**, Aufnahme-Rot als eigener Token, Tertiär Lavendel für KI-/Textverbesserungs-Elemente, Sekundär kühles Blau für Info/Optional.
 
@@ -475,7 +475,7 @@ Akzent **Aurora-Türkis**, Aufnahme-Rot als eigener Token, Tertiär Lavendel fü
 | `errorContainer` | `#93000A` | Bubble ERROR, Fehlerkarten, Cancel-Ziel „hover" |
 | `onErrorContainer` | `#FFDAD6` | darauf |
 
-**Zusatz-Tokens** (`LocalVoxColors` + `colors.xml`):
+**Zusatz-Tokens** (`LocalLoomColors` + `colors.xml`):
 
 | Token | Hex | Verwendung |
 |---|---|---|
@@ -582,17 +582,17 @@ Vorgaben: adaptive Ebenen 108 × 108 dp, sichtbarer Kern 66 × 66 dp (Kreis Ø 6
 
 Gleicher Hintergrund wie 4.1. Vordergrund `drawable/ic_share_foreground.xml`: Mikrofon (Pfade 1–4) um **8 dp nach links** verschoben (Kapsel x 37–55, Bügel um (46,54), Stiel x 46, Fuß x 38–54), **keine** Wellen; rechts drei **Textzeilen** als abgerundete Balken Höhe 4, Radius 2, Fill `#6FD9C7`: x 62–82 (y 42–46), x 62–78 (y 50–54), x 62–72 (y 58–62). Lesart „Sprache → Text". Safe-Zone: (82,42) → 30,5 ✓. Monochrom analog (alles `#FFFFFF`).
 
-### 4.3 Notification-Small-Icon `drawable/ic_stat_vox.xml` (24 × 24, reine Alpha-Silhouette, Weiß auf transparent; Quelle https://documentation.onesignal.com/docs/en/notification-icons)
+### 4.3 Notification-Small-Icon `drawable/ic_stat_whisperloom.xml` (24 × 24, reine Alpha-Silhouette, Weiß auf transparent; Quelle https://documentation.onesignal.com/docs/en/notification-icons)
 
 - Kapsel: `M12,3 a2,2 0 0 1 2,2 v5 a2,2 0 0 1 -4,0 V5 a2,2 0 0 1 2,-2 z` Fill `#FFFFFF` (x 10–14, y 3–12).
 - Bügel: `M7.5,10 a4.5,4.5 0 0 0 9,0` Stroke 1,75 round.
 - Stiel/Fuß: `M12,14.5 v3.5` und `M9.5,18 h5`, Stroke 1,75 round.
 - Wellen R 7,5 um (12,10), ±22°: rechts `M18.95,7.2 a7.5,7.5 0 0 1 0,5.6`, links `M5.05,7.2 a7.5,7.5 0 0 0 0,5.6`, Stroke 1,5 round.
-- Sicherheitsrand 2 dp eingehalten (x 5,05–18,95; y 3–18). `Notification.Builder.setColor(vox_primary)`; während RECORDING `setColor(vox_recording)`.
+- Sicherheitsrand 2 dp eingehalten (x 5,05–18,95; y 3–18). `Notification.Builder.setColor(loom_primary)`; während RECORDING `setColor(loom_recording)`.
 
 ### 4.4 Weitere Vektoren
 
-`ic_mic` (24 dp, für Bubble/IME/Hero; Material-Symbol) · `ic_stop` · `ic_replay` · `ic_close` (Cancel-Ziel). Splash: keine Lib; Manifest-Theme mit `windowBackground = @color/vox_background` (Android 12+ zeigt System-Splash mit dem adaptiven Icon).
+`ic_mic` (24 dp, für Bubble/IME/Hero; Material-Symbol) · `ic_stop` · `ic_replay` · `ic_close` (Cancel-Ziel). Splash: keine Lib; Manifest-Theme mit `windowBackground = @color/loom_background` (Android 12+ zeigt System-Splash mit dem adaptiven Icon).
 
 ---
 
@@ -601,7 +601,7 @@ Gleicher Hintergrund wie 4.1. Vordergrund `drawable/ic_share_foreground.xml`: Mi
 ### 5.1 Schwebender Knopf — Geometrie (`layout/floating_mic.xml`, `FloatingMicService`, `BubbleUi`)
 
 - Container `FrameLayout` 96 × 96 dp (Platz für Puls-Ring 1,35 × 68 = 92 dp), Knopf-Kreis **68 dp** zentriert (bisher 56), Elevation 8 dp, `outlineSpotShadowColor` Schwarz 40 %.
-- Ebenen (hinten → vorn): `pulse_ring` (View 84 dp oval, Stroke 4, nur RECORDING) · `state_ring` (View 72 dp oval, Stroke 2) · `bubble` (68 dp oval, `bubble_bg.xml` mit `@color/vox_*`) · `bubble_progress` (`ProgressBar` indeterminate 76 dp, Stroke 3, `indeterminateTint vox_primary`, nur SENDING) · `bubble_icon` (`ImageView` 28 dp) · darunter (4 dp Abstand) `bubble_label` (`TextView` in Pille: Höhe 22, Radius 11, Padding 10/0, labelMedium 12 sp, Grund `vox_surfaceContainerLow` 92 % Alpha).
+- Ebenen (hinten → vorn): `pulse_ring` (View 84 dp oval, Stroke 4, nur RECORDING) · `state_ring` (View 72 dp oval, Stroke 2) · `bubble` (68 dp oval, `bubble_bg.xml` mit `@color/loom_*`) · `bubble_progress` (`ProgressBar` indeterminate 76 dp, Stroke 3, `indeterminateTint loom_primary`, nur SENDING) · `bubble_icon` (`ImageView` 28 dp) · darunter (4 dp Abstand) `bubble_label` (`TextView` in Pille: Höhe 22, Radius 11, Padding 10/0, labelMedium 12 sp, Grund `loom_surfaceContainerLow` 92 % Alpha).
 - Touch-Ziel = ganzer 68-dp-Kreis. Drag/Tap-Unterscheidung, Positionsspeicherung (`floatX/floatY`), Clamp an Bildschirmrand: bestehend; **kein** Kanten-Snap (Position bleibt, wo losgelassen).
 
 **Vier Zustände (`BubbleState`):**
@@ -621,29 +621,29 @@ Gleicher Hintergrund wie 4.1. Vordergrund `drawable/ic_share_foreground.xml`: Mi
 - Kreis **72 dp** (bisher 64), unten mittig, Unterkante 96 dp über dem Bildschirmrand (bestehend), Füllung `surfaceContainerHigh` @ 92 %, Ring 2 dp `outline`, Icon `ic_close` 28 dp `onSurface`; darunter (6 dp) labelSmall `onSurfaceVariant` `float_cancel_label` „Verwerfen". Scrim: vertikaler Verlauf `#00000000` → `#66000000` über dem unteren Bildschirmviertel während des Drags.
 - Erscheint nur beim Ziehen in RECORDING/ERROR (`fadeIn + scaleIn(0.8)` 200 ms). Treffer-Radius (Magnet) 56 dp (`BubblePosition.isOverCancel`): Ziel skaliert 1,12, Füllung `errorContainer`, Icon `onErrorContainer`, Label `float_cancel_release` „Loslassen zum Verwerfen"; Haptik `CONFIRM` beim Eintritt, `REJECT` beim Loslassen darüber. Loslassen → Toast `float_discarded` (bestehend), Knopf springt an gemerkte Position zurück, Zustand IDLE. Ziel `contentDescription` `cd_cancel` (bestehend „Diktat verwerfen").
 
-### 5.3 IME-Tastatur (`layout/keyboard_view.xml`, `VoxInputMethodService`)
+### 5.3 IME-Tastatur (`layout/keyboard_view.xml`, `WhisperLoomInputMethodService`)
 
 ```
-LinearLayout vertical, background @color/vox_background, oben 1 dp @color/vox_outlineVariant, paddingH 12, paddingTop 8, paddingBottom 12 (+ Nav-Inset); Gesamthöhe ≈ 240 dp
+LinearLayout vertical, background @color/loom_background, oben 1 dp @color/loom_outlineVariant, paddingH 12, paddingTop 8, paddingBottom 12 (+ Nav-Inset); Gesamthöhe ≈ 240 dp
 ├─ Statuszeile   TextView labelMedium 13 sp, zentriert, Höhe 24, Farbe je Zustand:
 │                kb_hint_hold (onSurfaceVariant) · kb_listening (recordingText) · kb_transcribing (onSurfaceVariant) · kb_error (error) ·
 │                kb_need_permission (warning; Tipp → MainActivity route=setup step=3) · kb_not_configured "Kein Zugang eingerichtet — tippe zum Einrichten" (warning; Tipp → route=setup)
 │                accessibilityLiveRegion = polite
 ├─ Pegelband     LevelBandView (custom View) Höhe 28, marginH 40: 21 Balken, 3 dp breit, 4 dp Gap, Radius 1,5, Höhe 4–24 dp aus RMS
-│                (Attack 50 ms / Release 250 ms); Farbe vox_recording bei Aufnahme, sonst vox_surfaceContainerHighest flach; importantForAccessibility = no
+│                (Attack 50 ms / Release 250 ms); Farbe loom_recording bei Aufnahme, sonst loom_surfaceContainerHighest flach; importantForAccessibility = no
 ├─ Mikro-Zone    FrameLayout 112 dp: Puls-Ring (View 104 dp oval, nur Aufnahme) + ImageButton 88 dp oval (mic_button_bg.xml, Level-Drawable):
-│                IDLE      vox_surfaceContainerHigh + 2 dp Ring vox_primary, ic_mic 36 dp vox_primary
-│                RECORDING vox_recording, ic_stop 36 dp vox_onRecording, Puls
-│                SENDING   vox_primaryContainer + ProgressBar-Bogen vox_primary, ic_mic vox_onPrimaryContainer @ 50 %
-│                ERROR     vox_errorContainer + 2 dp Ring vox_error, ic_replay vox_onErrorContainer
+│                IDLE      loom_surfaceContainerHigh + 2 dp Ring loom_primary, ic_mic 36 dp loom_primary
+│                RECORDING loom_recording, ic_stop 36 dp loom_onRecording, Puls
+│                SENDING   loom_primaryContainer + ProgressBar-Bogen loom_primary, ic_mic loom_onPrimaryContainer @ 50 %
+│                ERROR     loom_errorContainer + 2 dp Ring loom_error, ic_replay loom_onErrorContainer
 │                contentDescription cd_mic (bestehend); Halten-zum-Sprechen bleibt (ACTION_DOWN/UP)
-└─ Tastenreihe   LinearLayout 52 dp, marginTop 8, Abstand 4 dp; Tasten: Höhe 48, minWidth 44, Radius 12, Füllung vox_surfaceContainerHigh, gedrückt vox_surfaceContainerHighest,
-                 Ripple vox_onSurface @ 12 %; Icons 22 dp vox_onSurface, Text 18 sp vox_onSurface
+└─ Tastenreihe   LinearLayout 52 dp, marginTop 8, Abstand 4 dp; Tasten: Höhe 48, minWidth 44, Radius 12, Füllung loom_surfaceContainerHigh, gedrückt loom_surfaceContainerHighest,
+                 Ripple loom_onSurface @ 12 %; Icons 22 dp loom_onSurface, Text 18 sp loom_onSurface
                  [ic_language cd_kb_switch] [ "," cd_kb_comma ] [ Leertaste weight 1, Label kb_space "Leer" 15 sp onSurfaceVariant, cd_kb_space ] [ "." cd_kb_period ] [ic_backspace cd_kb_backspace] [ic_keyboard_return cd_kb_enter]
-                 [ic_replay cd_kb_retry, Farbe vox_error — nur ERROR sichtbar] [ic_settings cd_kb_settings → MainActivity route=settings]
+                 [ic_replay cd_kb_retry, Farbe loom_error — nur ERROR sichtbar] [ic_settings cd_kb_settings → MainActivity route=settings]
 ```
 
-Subtypes de/en (`method.xml`) bleiben. Tastenhöhe wächst ab `fontScale ≥ 1,3` auf 56 dp. Alle Drawables referenzieren ausschließlich `@color/vox_*`.
+Subtypes de/en (`method.xml`) bleiben. Tastenhöhe wächst ab `fontScale ≥ 1,3` auf 56 dp. Alle Drawables referenzieren ausschließlich `@color/loom_*`.
 
 ### 5.4 Motion & Feedback (dezent, alle Werte verbindlich)
 
@@ -667,7 +667,7 @@ Keine Bounces außer dem Shake; keine Animation > 500 ms außer Endlosschleifen.
 
 ### 5.5 Notification (N1)
 
-`setSmallIcon(ic_stat_vox)`, `setColor(vox_primary)` (RECORDING: `vox_recording`), Titel `float_running`, Text `float_running_text`, Aktion `float_stop` „Beenden" (`ic_stop`), `setOngoing(true)`, Kanal `float_channel` `IMPORTANCE_LOW`, **`contentIntent` → `MainActivity(route=home)`** (neu — bisher totes Ende).
+`setSmallIcon(ic_stat_whisperloom)`, `setColor(loom_primary)` (RECORDING: `loom_recording`), Titel `float_running`, Text `float_running_text`, Aktion `float_stop` „Beenden" (`ic_stop`), `setOngoing(true)`, Kanal `float_channel` `IMPORTANCE_LOW`, **`contentIntent` → `MainActivity(route=home)`** (neu — bisher totes Ende).
 
 ### 5.6 Barrierefreiheit (verbindlich, Compose und View)
 
@@ -690,8 +690,8 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 
 | Key | Text |
 |---|---|
-| `app_name` (bestehend) | Vox |
-| `ime_label` (bestehend) | Vox Diktat |
+| `app_name` (bestehend) | WhisperLoom |
+| `ime_label` (bestehend) | WhisperLoom Diktat |
 | `subtype_de` / `subtype_en` (bestehend) | Deutsch / Englisch |
 | `common_next` | Weiter |
 | `common_back` | Zurück |
@@ -782,9 +782,9 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `home_val_kb_off` | Nicht aktiviert (optional) |
 | `home_val_models` | %1$d geladen · %2$s belegt |
 | `home_val_models_none` | Keins geladen |
-| `home_share_hint` | Sprachnachrichten abtippen: in WhatsApp lange drücken → Teilen → Vox. |
+| `home_share_hint` | Sprachnachrichten abtippen: in WhatsApp lange drücken → Teilen → WhisperLoom. |
 | `home_rerun_setup` | Einrichtung erneut öffnen |
-| `home_version` | Vox %1$s |
+| `home_version` | WhisperLoom %1$s |
 | `home_snack_overlay_lost` | „Über anderen Apps anzeigen" wurde entzogen |
 | `home_snack_fix` | Erlauben |
 
@@ -817,12 +817,12 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `setup_status_skipped` | übersprungen |
 | `setup_status_done` | erledigt |
 | `welcome_title` | Diktiere in jede App. |
-| `welcome_body` | Vox nimmt auf, erkennt den Text über deinen eigenen Zugang oder ein Offline-Modell und tippt ihn ins aktuelle Feld. In ein paar Schritten ist alles bereit. |
+| `welcome_body` | WhisperLoom nimmt auf, erkennt den Text über deinen eigenen Zugang oder ein Offline-Modell und tippt ihn ins aktuelle Feld. In ein paar Schritten ist alles bereit. |
 | `welcome_point_1` | Online oder offline — du entscheidest |
 | `welcome_point_2` | Dein Key bleibt auf dem Gerät |
 | `welcome_point_3` | Dauert etwa zwei Minuten |
 | `welcome_start` | Los geht's |
-| `setup_s1_title` | Wie soll Vox Sprache erkennen? |
+| `setup_s1_title` | Wie soll WhisperLoom Sprache erkennen? |
 | `setup_s1_body` | Du kannst später jederzeit wechseln. |
 | `setup_s1_online` | Online-Dienst |
 | `setup_s1_online_body` | Beste Qualität, schnell. Audio wird an den gewählten Anbieter gesendet. Braucht einen API-Key (bei Groq kostenlos). |
@@ -839,24 +839,24 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `setup_s3_btn` | Mikrofon erlauben |
 | `setup_s3_denied` | Du hast das Mikrofon abgelehnt. Bitte in den App-Einstellungen erlauben. |
 | `setup_s4_title` | Über anderen Apps anzeigen |
-| `setup_s4_body` | Der schwebende Mikro-Knopf liegt über anderen Apps. Dafür braucht Android deine Erlaubnis — du landest gleich in den Systemeinstellungen: dort „Vox" einschalten und zurück. |
+| `setup_s4_body` | Der schwebende Mikro-Knopf liegt über anderen Apps. Dafür braucht Android deine Erlaubnis — du landest gleich in den Systemeinstellungen: dort „WhisperLoom" einschalten und zurück. |
 | `setup_s4_step_1` | Die Systemeinstellung öffnet sich |
 | `setup_s4_step_2` | Schalter „Über anderen Apps anzeigen" einschalten |
-| `setup_s4_step_3` | Zurück-Taste — Vox prüft automatisch |
+| `setup_s4_step_3` | Zurück-Taste — WhisperLoom prüft automatisch |
 | `setup_s4_btn` | Einstellung öffnen |
 | `setup_s4_keyboard_only` | Nur Tastatur nutzen |
 | `setup_s4_keyboard_only_hint` | Ohne diesen Schritt funktioniert nur die Tastatur-Variante. |
 | `setup_s5_title` | Text automatisch einfügen |
 | `setup_s5_fallback` | Ohne diesen Schritt landet der Text in der Zwischenablage — du fügst ihn dann selbst ein. |
 | `setup_s5_step_1` | Die Bedienungshilfe-Einstellungen öffnen sich |
-| `setup_s5_step_2` | Installierte Apps → Vox → Ein |
+| `setup_s5_step_2` | Installierte Apps → WhisperLoom → Ein |
 | `setup_s5_step_3` | Bei „Eingeschränkte Einstellung": App-Info → ⋮ → Eingeschränkte Einstellungen zulassen, dann erneut |
 | `setup_s5_btn` | Bedienungshilfe aktivieren |
 | `setup_s6_title` | Beenden per Benachrichtigung |
 | `setup_s6_body` | Solange der Knopf läuft, zeigt Android eine stille Benachrichtigung mit „Beenden". Ohne Erlaubnis ist sie unsichtbar — beenden kannst du den Knopf dann in der App. |
 | `setup_s6_btn` | Benachrichtigungen erlauben |
 | `setup_s7_title` | Diktat-Tastatur |
-| `setup_s7_body` | Alternative zum Knopf: die Vox-Tastatur mit Halten-zum-Sprechen. Zwei Schritte: aktivieren, dann auswählen. |
+| `setup_s7_body` | Alternative zum Knopf: die WhisperLoom-Tastatur mit Halten-zum-Sprechen. Zwei Schritte: aktivieren, dann auswählen. |
 | `setup_s7_enable` | 1 · Tastatur aktivieren |
 | `setup_s7_enable_btn` | Aktivieren |
 | `setup_s7_select` | 2 · Tastatur auswählen |
@@ -867,7 +867,7 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `setup_done_a11y_skipped` | übersprungen — Text landet in der Zwischenablage |
 | `setup_done_start` | Knopf starten & los |
 | `setup_done_home` | Zum Start |
-| `a11y_label` (bestehend) | Vox Text-Einfügen |
+| `a11y_label` (bestehend) | WhisperLoom Text-Einfügen |
 | `a11y_description` (bestehend) | Fügt diktierten Text ins gerade fokussierte Feld ein, damit du beim Diktieren nicht die Tastatur wechseln musst. Es wird nichts mitgelesen oder gespeichert. |
 
 ### 6.4 Einstellungen-Hub (E), Über (E6)
@@ -880,7 +880,7 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `settings_group_button` | Knopf & Tastatur |
 | `settings_group_models` | Offline-Modelle |
 | `settings_group_help` | Anleitung & Hilfe |
-| `settings_group_about` | Über Vox |
+| `settings_group_about` | Über WhisperLoom |
 | `settings_help_sub` | Anleitung, API-Keys, Datenschutz |
 | `settings_models_none` | Keins geladen |
 | `settings_val_bubble_on` | Knopf läuft |
@@ -998,7 +998,7 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `perm_allow` | Erlauben |
 | `perm_open` | Öffnen |
 | `button_card_keyboard` | Diktier-Tastatur |
-| `button_keyboard_intro` | Alternative zum Knopf: Vox als Tastatur mit Halten-zum-Sprechen. Nützlich, wenn eine App kein Overlay erlaubt. |
+| `button_keyboard_intro` | Alternative zum Knopf: WhisperLoom als Tastatur mit Halten-zum-Sprechen. Nützlich, wenn eine App kein Overlay erlaubt. |
 | `button_card_howto` | Kurzanleitung |
 | `help_dictate_1` | Knopf antippen = Aufnahme |
 | `help_dictate_2` | Nochmal antippen = fertig & einfügen |
@@ -1052,7 +1052,7 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `help_s1_title` | So funktioniert's |
 | `help_s1_bubble` | Schwebender Knopf: antippen = Aufnahme, nochmal = fertig & einfügen, auf ✕ ziehen = verwerfen, rot = Fehler, antippen = erneut. |
 | `help_s1_keyboard` | Diktier-Tastatur: Mikrofon gedrückt halten, sprechen, loslassen. |
-| `help_s1_share` | Sprachnachrichten: in WhatsApp lange drücken → Teilen → Vox. Der Text erscheint in Absätzen, du kannst ihn kopieren oder weitergeben. |
+| `help_s1_share` | Sprachnachrichten: in WhatsApp lange drücken → Teilen → WhisperLoom. Der Text erscheint in Absätzen, du kannst ihn kopieren oder weitergeben. |
 | `help_s2_title` | Einrichtung Schritt für Schritt |
 | `help_s3_title` | API-Key bekommen |
 | `help_s3_intro` | Ein API-Key ist ein persönlicher Zugangsschlüssel. Du bezahlst nur, was du nutzt — ein Diktat kostet meist unter einem Cent. |
@@ -1071,14 +1071,14 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `help_s5_title` | Offline-Modus |
 | `help_s5_body` | Ein Offline-Modell erkennt Sprache direkt auf dem Gerät. Es wird einmalig geladen (32–574 MB) und liegt im App-Speicher; löschen kannst du es unter Offline-Modelle. Small ist für Deutsch die beste Balance. Die Erkennung dauert je Modell 2–10 Sekunden. |
 | `help_s6_title` | Datenschutz |
-| `help_s6_online` | Online: Audio und Kontext-Prompt gehen an den gewählten Anbieter. Bei Textverbesserung geht der erkannte Text an das Sprachmodell. Dein Key bleibt auf dem Gerät. Vox speichert keine Aufnahmen. |
+| `help_s6_online` | Online: Audio und Kontext-Prompt gehen an den gewählten Anbieter. Bei Textverbesserung geht der erkannte Text an das Sprachmodell. Dein Key bleibt auf dem Gerät. WhisperLoom speichert keine Aufnahmen. |
 | `help_s6_offline` | Offline: Nichts verlässt das Gerät — nur der Modell-Download geht ins Netz. |
 | `help_s6_a11y` | Die Bedienungshilfe liest nichts mit und speichert nichts; sie fügt nur den diktierten Text ein. |
 | `help_s7_title` | Wenn etwas nicht klappt |
 | `help_p1` | Knopf erscheint nicht |
-| `help_p1_body` | „Über anderen Apps anzeigen" muss erlaubt sein. Zusätzlich in den Android-Einstellungen die Akku-Optimierung für Vox ausschalten. |
+| `help_p1_body` | „Über anderen Apps anzeigen" muss erlaubt sein. Zusätzlich in den Android-Einstellungen die Akku-Optimierung für WhisperLoom ausschalten. |
 | `help_p2` | Text landet nur in der Zwischenablage |
-| `help_p2_body` | Die Bedienungshilfe „Vox" ist aus. Aktivieren, dann fügt Vox den Text direkt ein. |
+| `help_p2_body` | Die Bedienungshilfe „WhisperLoom" ist aus. Aktivieren, dann fügt WhisperLoom den Text direkt ein. |
 | `help_p3` | Key ungültig (401) oder Limit erreicht (429) |
 | `help_p3_body` | Key beim Anbieter neu erzeugen und einfügen; Guthaben oder Tageslimit prüfen. |
 | `help_p4` | „Eingeschränkte Einstellung" |
@@ -1090,7 +1090,7 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 
 | Key | Text |
 |---|---|
-| `share_label` (bestehend) | Mit Vox transkribieren |
+| `share_label` (bestehend) | Mit WhisperLoom transkribieren |
 | `share_title` (bestehend) | Transkription |
 | `share_starting` (bestehend) | Wird vorbereitet … |
 | `share_decoding` (bestehend) | Audio wird entpackt … |
@@ -1104,7 +1104,7 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `share_forward` (bestehend) | Teilen |
 | `share_copied` (bestehend) | In die Zwischenablage kopiert |
 | `share_no_audio` (bestehend) | Keine Audiodatei erhalten |
-| `share_no_audio_body` | Teile eine Audiodatei oder Sprachnachricht mit Vox. |
+| `share_no_audio_body` | Teile eine Audiodatei oder Sprachnachricht mit WhisperLoom. |
 | `share_empty` (bestehend) | Die Datei enthält keine Tonspur |
 | `share_nothing_recognised` (bestehend) | (nichts erkannt) |
 | `share_one_failed` (bestehend) | Fehlgeschlagen: %1$s |
@@ -1124,8 +1124,8 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 
 | Key | Text |
 |---|---|
-| `float_channel` (bestehend) | Vox Diktat |
-| `float_running` (bestehend) | Vox-Diktat aktiv |
+| `float_channel` (bestehend) | WhisperLoom Diktat |
+| `float_running` (bestehend) | WhisperLoom-Diktat aktiv |
 | `float_running_text` (bestehend) | Knopf antippen zum Diktieren, ziehen zum Verschieben |
 | `float_stop` (bestehend) | Beenden |
 | `float_no_overlay` (bestehend) | Bitte „Über anderen Apps anzeigen" erlauben |
@@ -1136,7 +1136,7 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `float_discarded` (bestehend) | Diktat verworfen |
 | `float_cancel_label` | Verwerfen |
 | `float_cancel_release` | Loslassen zum Verwerfen |
-| `float_not_configured` | Kein Zugang eingerichtet — in Vox einrichten |
+| `float_not_configured` | Kein Zugang eingerichtet — in WhisperLoom einrichten |
 | `cd_bubble_idle` | Diktat starten |
 | `cd_bubble_recording` | Aufnahme läuft, %1$s — antippen zum Beenden |
 | `cd_bubble_sending` | Wird übertragen |
@@ -1162,7 +1162,7 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `cd_kb_backspace` | Löschen |
 | `cd_kb_enter` | Eingabe |
 | `cd_kb_retry` | Erneut senden |
-| `cd_kb_settings` | Vox-Einstellungen |
+| `cd_kb_settings` | WhisperLoom-Einstellungen |
 
 ---
 
@@ -1225,23 +1225,23 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 3. „Füllwörter ausblenden" ist standardmäßig AN; AUS zeigt den unveränderten Rohtext (wortgetreu); Kopieren/Teilen liefern den angezeigten Stand.
 4. Fehler je Datei zeigt Grund + „Erneut" nur für diese Datei; „Kein Zugang" zeigt „Einrichtung öffnen" (führt in W), „Keine Audiodatei" zeigt „Schließen".
 5. Kopieren zeigt Snackbar; Zwischenablage wird nie automatisch überschrieben; Schließen bricht laufende Arbeit ab.
-6. Die Activity trägt im Teilen-Menü das Icon `ic_share` (Mikrofon + Textzeilen) und das Label „Mit Vox transkribieren".
+6. Die Activity trägt im Teilen-Menü das Icon `ic_share` (Mikrofon + Textzeilen) und das Label „Mit WhisperLoom transkribieren".
 
 **V1 Schwebender Knopf**
 1. Knopf 68 dp; die vier Zustände unterscheiden sich gleichzeitig in Füllung, Ring, Icon und Label (Tabelle §5.1).
 2. RECORDING zeigt Timer „● m:ss" im Sekundentakt und Puls-Ring (statisch bei Reduce-Motion); SENDING zeigt rotierenden Bogen ohne Gesamt-Alpha; ERROR zeigt Shake einmalig, Tipp sendet erneut.
 3. Ziehen in RECORDING/ERROR blendet das 72-dp-Abbrechen-Ziel ein; im Treffer-Radius wächst es auf 1,12 und färbt `errorContainer`; Loslassen verwirft mit Toast und stellt Position wieder her.
 4. `contentDescription` wechselt je Zustand; ohne Bedienungshilfe erscheint nach dem Senden 2 s „Kopiert — einfügen".
-5. Alle Farben stammen aus `@color/vox_*`; kein zweiter Hex-Wert in Drawables/Code.
+5. Alle Farben stammen aus `@color/loom_*`; kein zweiter Hex-Wert in Drawables/Code.
 
 **V2 IME-Tastatur**
-1. Grund `vox_background`, Tasten `vox_surfaceContainerHigh`, Text/Icon `vox_onSurface`; keine Emoji-Glyphen.
+1. Grund `loom_background`, Tasten `loom_surfaceContainerHigh`, Text/Icon `loom_onSurface`; keine Emoji-Glyphen.
 2. Mikro-Taste 88 dp zeigt dieselben vier Zustände wie der Knopf; Pegelband (21 Balken) reagiert nur während der Aufnahme.
 3. Statuszeile zeigt bei fehlendem Mikrofon/Zugang einen Warntext, dessen Tipp den Assistenten auf dem passenden Schritt öffnet.
 4. Jede Taste ≥ 48 dp und mit contentDescription; Zahnrad öffnet E.
 
 **N1 Notification**
-1. Small-Icon ist die weiße Silhouette `ic_stat_vox` (kein Quadrat); Farbe `vox_primary`, während RECORDING `vox_recording`.
+1. Small-Icon ist die weiße Silhouette `ic_stat_whisperloom` (kein Quadrat); Farbe `loom_primary`, während RECORDING `loom_recording`.
 2. Aktion „Beenden" stoppt den Service; Tipp auf die Notification öffnet H.
 
 **Icons**
@@ -1299,7 +1299,7 @@ Der Katalog wird als Kotlin-Objekt (`ProviderCatalog`) aus dem JSON in `api-prov
 | `SettingsActivity` (`api_url/key/model/prompt`, Sprache, Füllwörter/Groß/Leer, `switch_llm` + `switch_smart_fillers`, `llm_model`) | E1 · E2 (Stufe ersetzt `switch_llm`) |
 | `ShareTranscribeActivity` (SEND/SEND_MULTIPLE, Fortschritt Datei/Stück, Teilergebnisse, Abschnitte, Kopieren/Teilen/Retry, `plainText()`, Abbruch) | S (+ Absätze, Füllwort-Schalter, Einzel-Retry, „Einrichten"-Ausweg) |
 | `FloatingMicService`/`BubbleUi` (4 Zustände, Timer, Drag/Tap, Cancel-Ziel, Position, Clipboard-Fallback, Notification) | V1/N1 — Logik identisch, Optik/Größe/Feedback neu, Notification-Tap neu |
-| `VoxInputMethodService` (Status, Pegel, Halten, Tasten, Retry, Zahnrad, Subtypes) | V2 |
+| `WhisperLoomInputMethodService` (Status, Pegel, Halten, Tasten, Retry, Zahnrad, Subtypes) | V2 |
 | `TextPolisher.FILLERS` | B3 Standardwörter (+ `disabledFillers`/`customFillers` in `PolishOptions`) |
 | `RefinePrompt.build(german, smartFillers)` | erweitert um `level` (smooth/beautify/summarize) |
 | `offline-v1` (`WhisperEngine`, `WhisperModel`, JNI) | E4/Schritt 2b + `ModelStore` (Download, SHA-256, `.part`) — Details `whisper-cpp.md` |

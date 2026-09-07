@@ -4,13 +4,13 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-// Native-Build (whisper.cpp via CMake/NDK) nur, wenn vox.skipNative NICHT gesetzt ist.
+// Native-Build (whisper.cpp via CMake/NDK) nur, wenn whisperloom.skipNative NICHT gesetzt ist.
 // Der aarch64-Dev-VPS hat kein NDK (gibt es nur fuer x86_64-Hosts) und setzt die Property in
 // ~/.gradle/gradle.properties: Kotlin, Tests und ein APK ohne .so bauen trotzdem. CI (x86_64) baut komplett.
-val skipNative = providers.gradleProperty("vox.skipNative").isPresent
+val skipNative = providers.gradleProperty("whisperloom.skipNative").isPresent
 
 android {
-    namespace = "com.chris.vox"
+    namespace = "com.chris.whisperloom"
     // Compose 1.12 (BOM 2026.08.00) verlangt compileSdk 37 + AGP >= 9.2.0:
     // https://developer.android.com/jetpack/androidx/releases/compose-ui#1.12.0-alpha01
     compileSdk = 37
@@ -20,11 +20,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.chris.vox"
+        applicationId = "com.chris.whisperloom"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "3.1.0"
+        versionCode = 5
+        versionName = "3.2.0"
 
         if (!skipNative) {
             externalNativeBuild {
@@ -34,7 +34,7 @@ android {
                         "-DANDROID_STL=c++_static", // eine .so, kein libc++_shared.so
                         "-DANDROID_PLATFORM=android-26",
                     )
-                    targets += "vox"
+                    targets += "whisperloom"
                 }
             }
             // Nur arm64: reale Zielgeraete. x86_64 nur fuer Emulator-Tests (CMake laesst dann GGML_CPU_ARM_ARCH weg).
@@ -75,15 +75,15 @@ android {
         create("release") {
             // Keystore + Passwort kommen aus Umgebungsvariablen (CI: aus GitHub-Secrets).
             // Kein Secret im Repo. Fehlt der Keystore lokal, bleibt release unsigniert.
-            val ksPath = System.getenv("VOX_KEYSTORE") ?: "keystore/vox-release.p12"
+            val ksPath = System.getenv("WHISPERLOOM_KEYSTORE") ?: "keystore/whisperloom-release.p12"
             val ks = file(ksPath)
             if (ks.exists()) {
                 storeFile = ks
                 storeType = "PKCS12"
-                storePassword = System.getenv("VOX_KEYSTORE_PASSWORD") ?: ""
-                keyAlias = System.getenv("VOX_KEY_ALIAS") ?: "vox"
-                keyPassword = System.getenv("VOX_KEY_PASSWORD")
-                    ?: System.getenv("VOX_KEYSTORE_PASSWORD") ?: ""
+                storePassword = System.getenv("WHISPERLOOM_KEYSTORE_PASSWORD") ?: ""
+                keyAlias = System.getenv("WHISPERLOOM_KEY_ALIAS") ?: "whisperloom"
+                keyPassword = System.getenv("WHISPERLOOM_KEY_PASSWORD")
+                    ?: System.getenv("WHISPERLOOM_KEYSTORE_PASSWORD") ?: ""
             }
         }
     }
@@ -106,7 +106,7 @@ android {
             // https://developer.android.com/build/shrink-code
             isMinifyEnabled = true
             isShrinkResources = true
-            val ks = file(System.getenv("VOX_KEYSTORE") ?: "keystore/vox-release.p12")
+            val ks = file(System.getenv("WHISPERLOOM_KEYSTORE") ?: "keystore/whisperloom-release.p12")
             if (ks.exists()) signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

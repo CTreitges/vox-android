@@ -1,18 +1,23 @@
 # Changelog
 
-Alle nennenswerten Änderungen an Vox. Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach [SemVer](https://semver.org/lang/de/).
+Alle nennenswerten Änderungen an WhisperLoom. Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach [SemVer](https://semver.org/lang/de/).
 
-## [Unveröffentlicht]
+## [3.2.0] — 2026-09-07
 
 ### Hinzugefügt
 
 - **Illustriertes Tutorial nach der Einrichtung** (Knopf, Tastatur, Sprachnachrichten aus WhatsApp abtippen, Ergebnis): vier Seiten, einmalig nach „Knopf starten & los" bzw. beim ersten Start nach dem Update; erneut unter Anleitung & Hilfe → „Tutorial erneut ansehen", „Mehr" beim Sprachnachrichten-Hinweis auf dem Startbildschirm springt direkt zur passenden Seite.
 
+### Geändert
+
+- **Neuer Name: WhisperLoom.** Neue Paket-ID `com.chris.whisperloom` — als neue App installieren, vorherige Version deinstallieren, Einstellungen einmal neu eingeben. Signaturschlüssel unverändert.
+- Der schwebende Knopf startet nach dem Tutorial, nicht mehr darüber.
+
 ## [3.1.0] — 2026-09-07
 
 ### Geändert
 
-- **Neuer Name: Vox.** Neue Paket-ID `com.chris.vox` — Vox wird als neue App installiert; die vorherige Version deinstallieren und API-Key/Einstellungen einmal neu eingeben. Signaturschlüssel unverändert.
+- **Neuer Name, neue Paket-ID** — die App wird als neue App installiert; die vorherige Version deinstallieren und API-Key/Einstellungen einmal neu eingeben. Signaturschlüssel unverändert.
 
 ## [3.0.0] — 2026-09-07
 
@@ -32,7 +37,7 @@ Komplett neue Oberfläche, Offline-Erkennung zurück, Anbieter-Katalog, Textverb
 - **Transkription geteilter Sprachnachrichten:** Absätze (Heuristik `Paragrapher`), Schalter „Füllwörter ausblenden" (Standard an, ausgeschaltet wortgetreu), Erneut je Datei und „Alles erneut", „Einrichtung öffnen" bei fehlendem Zugang, Anzeige des aktiven Backends.
 - **Schwebender Knopf** neu: 68 dp, vier Zustände mit Füllung/Ring/Icon/Label, Timer „● m:ss", Puls-Ring, rotierender Sende-Bogen, Erfolgsring, Shake bei Fehler, Haptik, Reduce-Motion; Abbrechen-Ziel 72 dp mit Magnet-Radius, Scrim und „Loslassen zum Verwerfen"; Hinweis „Kopiert — einfügen" beim Zwischenablage-Fallback.
 - **Diktat-Tastatur** neu: Statuszeile mit tippbaren Warnhinweisen (führen in die Einrichtung), 21-Balken-Pegelband, Mikro-Taste mit denselben vier Zuständen, Tastenreihe mit Material-Symbolen und contentDescriptions, Zahnrad → Einstellungen.
-- **Benachrichtigung:** monochromes Icon, Farbe je Zustand, Tipp öffnet Vox (bisher totes Ende).
+- **Benachrichtigung:** monochromes Icon, Farbe je Zustand, Tipp öffnet WhisperLoom (bisher totes Ende).
 - **Adaptives App-Icon** (Hintergrund, Vordergrund, Monochrom für Themed Icons), eigenes Teilen-Ziel-Icon, Notification-Icon.
 - **Deep-Links** `route`/`step` aus Overlay, IME und Benachrichtigung in Home, Einrichtung (auf einem bestimmten Schritt) oder Einstellungen.
 - Dokumentation: `docs/ANLEITUNG.md` (Nutzer-Anleitung), `docs/design/ux-spec-v3.md`, `docs/research/`, dieses CHANGELOG.
@@ -53,7 +58,7 @@ Komplett neue Oberfläche, Offline-Erkennung zurück, Anbieter-Katalog, Textverb
 - Modell-Zeilen sind für TalkBack ein Element („Small, Optionsfeld, ausgewählt"); „Erneut" nach Fehlschlag ist während eines anderen Downloads gesperrt.
 - Download-Abbruch bei hängender Verbindung endet als Abbruch (Teildatei verworfen) statt als „Netzwerkfehler".
 - Lint-Fehler brechen den Build (`abortOnError = true`); Kontext-Feld bei Mistral/OpenRouter sagt ehrlich, dass der Anbieter keinen Kontext entgegennimmt.
-- Alle Farben in einer Wahrheit (`res/values/colors.xml`, Präfix `vox_`), Overlay/IME/Benachrichtigung/Themes lesen dieselben Tokens; Emoji-Glyphen auf Tasten durch Vektor-Icons ersetzt.
+- Alle Farben in einer Wahrheit (`res/values/colors.xml`, Präfix `loom_`), Overlay/IME/Benachrichtigung/Themes lesen dieselben Tokens; Emoji-Glyphen auf Tasten durch Vektor-Icons ersetzt.
 - Ein Komma direkt vor dem Satzende, das durch das Entfernen eines Füllworts übrig bliebe, wird mit entfernt.
 
 ### Entfernt
@@ -67,9 +72,9 @@ Komplett neue Oberfläche, Offline-Erkennung zurück, Anbieter-Katalog, Textverb
 - Toolchain: AGP 9.4.0, Gradle 9.6.1, Kotlin 2.2.10 (built-in, kein `kotlin.android`-Plugin mehr), Compose-Compiler-Plugin 2.2.10, JDK 17, compileSdk 37, targetSdk 35, minSdk 26, versionCode 3.
 - Compose BOM 2026.08.00 (ui 1.12.0, material3 1.4.0), activity-compose 1.13.0, lifecycle-runtime-compose 2.11.0; bewusst ohne navigation-compose, material-icons, ViewModel-Lib, DI.
 - Release mit R8 (Full Mode) + Resource-Shrinking; `mapping.txt` als CI-Artefakt; Keep-Regel nur für `WhisperLib` (JNI).
-- Native: Submodul `whisper.cpp` @ v1.9.3 (`371b5a75`), NDK 28.2.13676358, CMake 3.22.1, nur `arm64-v8a`, `GGML_CPU_ARM_ARCH=armv8.2-a+fp16+dotprod`, `c++_static`, 16-KB-Page-Alignment, Debug-Buildtyp mit optimiertem Native-Build; Gradle-Property `vox.skipNative` baut ohne NDK (APK ohne Offline-Engine).
+- Native: Submodul `whisper.cpp` @ v1.9.3 (`371b5a75`), NDK 28.2.13676358, CMake 3.22.1, nur `arm64-v8a`, `GGML_CPU_ARM_ARCH=armv8.2-a+fp16+dotprod`, `c++_static`, 16-KB-Page-Alignment, Debug-Buildtyp mit optimiertem Native-Build; Gradle-Property `whisperloom.skipNative` baut ohne NDK (APK ohne Offline-Engine).
 - Network-Security-Config: Klartext nur für eigene Server, alle Cloud-Domains des Katalogs strikt https (Test hält beides synchron).
-- Neue Foreground-Service-Typen/Permissions: `dataSync` (Modell-Download), `FOREGROUND_SERVICE_DATA_SYNC`, `ACCESS_NETWORK_STATE`; `Application`-Klasse `VoxApplication`.
+- Neue Foreground-Service-Typen/Permissions: `dataSync` (Modell-Download), `FOREGROUND_SERVICE_DATA_SYNC`, `ACCESS_NETWORK_STATE`; `Application`-Klasse `WhisperLoomApplication`.
 - CI: Submodule, NDK/CMake/Build-Tools 36/Platform 37, `.cxx`-Cache, JNI-Symbol-Abgleich (`tools/check_jni_symbols.py`), Prüfung des Release-APKs (`.so` vorhanden, kein Modell, nur arm64, 16-KB-Alignment).
 - Tests: Robolectric 4.16.1 (SDK 35, `sqliteMode=LEGACY`, `conscryptMode=OFF` für aarch64-Hosts), androidx.test core 1.7.0 / ext-junit 1.3.0, Compose `ui-test-junit4`; Stand 3.0.0: 58 Testklassen in 55 Dateien, 403 `@Test`-Methoden (JVM + Robolectric, HTTP gegen lokalen `HttpServer`).
 
@@ -82,7 +87,7 @@ Komplett neue Oberfläche, Offline-Erkennung zurück, Anbieter-Katalog, Textverb
 
 ### Hinzugefügt
 
-- **Sprachnachrichten aus anderen Apps transkribieren:** Vox erscheint im Teilen-Menü (`ACTION_SEND`/`ACTION_SEND_MULTIPLE` für `audio/*` und `application/ogg`). Eine WhatsApp-, Telegram- oder Signal-Sprachnachricht teilen und den Text lesen, kopieren oder weiterleiten; mehrere Dateien werden nacheinander abgearbeitet und mit Quelle und Dauer überschrieben.
+- **Sprachnachrichten aus anderen Apps transkribieren:** WhisperLoom erscheint im Teilen-Menü (`ACTION_SEND`/`ACTION_SEND_MULTIPLE` für `audio/*` und `application/ogg`). Eine WhatsApp-, Telegram- oder Signal-Sprachnachricht teilen und den Text lesen, kopieren oder weiterleiten; mehrere Dateien werden nacheinander abgearbeitet und mit Quelle und Dauer überschrieben.
 - Geteiltes Audio wird auf dem Gerät dekodiert (MediaExtractor/MediaCodec → 16 kHz Mono, in eine Datei statt in den Heap), weil die Anbieter Opus-in-OGG nicht direkt annehmen; lange Aufnahmen werden bei 5 Minuten an der leisesten Stelle der letzten 20 Sekunden geschnitten (nie vor der halben Höchstlänge, nur bei deutlich leiserer Stelle).
 - Geteilte Nachrichten werden wortgetreu ausgegeben (keine Füllwort-Entfernung, keine KI-Glättung); die Zwischenablage wird nur auf Knopfdruck überschrieben.
 - `WavEncoder` gibt den Kopf getrennt heraus (Streaming aus der PCM-Datei, `WavUpload`); Dauer-Formatierung in `Formats`.
@@ -115,6 +120,7 @@ Komplett neue Oberfläche, Offline-Erkennung zurück, Anbieter-Katalog, Textverb
 - Diktat ohne Tastaturwechsel: schwebender Mikro-Button (Overlay) + Bedienungshilfe, die den Text an der Cursor-Position ins fokussierte Feld einfügt — Gboard bleibt aktiv.
 - Release-Signierung aus GitHub-Secrets, CI mit Unit-Tests, Lint, Debug- und Release-APK.
 
+[3.2.0]: #320--2026-09-07
 [3.1.0]: #310--2026-09-07
 [3.0.0]: #300--2026-09-07
 [2.1.0]: #210--2026-08-20

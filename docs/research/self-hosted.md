@@ -1,4 +1,4 @@
-# Vox — Provider „Eigener Server" (Recherche + Anleitung + App-Änderungsliste)
+# WhisperLoom — Provider „Eigener Server" (Recherche + Anleitung + App-Änderungsliste)
 
 Stand: 2026-09-06 · Ziel-Maschine für spätere Installation: Oracle-VPS aarch64 (4 Kerne, 24 GB RAM, Ubuntu 24.04, Caddy, systemd-User-Services).
 
@@ -10,7 +10,7 @@ Alle Versions-/Verhaltensaussagen stammen aus den verlinkten Quellen (abgerufen 
 
 | Datei | Relevantes Verhalten |
 |---|---|
-| `app/src/main/java/com/chris/vox/api/Http.kt` | `HttpURLConnection`, `CONNECT_TIMEOUT_MS = 15_000`, `READ_TIMEOUT_MS = 90_000` (Konstanten, nicht konfigurierbar). Setzt **immer** `Authorization: Bearer $apiKey` — auch bei leerem Key. `endpoint(baseUrl, path)` = `baseUrl.trimEnd('/') + path`. Fehlertext aus `{"error":{"message":…}}`, sonst erste 200 Zeichen. |
+| `app/src/main/java/com/chris/whisperloom/api/Http.kt` | `HttpURLConnection`, `CONNECT_TIMEOUT_MS = 15_000`, `READ_TIMEOUT_MS = 90_000` (Konstanten, nicht konfigurierbar). Setzt **immer** `Authorization: Bearer $apiKey` — auch bei leerem Key. `endpoint(baseUrl, path)` = `baseUrl.trimEnd('/') + path`. Fehlertext aus `{"error":{"message":…}}`, sonst erste 200 Zeichen. |
 | `api/ApiTranscriber.kt` | `if (apiKey.isBlank()) throw ApiNotConfiguredException()`. Multipart-Felder: `model`, `response_format=json`, `language` (nur wenn ≠ `auto`), `prompt` (optional), `file` als `audio.wav` (`Content-Type: audio/wav`, 16 kHz Mono PCM — `AudioUtils.SAMPLE_RATE = 16_000`). Liest `text` aus der Antwort. Pfad: `/audio/transcriptions` → Base-URL muss auf `/v1` enden. |
 | `api/TextRefiner.kt` | Gleicher `baseUrl`/`apiKey` wie Transkription (aus `TranscriptionEngine`), `POST /chat/completions`, `temperature: 0`, liest `choices[0].message.content`. `if (apiKey.isBlank()) throw ApiNotConfiguredException()`. |
 | `api/ApiErrors.kt` | `ApiNotConfiguredException("Kein API-Key hinterlegt")`, `ApiHttpException(code, detail)`, `ApiNetworkException(cause.message)` — die rohe `IOException`-Meldung landet im UI (`toast(e.message)` in `FloatingMicService`, `statusView.text = e.message` in der IME). `isRetryable()`: Netzfehler, 408/429/≥500. |
@@ -27,7 +27,7 @@ Konsequenz: Ohne Änderungen scheitert „Eigener Server" an (1) leerem Key, (2)
 
 ### 1.1 Übersichtstabelle
 
-| Server | Endpunkt `/v1/audio/transcriptions` | Felder `model`/`language`/`prompt`/`response_format` | API-Key | WAV ok | CPU-only | aarch64-Image | Einschätzung für Vox |
+| Server | Endpunkt `/v1/audio/transcriptions` | Felder `model`/`language`/`prompt`/`response_format` | API-Key | WAV ok | CPU-only | aarch64-Image | Einschätzung für WhisperLoom |
 |---|---|---|---|---|---|---|---|
 | **speaches** (ex faster-whisper-server) | ja, nativ | alle vier; `prompt` → `initial_prompt` | optional (`API_KEY`), ohne Env offen | ja | ja (`latest-cpu`, `WHISPER__COMPUTE_TYPE=int8`) | **ja** (Workflow baut `linux/amd64,linux/arm64`) | **Empfehlung #1** (voll kompatibel, Key optional) |
 | **hwdsl2/whisper-server** (faster-whisper) | ja, nativ | alle vier | `WHISPER_API_KEY`; Neuinstallation mit Volume **erzeugt automatisch einen Key** | ja | ja (int8 Default) | **ja** (amd64+arm64) | Empfehlung #2 (junges Projekt, 04/2026; Lizenz „Other") |
@@ -68,7 +68,7 @@ Quellen: speaches [GitHub](https://github.com/speaches-ai/speaches), [Installati
 - Endpunkt Default `/inference`; mit `--inference-path /v1/audio/transcriptions` OpenAI-Pfad. Optionen: `--host` (Default `127.0.0.1`!), `--port 8080`, `-m ggml-….bin`, `-t N` Threads, `-l LANG` (Default **`en`**, `auto` möglich), `--convert` (ffmpeg für Nicht-WAV), `--vad`, `--no-gpu`. Quelle: [server README](https://github.com/ggml-org/whisper.cpp/blob/master/examples/server/README.md).
 - Multipart-Felder, die `server.cpp` liest: `file` (Pflicht), `language`, `detect_language`, `prompt`, `carry_initial_prompt`, `response_format`, `temperature`, `temperature_inc`, Decoder-Parameter (`beam_size`, `best_of`, …), VAD-Parameter. **Unbekannte Felder (z. B. `model`) werden ignoriert.** Antwort bei `response_format=json`: `{"text": "…"}` — exakt was `ApiTranscriber` liest. Fehler: HTTP 400 (`file` fehlt / „failed to read audio data"), 500, 503 (Modell lädt). **Keine Authentifizierung**, CORS `*`. Quelle: [server.cpp](https://raw.githubusercontent.com/ggml-org/whisper.cpp/master/examples/server/server.cpp).
 - WAV-Anforderung: „WAV Files are passed to the inference model via http requests"; die App sendet 16 kHz Mono PCM-WAV → passt ohne `--convert`.
-- **Stolperfalle Sprache:** Wenn Vox bei „Automatisch erkennen" das Feld `language` weglässt, nimmt whisper-server seinen Startwert (Default `en`). Server daher mit `-l auto` (oder `-l de`) starten.
+- **Stolperfalle Sprache:** Wenn WhisperLoom bei „Automatisch erkennen" das Feld `language` weglässt, nimmt whisper-server seinen Startwert (Default `en`). Server daher mit `-l auto` (oder `-l de`) starten.
 - Modelle (`models/download-ggml-model.sh <name>`): `small` 466 MiB, `medium` 1,5 GiB, `large-v3-turbo` 1,5 GiB, `large-v3-turbo-q5_0` 547 MiB, `large-v3-q5_0` 1,1 GiB. Multilingual, sofern kein `.en`. Quelle: [models/README.md](https://raw.githubusercontent.com/ggml-org/whisper.cpp/master/models/README.md).
 - Docker: `docker run -it --rm -p 8080:8080 -v path/to/models:/models whisper.cpp:main "whisper-server --host 0.0.0.0 -m /models/ggml-base.bin"` (README-Muster; Image `ghcr.io/ggml-org/whisper.cpp:main`). Quelle: [README Docker](https://github.com/ggml-org/whisper.cpp/blob/master/README.md).
 - Letztes Release-Tag laut GitHub-API: `b4938` (2026-08-20) **(unsicher — Tag-Schema wirkt wie llama.cpp-Build-Nummern; ggf. Versionsschema geändert)**.
@@ -123,7 +123,7 @@ Empfehlung: **`qwen3:8b` mit `reasoning_effort: "none"`** als Default, `gemma3:4
 
 - **Tailscale:** Handy + Server im selben Tailnet, stabile `100.x.y.z`-IP, kein offener Port. `tailscale serve --bg --https=443 localhost:8000` gibt dem Dienst ein gültiges TLS-Zertifikat unter `https://<maschine>.<tailnet>.ts.net` (MagicDNS + HTTPS-Zertifikate im Admin aktivieren). Serve = nur Tailnet, Funnel = öffentlich. Quelle: [Tailscale Serve](https://tailscale.com/kb/1242/tailscale-serve), [DNS](https://tailscale.com/docs/reference/dns-in-tailscale).
 - **WireGuard:** gleiches Prinzip mit eigenem Tunnel (`10.x`-Adressen) — kein Zusatzaufwand in der App.
-- **Caddy als TLS-Reverse-Proxy mit Bearer-Auth** (whisper-server hat keine Auth): Matcher `header Authorization "Bearer …"` + `not {…}` → `respond 401`. Alternative `basic_auth` (bcrypt via `caddy hash-password`; seit v2.8.0 heißt die Direktive `basic_auth`) — Vox sendet aber Bearer, daher Bearer-Matcher wählen. Quelle: [Caddy matchers](https://caddyserver.com/docs/caddyfile/matchers), [basic_auth](https://caddyserver.com/docs/caddyfile/directives/basic_auth), [Beispiel Bearer-Auth vor Ollama](https://medium.com/@dmitrywat/securing-your-ollama-instance-with-caddy-bearer-authentication-a2f131ae0101).
+- **Caddy als TLS-Reverse-Proxy mit Bearer-Auth** (whisper-server hat keine Auth): Matcher `header Authorization "Bearer …"` + `not {…}` → `respond 401`. Alternative `basic_auth` (bcrypt via `caddy hash-password`; seit v2.8.0 heißt die Direktive `basic_auth`) — WhisperLoom sendet aber Bearer, daher Bearer-Matcher wählen. Quelle: [Caddy matchers](https://caddyserver.com/docs/caddyfile/matchers), [basic_auth](https://caddyserver.com/docs/caddyfile/directives/basic_auth), [Beispiel Bearer-Auth vor Ollama](https://medium.com/@dmitrywat/securing-your-ollama-instance-with-caddy-bearer-authentication-a2f131ae0101).
 
 ### 3.3 Timeouts
 
@@ -234,7 +234,7 @@ object ServerUrlCheck {
 
 ### Eigener Server
 
-Vox spricht die OpenAI-API. Jeder Server, der `POST /v1/audio/transcriptions` (und optional `POST /v1/chat/completions`) anbietet, funktioniert — also auch ein Rechner bei dir zu Hause oder dein VPS. Das Audio verlässt dann nie deine eigene Infrastruktur.
+WhisperLoom spricht die OpenAI-API. Jeder Server, der `POST /v1/audio/transcriptions` (und optional `POST /v1/chat/completions`) anbietet, funktioniert — also auch ein Rechner bei dir zu Hause oder dein VPS. Das Audio verlässt dann nie deine eigene Infrastruktur.
 
 **Du brauchst:** einen Linux-Rechner/VPS mit Docker (x86-64 oder ARM64, ≥ 4 Kerne, ≥ 8 GB RAM; für die Textveredelung zusätzlich ≈ 6 GB) und eine Verbindung vom Handy dorthin (gleiches WLAN, Tailscale/WireGuard oder HTTPS über Caddy).
 
@@ -255,7 +255,7 @@ curl -X POST -H "Authorization: Bearer mein-geheimer-schluessel" \
   http://localhost:8000/v1/models/Systran/faster-whisper-medium
 ```
 
-`API_KEY` weglassen, wenn der Server nur im eigenen Netz erreichbar ist — dann bleibt das Key-Feld in Vox leer.
+`API_KEY` weglassen, wenn der Server nur im eigenen Netz erreichbar ist — dann bleibt das Key-Feld in WhisperLoom leer.
 
 *Alternative (noch kleiner): whisper.cpp*
 
@@ -285,13 +285,13 @@ Ollama braucht keinen Key. Auf 4 CPU-Kernen liefert ein 8B-Modell ≈ 5–8 Wör
 
 #### Schritt 3 — Von außen erreichbar machen
 
-**Variante A: Tailscale (empfohlen, kein offener Port).** Tailscale auf Server und Handy installieren, beide im selben Tailnet. Dann in Vox `http://100.x.y.z:8000/v1` eintragen (die Tailscale-IP des Servers). Mit gültigem Zertifikat: `sudo tailscale serve --bg --https=443 localhost:8000` → `https://<server>.<tailnet>.ts.net/v1` (MagicDNS und HTTPS-Zertifikate im Tailscale-Admin aktivieren).
+**Variante A: Tailscale (empfohlen, kein offener Port).** Tailscale auf Server und Handy installieren, beide im selben Tailnet. Dann in WhisperLoom `http://100.x.y.z:8000/v1` eintragen (die Tailscale-IP des Servers). Mit gültigem Zertifikat: `sudo tailscale serve --bg --https=443 localhost:8000` → `https://<server>.<tailnet>.ts.net/v1` (MagicDNS und HTTPS-Zertifikate im Tailscale-Admin aktivieren).
 
 **Variante B: Caddy mit TLS + Bearer-Token** (wenn der Server ohnehin öffentlich ist, z. B. VPS mit Domain):
 
 ```caddyfile
 whisper.example.de {
-	@unauth not header Authorization "Bearer {env.VOX_TOKEN}"
+	@unauth not header Authorization "Bearer {env.WHISPERLOOM_TOKEN}"
 	respond @unauth "Unauthorized" 401
 
 	handle /v1/audio/* {
@@ -304,7 +304,7 @@ whisper.example.de {
 }
 ```
 
-`VOX_TOKEN` als Umgebungsvariable des Caddy-Dienstes setzen (nicht in die Datei schreiben). In Vox: Base-URL `https://whisper.example.de/v1`, Key = Token. Vorteil: STT und LLM laufen hinter **einer** URL, so dass in der App keine zweite Base-URL nötig ist. (Für whisper-server statt speaches den `handle_path`-Block auf Port 8080 zeigen lassen; das Ollama-Backend braucht keinen eigenen Key, der Caddy-Token schützt beide.)
+`WHISPERLOOM_TOKEN` als Umgebungsvariable des Caddy-Dienstes setzen (nicht in die Datei schreiben). In WhisperLoom: Base-URL `https://whisper.example.de/v1`, Key = Token. Vorteil: STT und LLM laufen hinter **einer** URL, so dass in der App keine zweite Base-URL nötig ist. (Für whisper-server statt speaches den `handle_path`-Block auf Port 8080 zeigen lassen; das Ollama-Backend braucht keinen eigenen Key, der Caddy-Token schützt beide.)
 
 #### Schritt 4 — Testen (vom Rechner aus)
 
@@ -326,7 +326,7 @@ curl -s http://SERVER:11434/v1/chat/completions -H "Content-Type: application/js
 
 Bei Fehler: `docker logs speaches` bzw. `journalctl -u ollama`.
 
-#### Schritt 5 — In Vox eintragen
+#### Schritt 5 — In WhisperLoom eintragen
 
 Einstellungen → Anbieter **Eigener Server**:
 
@@ -339,7 +339,7 @@ Einstellungen → Anbieter **Eigener Server**:
 | LLM-Server-URL | `http://SERVER:11434/v1` (Ollama; leer = gleiche URL wie oben) |
 | LLM-Modell | `qwen3:8b` |
 
-Hinweis: Unverschlüsseltes `http://` erlaubt Vox nur zu privaten Adressen (192.168.x.x, 10.x.x.x, 172.16–31.x.x, 100.64–127.x.x/Tailscale, `*.local`). Über das Internet immer `https://` oder VPN.
+Hinweis: Unverschlüsseltes `http://` erlaubt WhisperLoom nur zu privaten Adressen (192.168.x.x, 10.x.x.x, 172.16–31.x.x, 100.64–127.x.x/Tailscale, `*.local`). Über das Internet immer `https://` oder VPN.
 
 ---
 

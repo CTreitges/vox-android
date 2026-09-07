@@ -1,4 +1,4 @@
-# Recherche-Reports zu Vox 3.0.0
+# Recherche-Reports zu WhisperLoom 3.0.0
 
 Stand aller Reports: **2026-09-06** (Recherchetag vor der v3-Implementierung). Die Dateien sind unveränderte Kopien der Arbeitsreports; sie dokumentieren, worauf die Entscheidungen der Version 3.0.0 beruhen, und sind **keine** gepflegte Referenz.
 
