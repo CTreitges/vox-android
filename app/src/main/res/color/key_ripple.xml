@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ripple der Tasten: wb_onSurface @ 12 % (UX-Spec §5.3). android:alpha auf ColorStateList-Items
+<!-- Ripple der Tasten: vox_onSurface @ 12 % (UX-Spec §5.3). android:alpha auf ColorStateList-Items
      gibt es seit API 23 — so bleibt der Hex-Wert in colors.xml. -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@color/wb_onSurface" android:alpha="0.12" />
+    <item android:color="@color/vox_onSurface" android:alpha="0.12" />
 </selector>

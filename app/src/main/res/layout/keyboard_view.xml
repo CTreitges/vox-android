@@ -18,11 +18,11 @@
         android:minHeight="24dp"
         android:gravity="center"
         android:accessibilityLiveRegion="polite"
-        android:textColor="@color/wb_onSurfaceVariant"
+        android:textColor="@color/vox_onSurfaceVariant"
         android:textSize="13sp"
         android:text="@string/kb_hint_hold" />
 
-    <com.chris.whisperbar.ime.LevelBandView
+    <com.chris.vox.ime.LevelBandView
         android:id="@+id/level"
         android:layout_width="match_parent"
         android:layout_height="28dp"
@@ -73,7 +73,7 @@
             android:padding="26dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_mic"
-            android:tint="@color/wb_primary" />
+            android:tint="@color/vox_primary" />
     </FrameLayout>
 
     <!-- Tastenreihe 52 dp (Tasten 48, ab fontScale 1,3: 56/60 — ImeMetrics). Abstand 4 dp = 2 x margin 2. -->
@@ -104,7 +104,7 @@
             android:layout_weight="1"
             android:contentDescription="@string/cd_kb_space"
             android:text="@string/kb_space"
-            android:textColor="@color/wb_onSurfaceVariant"
+            android:textColor="@color/vox_onSurfaceVariant"
             android:textSize="15sp" />
 
         <Button
@@ -130,7 +130,7 @@
             style="@style/KeyIcon"
             android:contentDescription="@string/cd_kb_retry"
             android:src="@drawable/ic_replay"
-            android:tint="@color/wb_error"
+            android:tint="@color/vox_error"
             android:visibility="gone" />
 
         <ImageButton

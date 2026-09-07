@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "WhisperBar"
+rootProject.name = "Vox"
 include(":app")

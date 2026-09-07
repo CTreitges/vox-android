@@ -12,11 +12,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- allowBackup=false: die Einstellungen enthalten API-Keys im Klartext (shared_prefs/whisperbar.xml).
+    <!-- allowBackup=false: die Einstellungen enthalten API-Keys im Klartext (shared_prefs/vox.xml).
          Ohne Backup-Regeln landeten sie im Google-Auto-Backup und beim Geraetewechsel — die App
          verspricht "Dein Key bleibt auf dem Geraet". Modelle (32-574 MB) sind ohnehin zu gross fuers Backup. -->
     <application
-        android:name=".WhisperBarApp"
+        android:name=".VoxApplication"
         android:allowBackup="false"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -60,7 +60,7 @@
             android:label="@string/share_label"
             android:excludeFromRecents="true"
             android:configChanges="orientation|screenSize|keyboardHidden">
-            <!-- Damit WhisperBar im Teilen-Menü von WhatsApp & Co. auftaucht.
+            <!-- Damit Vox im Teilen-Menü von WhatsApp & Co. auftaucht.
                  audio/* deckt Sprachnachrichten (ogg/opus), m4a, mp3 und amr ab;
                  application/ogg, weil manche Apps ogg so auszeichnen. -->
             <intent-filter>
@@ -78,7 +78,7 @@
         </activity>
 
         <service
-            android:name=".ime.WhisperBarInputMethodService"
+            android:name=".ime.VoxInputMethodService"
             android:exported="true"
             android:label="@string/ime_label"
             android:permission="android.permission.BIND_INPUT_METHOD">

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 2-dp-Ring des Abbrechen-Ziels: wb_outline. -->
+<!-- 2-dp-Ring des Abbrechen-Ziels: vox_outline. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
     <solid android:color="@android:color/transparent" />
-    <stroke android:width="2dp" android:color="@color/wb_outline" />
+    <stroke android:width="2dp" android:color="@color/vox_outline" />
 </shape>

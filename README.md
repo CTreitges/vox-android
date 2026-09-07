@@ -1,14 +1,14 @@
-# WhisperBar — Diktieren in jede Android-App
+# Vox — Diktieren in jede Android-App
 
-Sprechen statt tippen: WhisperBar nimmt auf, erkennt den Text und schreibt ihn in das Feld, in dem gerade der Cursor steht — über einen **schwebenden Mikro-Knopf** (die gewohnte Tastatur bleibt), als eigene **Diktat-Tastatur** oder für **Sprachnachrichten** aus WhatsApp & Co. per Teilen-Menü.
+Sprechen statt tippen: Vox nimmt auf, erkennt den Text und schreibt ihn in das Feld, in dem gerade der Cursor steht — über einen **schwebenden Mikro-Knopf** (die gewohnte Tastatur bleibt), als eigene **Diktat-Tastatur** oder für **Sprachnachrichten** aus WhatsApp & Co. per Teilen-Menü.
 
 Die Erkennung läuft wahlweise **online** über deinen eigenen Zugang bei einem OpenAI-kompatiblen Anbieter (OpenAI, Groq, Mistral, Together AI, DeepInfra, OpenRouter oder ein eigener Server) oder **offline** auf dem Gerät mit whisper.cpp und einem einmalig heruntergeladenen Modell. Eine optionale KI-Textverbesserung glättet, verschönert oder fasst zusammen.
 
-Version **3.0.0** — Nutzer-Anleitung: [docs/ANLEITUNG.md](docs/ANLEITUNG.md) · Änderungen: [CHANGELOG.md](CHANGELOG.md).
+Version **3.1.0** — Nutzer-Anleitung: [docs/ANLEITUNG.md](docs/ANLEITUNG.md) · Änderungen: [CHANGELOG.md](CHANGELOG.md).
 
-Inspiriert von [Wispr Flow](https://wisprflow.ai/) und der Mac-App [Whisper Bar](https://whisperbar.app/) (Kevin Chromik) — eigenständige, unabhängige Implementierung.
+Inspiriert von [Wispr Flow](https://wisprflow.ai/) — eigenständige, unabhängige Implementierung.
 
-## Features (3.0.0)
+## Features (3.1.0)
 
 - **Drei Diktat-Wege:** schwebender Mikro-Knopf über allen Apps (Overlay + Bedienungshilfe fügt direkt ins Feld ein, Zwischenablage als Fallback) · Diktat-Tastatur mit Halten-zum-Sprechen und Pegelband · Sprachnachrichten aus WhatsApp/Telegram/Signal per Teilen-Menü abtippen (Absätze, Schalter „Füllwörter ausblenden", mehrere Dateien, lange Aufnahmen gestückelt).
 - **Online oder offline:** Anbieter-Katalog mit Modellen, Preisen und Key-Links; Offline-Erkennung mit whisper.cpp v1.9.3 und Modellen Tiny/Base/Small/Large v3 Turbo (Download bei Bedarf mit Fortsetzen und SHA-256-Prüfung, kein Modell im APK).
@@ -43,17 +43,17 @@ Dienste: FloatingMicService (FGS microphone) · ModelDownloadService (FGS dataSy
 
 Grundsätze: reine Logik in Android-freien Kotlin-Objekten (JVM-testbar), Compose nur in `ui/`, klassische Views nur in IME und Overlay. Bewusst **ohne** ViewModel-, Navigation- oder DI-Bibliothek, ohne HTTP-Client-Bibliothek (`HttpURLConnection`) und ohne `material-icons-*` (Icons als eigene Vektor-XML).
 
-| Schicht | Paket / Dateien (`app/src/main/java/com/chris/whisperbar/`) |
+| Schicht | Paket / Dateien (`app/src/main/java/com/chris/vox/`) |
 |---|---|
-| Oberfläche | `ui/` — Compose (Material 3, festes dunkles Theme): `MainActivity` mit State-Navigation; Screens Home, Einrichtungs-Assistent, Einstellungen (Erkennung, Text, Knopf & Tastatur, Offline-Modelle, Anleitung & Hilfe, Über); Farb-Tokens in `ui/theme/Color.kt`, `ui/theme/Theme.kt` (eine Farbwahrheit: `res/values/colors.xml`, Präfix `wb_`) |
+| Oberfläche | `ui/` — Compose (Material 3, festes dunkles Theme): `MainActivity` mit State-Navigation; Screens Home, Einrichtungs-Assistent, Einstellungen (Erkennung, Text, Knopf & Tastatur, Offline-Modelle, Anleitung & Hilfe, Über); Farb-Tokens in `ui/theme/Color.kt`, `ui/theme/Theme.kt` (eine Farbwahrheit: `res/values/colors.xml`, Präfix `vox_`) |
 | Online-Erkennung / LLM | `api/` — `ProviderCatalog` (Anbieter, Modelle, Flags), `ApiAccess` + `AccessResolver` (getrennte STT-/LLM-Zugänge), `Http` (Bearer nur bei Key, Read-Timeout), `ApiErrors` (lesbare Netz-/Statusfehler, `isRetryable`), `TranscriptionRequest` (Multipart-Felder je Anbieter, `languages[]` bei GPT Transcribe), `ApiTranscriber`, `WavUpload`, `ChatPayload` (`temperature` vs. `reasoning_effort`), `RefinePrompt` (Modi Glätten/Verschönern/Zusammenfassen/Absätze), `TextRefiner`, `ServerUrlCheck` (private Hosts, http-Regeln) |
 | Offline-Erkennung | `whisper/` — `WhisperLib` (JNI-Bindings), `WhisperContext` (ein nativer Kontext, Single-Thread), `WhisperEngine` (prozessweit, Modellwechsel, Freigabe bei Speicherdruck), `OfflineBackend`, `OfflineSupport` (CPU-Guard fphp+asimddp, Performance-Kerne, RAM), `ModelCatalog` (Datei, Bytes, SHA-256), `ModelStore` (`filesDir/models`, `.part`), `ModelDownloader` (Range-Resume, SHA-256 streamend, Retry), `ModelDownloads` (StateFlow), `ModelDownloadService` (Foreground-Service `dataSync`); nativ: `app/src/main/cpp/CMakeLists.txt`, `whisper_jni.cpp`; Submodul `whisper.cpp` @ v1.9.3 |
 | Schwebender Knopf | `overlay/` — `FloatingMicService` (Overlay, Drag/Tap, Retry-Puffer, Clipboard-Fallback), `BubbleUi`/`BubbleVisuals`/`BubbleMotion` (Zustände, Timer, Motion — reine Logik), `BubbleRenderer`, `BubbleAnimators`, `MicViews`, `CancelTarget` (Abbrechen-Ziel mit Scrim), `BubblePosition` (Clamping, Magnet-Radius), `BubbleNotification` |
-| Diktat-Tastatur | `ime/` — `WhisperBarInputMethodService`, `LevelBand` + `LevelBandView` (21-Balken-Pegel), `ImeMetrics` |
+| Diktat-Tastatur | `ime/` — `VoxInputMethodService`, `LevelBand` + `LevelBandView` (21-Balken-Pegel), `ImeMetrics` |
 | Text einfügen | `a11y/` — `TextInserterAccessibilityService`, `TextInsertion` (Cursor/Auswahl, leeres Feld) |
 | Pipeline & Audio | `TranscriptionEngine` (trimSilence → Backend → Refine → Polish; `SharedAudioTranscriber` für geteilte Audios), `TranscriptionBackend` (`OnlineBackend`), `AudioRecorder`, `AudioUtils`, `WavEncoder`, `AudioDecoder` (MediaCodec → 16 kHz Mono), `AudioConvert`, `AudioChunks` (5-Minuten-Stücke an Sprechpausen), `Formats` |
 | Textveredelung | `TextPolisher` + `PolishPlan` (Füllwörter eingebaut/eigene/abgewählte, Groß-Schreibung, Whitespace), `Paragrapher` (Absatz-Heuristik) |
-| Daten & Start | `Prefs` (SharedPreferences, Migration v2 → v3), `SetupState` (Zugang vollständig?; „eingerichtet?" entscheidet `ui/nav/SetupRouter`), `AppNav` (Deep-Link-Intents route/step), `WhisperBarApp` (Application: Engine-Init, `onTrimMemory`), `ShareTranscribeActivity` (Teilen-Ziel) |
+| Daten & Start | `Prefs` (SharedPreferences, Migration v2 → v3), `SetupState` (Zugang vollständig?; „eingerichtet?" entscheidet `ui/nav/SetupRouter`), `AppNav` (Deep-Link-Intents route/step), `VoxApplication` (Application: Engine-Init, `onTrimMemory`), `ShareTranscribeActivity` (Teilen-Ziel) |
 
 Weitere Unterlagen: [docs/design/ux-spec-v3.md](docs/design/ux-spec-v3.md) (verbindliche UX-Spezifikation der v3-Oberfläche) und [docs/research/](docs/research/README.md) (Recherche-Reports zu Compose-Stack, Anbietern, whisper.cpp und Self-Hosting).
 
@@ -75,8 +75,8 @@ Zielplattform: compileSdk 37, targetSdk 35, minSdk 26. Compose BOM 2026.08.00 (u
 ### Lokal
 
 ```bash
-git clone --recurse-submodules https://github.com/CTreitges/whisperbar-android.git     # whisper.cpp kommt als Submodul (v1.9.3)
-cd whisperbar-android
+git clone --recurse-submodules https://github.com/CTreitges/vox-android.git     # whisper.cpp kommt als Submodul (v1.9.3)
+cd vox-android
 ./gradlew assembleDebug                        # Debug-APK: app/build/outputs/apk/debug/app-debug.apk
 ./gradlew testDebugUnitTest lintDebug          # Tests + Lint
 ```
@@ -86,12 +86,12 @@ Fehlt das Submodul (Clone ohne `--recurse-submodules`): `git submodule update --
 **Ohne NDK bauen** (z. B. auf einem aarch64-Linux-Host, für den es kein NDK gibt):
 
 ```bash
-./gradlew -Pwb.skipNative=true assembleDebug
+./gradlew -Pvox.skipNative=true assembleDebug
 ```
 
-Damit entfällt der komplette Native-Build — Kotlin, Tests und ein APK entstehen trotzdem, aber **ohne `libwhisperbar.so`**: Die Offline-Engine meldet auf dem Gerät „nicht unterstützt", der Online-Modus funktioniert. Die Property kann auch dauerhaft in `~/.gradle/gradle.properties` stehen (`wb.skipNative=true`).
+Damit entfällt der komplette Native-Build — Kotlin, Tests und ein APK entstehen trotzdem, aber **ohne `libvox.so`**: Die Offline-Engine meldet auf dem Gerät „nicht unterstützt", der Online-Modus funktioniert. Die Property kann auch dauerhaft in `~/.gradle/gradle.properties` stehen (`vox.skipNative=true`).
 
-Native-Konfiguration (nur ohne `wb.skipNative`): nur `arm64-v8a`, `GGML_CPU_ARM_ARCH=armv8.2-a+fp16+dotprod` mit Laufzeit-Guard in `OfflineSupport`, `c++_static` (eine `.so`), Debug-Buildtyp baut den Native-Teil trotzdem als Release (whisper.cpp PR #3913 — sonst unbrauchbar langsam), 16-KB-Page-Alignment, `debugSymbolLevel = SYMBOL_TABLE` im Release. `tools/check_jni_symbols.py` gleicht die `external fun`-Deklarationen in `WhisperLib.kt` mit den `JNIEXPORT`-Symbolen in `whisper_jni.cpp` ab (derselbe Abgleich läuft als `JniSymbolsTest`).
+Native-Konfiguration (nur ohne `vox.skipNative`): nur `arm64-v8a`, `GGML_CPU_ARM_ARCH=armv8.2-a+fp16+dotprod` mit Laufzeit-Guard in `OfflineSupport`, `c++_static` (eine `.so`), Debug-Buildtyp baut den Native-Teil trotzdem als Release (whisper.cpp PR #3913 — sonst unbrauchbar langsam), 16-KB-Page-Alignment, `debugSymbolLevel = SYMBOL_TABLE` im Release. `tools/check_jni_symbols.py` gleicht die `external fun`-Deklarationen in `WhisperLib.kt` mit den `JNIEXPORT`-Symbolen in `whisper_jni.cpp` ab (derselbe Abgleich läuft als `JniSymbolsTest`).
 
 ### CI (GitHub Actions)
 
@@ -101,16 +101,16 @@ Native-Konfiguration (nur ohne `wb.skipNative`): nur `arm64-v8a`, `GGML_CPU_ARM_
 2. CMake-Zwischenstand (`app/.cxx`) wird gecacht (Key: Submodul-Commit + `cpp/**` + `build.gradle.kts`).
 3. `tools/check_jni_symbols.py`, dann `testDebugUnitTest lintDebug`, `assembleDebug`.
 4. Signiertes `assembleRelease` mit dem Keystore aus den Secrets.
-5. Prüfung des Release-APKs: `lib/arm64-v8a/libwhisperbar.so` vorhanden, **kein** `assets/*.bin` (Modelle kommen nur per Download), keine anderen ABIs, `zipalign -P 16` und `llvm-readelf` bestätigen 16-KB-Alignment aller `LOAD`-Segmente.
-6. Artefakte: `whisperbar-debug-apk`, `whisperbar-release-apk`, `whisperbar-release-mapping` (R8-`mapping.txt` zum Entschlüsseln von Stacktraces), `unit-and-lint-reports`.
+5. Prüfung des Release-APKs: `lib/arm64-v8a/libvox.so` vorhanden, **kein** `assets/*.bin` (Modelle kommen nur per Download), keine anderen ABIs, `zipalign -P 16` und `llvm-readelf` bestätigen 16-KB-Alignment aller `LOAD`-Segmente.
+6. Artefakte: `vox-debug-apk`, `vox-release-apk`, `vox-release-mapping` (R8-`mapping.txt` zum Entschlüsseln von Stacktraces), `unit-and-lint-reports`.
 
 ### Release-Signierung
 
-Ein persistenter PKCS12-Keystore liegt als GitHub-Secrets `WB_KEYSTORE_B64` (Base64) und `WB_KEYSTORE_PASSWORD` (nicht im Repo). Die CI dekodiert ihn und signiert `assembleRelease`; derselbe Schlüssel signiert jedes Release, damit Updates über die installierte Version gehen. Für lokale Release-Builds: Keystore unter `keystore/whisperbar-release.p12` ablegen (per `.gitignore` ausgeschlossen) und `WB_KEYSTORE`, `WB_KEYSTORE_PASSWORD`, `WB_KEY_ALIAS` (Standard `whisperbar`) als Umgebungsvariablen setzen — fehlt der Keystore, bleibt das Release-APK unsigniert. Release-Builds laufen mit R8 (Full Mode) und Resource-Shrinking; einzige Keep-Regel: `com.chris.whisperbar.whisper.WhisperLib` (JNI-Symbole).
+Ein persistenter PKCS12-Keystore liegt als GitHub-Secrets `VOX_KEYSTORE_B64` (Base64) und `VOX_KEYSTORE_PASSWORD` (nicht im Repo). Die CI dekodiert ihn und signiert `assembleRelease`; derselbe Schlüssel signiert jedes Release, damit Updates über die installierte Version gehen. Für lokale Release-Builds: Keystore unter `keystore/vox-release.p12` ablegen (per `.gitignore` ausgeschlossen) und `VOX_KEYSTORE`, `VOX_KEYSTORE_PASSWORD`, `VOX_KEY_ALIAS` (Standard `vox`) als Umgebungsvariablen setzen — fehlt der Keystore, bleibt das Release-APK unsigniert. Release-Builds laufen mit R8 (Full Mode) und Resource-Shrinking; einzige Keep-Regel: `com.chris.vox.whisper.WhisperLib` (JNI-Symbole).
 
 ## Tests
 
-Alle Tests laufen ohne Gerät und ohne Emulator (`./gradlew testDebugUnitTest`): reine JVM-Tests für die Logik, Robolectric (SDK 35) für alles, was Android-Ressourcen, `org.json`, SharedPreferences oder Layout-Inflation braucht. HTTP-Pfade werden gegen einen lokalen JDK-`HttpServer` getestet. Stand 3.0.0: 58 Testklassen in 55 Dateien, 403 `@Test`-Methoden.
+Alle Tests laufen ohne Gerät und ohne Emulator (`./gradlew testDebugUnitTest`): reine JVM-Tests für die Logik, Robolectric (SDK 35) für alles, was Android-Ressourcen, `org.json`, SharedPreferences oder Layout-Inflation braucht. HTTP-Pfade werden gegen einen lokalen JDK-`HttpServer` getestet. Stand 3.1.0: 58 Testklassen in 55 Dateien, 403 `@Test`-Methoden.
 
 | Testklasse | Deckt ab |
 |---|---|
@@ -147,7 +147,7 @@ Alle Tests laufen ohne Gerät und ohne Emulator (`./gradlew testDebugUnitTest`):
 | `overlay/BubbleUiTest` | Timer „● m:ss", Blinken mit 1 Hz |
 | `overlay/BubbleVisualsTest` | Die vier Zustände unterscheiden sich in Füllung, Ring, Icon und Label |
 | `overlay/OverlayLayoutsTest` | `floating_mic`/`floating_cancel` inflaten, Renderer zeichnet jeden Zustand |
-| `ui/theme/WhisperBarThemeTest` | Compose-Smoke, Spec-Tokens im Farbschema, Palette == `colors.xml` |
+| `ui/theme/VoxThemeTest` | Compose-Smoke, Spec-Tokens im Farbschema, Palette == `colors.xml` |
 | `whisper/DownloadStateTest` | Prozent-Rechnung, Zustands-Map je Modell |
 | `whisper/JniSymbolsTest` | `external fun` ↔ `JNIEXPORT`-Symbole (Name, Präfix, Parameterzahl), kein Asset-Loader |
 | `whisper/ModelCatalogTest` | Bytes/SHA-256/URLs der vier Modelle, Small = Default und Empfehlung |
@@ -160,12 +160,12 @@ Nicht durch Tests abgedeckt und nur auf dem Gerät prüfbar: Overlay-/IME-Darste
 
 ## Versionen
 
-Aktuell **3.0.0** (2026-09-07). Alle Änderungen seit 1.0 im [CHANGELOG.md](CHANGELOG.md). Der letzte Stand der ersten Offline-Generation (Modell im APK) liegt als Tag `offline-v1` im Repo.
+Aktuell **3.1.0** (2026-09-07). Alle Änderungen seit 1.0 im [CHANGELOG.md](CHANGELOG.md). Der letzte Stand der ersten Offline-Generation (Modell im APK) liegt als Tag `offline-v1` im Repo.
 
 ## Lizenz / Credits
 
-- WhisperBar: **MIT** (siehe [LICENSE](LICENSE)).
+- Vox: **MIT** (siehe [LICENSE](LICENSE)).
 - [whisper.cpp](https://github.com/ggml-org/whisper.cpp) (MIT) — Offline-Erkennung; Modelle aus [huggingface.co/ggerganov/whisper.cpp](https://huggingface.co/ggerganov/whisper.cpp).
 - Jetpack Compose / AndroidX (Apache 2.0).
 - Icons: [Material Symbols](https://fonts.google.com/icons) (Apache 2.0).
-- Inspiration: Wispr Flow und Whisper Bar (Kevin Chromik) — eigenständige, unabhängige Implementierung.
+- Inspiration: Wispr Flow — eigenständige, unabhängige Implementierung.

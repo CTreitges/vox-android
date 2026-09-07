@@ -1,8 +1,8 @@
-# WhisperBar — Anleitung
+# Vox — Anleitung
 
-Version 3.0.0 · Stand 2026-09-07 · Für Android 8.0 (API 26) und neuer
+Version 3.1.0 · Stand 2026-09-07 · Für Android 8.0 (API 26) und neuer
 
-Diese Anleitung richtet sich an Anwender, die WhisperBar installieren, einrichten und im Alltag nutzen wollen. Entwickler finden Bau- und Architektur-Hinweise in der [README](../README.md); was sich von Version zu Version geändert hat, steht im [CHANGELOG](../CHANGELOG.md).
+Diese Anleitung richtet sich an Anwender, die Vox installieren, einrichten und im Alltag nutzen wollen. Entwickler finden Bau- und Architektur-Hinweise in der [README](../README.md); was sich von Version zu Version geändert hat, steht im [CHANGELOG](../CHANGELOG.md).
 
 Alle Bezeichnungen in dieser Anleitung („Mikro-Knopf starten", „Zugang prüfen", „Füllwörter ausblenden" …) sind die Bezeichnungen, die in der App selbst stehen. Preise und Modellnamen der Online-Anbieter: **Stand 09/2026, ohne Gewähr** — die Anbieter ändern beides laufend.
 
@@ -10,7 +10,7 @@ Alle Bezeichnungen in dieser Anleitung („Mikro-Knopf starten", „Zugang prüf
 
 ## Inhalt
 
-1. [Was WhisperBar kann](#1-was-whisperbar-kann)
+1. [Was Vox kann](#1-was-vox-kann)
 2. [Installation](#2-installation)
 3. [Erste Einrichtung — der Assistent Schritt für Schritt](#3-erste-einrichtung--der-assistent-schritt-für-schritt)
 4. [Diktieren mit dem schwebenden Knopf](#4-diktieren-mit-dem-schwebenden-knopf)
@@ -26,47 +26,48 @@ Alle Bezeichnungen in dieser Anleitung („Mikro-Knopf starten", „Zugang prüf
 
 ---
 
-## 1. Was WhisperBar kann
+## 1. Was Vox kann
 
-WhisperBar ist eine Diktier-App für Android. Du sprichst, WhisperBar erkennt den Text und tippt ihn in das Feld, in dem gerade der Cursor steht — in WhatsApp, Gmail, im Browser, in Notizen, überall.
+Vox ist eine Diktier-App für Android. Du sprichst, Vox erkennt den Text und tippt ihn in das Feld, in dem gerade der Cursor steht — in WhatsApp, Gmail, im Browser, in Notizen, überall.
 
 Dafür gibt es drei Wege:
 
 | Weg | Wann sinnvoll | Kurz gesagt |
 |---|---|---|
 | **Schwebender Mikro-Knopf** | Der Normalfall. Deine gewohnte Tastatur (z. B. Gboard) bleibt aktiv. | Ein runder Knopf liegt über allen Apps. Antippen = Aufnahme, nochmal antippen = fertig, der Text landet im aktiven Feld. |
-| **Diktat-Tastatur** | Wenn eine App kein Overlay erlaubt, oder wenn du lieber ohne Knopf arbeitest. | WhisperBar als eigene Android-Tastatur: Mikrofon gedrückt halten, sprechen, loslassen. |
-| **Sprachnachrichten abtippen** | Für Nachrichten, die andere dir schicken. | In WhatsApp, Telegram, Signal & Co. eine Sprachnachricht teilen → WhisperBar zeigt den Text in Absätzen, zum Lesen, Kopieren oder Weitergeben. |
+| **Diktat-Tastatur** | Wenn eine App kein Overlay erlaubt, oder wenn du lieber ohne Knopf arbeitest. | Vox als eigene Android-Tastatur: Mikrofon gedrückt halten, sprechen, loslassen. |
+| **Sprachnachrichten abtippen** | Für Nachrichten, die andere dir schicken. | In WhatsApp, Telegram, Signal & Co. eine Sprachnachricht teilen → Vox zeigt den Text in Absätzen, zum Lesen, Kopieren oder Weitergeben. |
 
 Die Spracherkennung selbst läuft wahlweise
 
 - **online** über einen Dienst deiner Wahl (OpenAI, Groq, Mistral, Together AI, DeepInfra, OpenRouter oder ein eigener Server). Du brauchst dafür einmalig einen API-Key des Anbieters; bei Groq ist das kostenlos. Beste Qualität, schnell.
 - **offline** direkt auf dem Gerät mit einem einmalig heruntergeladenen Whisper-Modell (32–574 MB). Nichts verlässt das Telefon, die Erkennung dauert dafür einige Sekunden.
 
-Dazu kommt eine optionale **Textverbesserung**: Ein Sprachmodell (KI) glättet Zeichensetzung und Groß-/Kleinschreibung, formuliert verständlicher oder fasst zusammen — in vier Stufen von „Aus" bis „Zusammenfassen". Unabhängig davon räumt WhisperBar lokal auf: Füllwörter („ähm", „äh") entfernen, Satzanfänge groß schreiben, ein Leerzeichen anhängen.
+Dazu kommt eine optionale **Textverbesserung**: Ein Sprachmodell (KI) glättet Zeichensetzung und Groß-/Kleinschreibung, formuliert verständlicher oder fasst zusammen — in vier Stufen von „Aus" bis „Zusammenfassen". Unabhängig davon räumt Vox lokal auf: Füllwörter („ähm", „äh") entfernen, Satzanfänge groß schreiben, ein Leerzeichen anhängen.
 
-Was WhisperBar **nicht** tut: Es speichert keine Aufnahmen, es liest nicht mit, was du sonst tippst, und dein API-Key bleibt auf dem Gerät.
+Was Vox **nicht** tut: Es speichert keine Aufnahmen, es liest nicht mit, was du sonst tippst, und dein API-Key bleibt auf dem Gerät.
 
 ---
 
 ## 2. Installation
 
-WhisperBar wird nicht über den Play Store verteilt, sondern als APK-Datei über die GitHub-Releases-Seite des Projekts.
+Vox wird nicht über den Play Store verteilt, sondern als APK-Datei über die GitHub-Releases-Seite des Projekts.
 
 ### 2.1 Voraussetzungen
 
 - Android 8.0 oder neuer.
-- Für den **Offline-Modus** zusätzlich: ein 64-Bit-ARM-Gerät (arm64-v8a), dessen Prozessor FP16-Vektorrechnung und DotProd beherrscht (praktisch alle Geräte ab etwa 2018, siehe [Kapitel 9](#9-offline-modus)). Auf anderen Geräten steht nur der Online-Modus zur Verfügung — WhisperBar zeigt das im Assistenten als „Auf diesem Gerät nicht verfügbar" an.
+- Für den **Offline-Modus** zusätzlich: ein 64-Bit-ARM-Gerät (arm64-v8a), dessen Prozessor FP16-Vektorrechnung und DotProd beherrscht (praktisch alle Geräte ab etwa 2018, siehe [Kapitel 9](#9-offline-modus)). Auf anderen Geräten steht nur der Online-Modus zur Verfügung — Vox zeigt das im Assistenten als „Auf diesem Gerät nicht verfügbar" an.
 
 ### 2.2 APK installieren
 
-1. Auf der Releases-Seite des Projekts das Release **3.0.0** öffnen und die APK-Datei auf das Telefon laden (direkt im Browser des Telefons ist am einfachsten).
+1. Auf der Releases-Seite des Projekts das Release **3.1.0** öffnen und die APK-Datei auf das Telefon laden (direkt im Browser des Telefons ist am einfachsten).
 2. Die heruntergeladene Datei antippen. Android fragt beim ersten Mal, ob der Browser (bzw. der Dateimanager) **unbekannte Apps installieren** darf — das Wording heißt je nach Hersteller „Unbekannte Apps installieren", „Aus dieser Quelle zulassen" oder „Unbekannte Quellen". Erlauben, zurück, erneut „Installieren" antippen.
 3. Google Play Protect prüft die App ggf. beim Installieren. Das ist normal für Apps außerhalb des Play Stores.
-4. Nach der Installation **WhisperBar** öffnen — der Einrichtungs-Assistent startet ([Kapitel 3](#3-erste-einrichtung--der-assistent-schritt-für-schritt)).
+4. Nach der Installation **Vox** öffnen — der Einrichtungs-Assistent startet ([Kapitel 3](#3-erste-einrichtung--der-assistent-schritt-für-schritt)).
 
 ### 2.3 Updates
 
+- **Ab 3.1.0 — neuer Name, neue Paket-ID `com.chris.vox`:** Vox wird als neue App installiert; die vorherige Version deinstallieren und API-Key/Einstellungen einmal neu eingeben. Signaturschlüssel unverändert.
 - Eine neue Version wird einfach **über die alte installiert** (APK herunterladen, antippen, „Aktualisieren"). Alle Einstellungen, der API-Key und heruntergeladene Offline-Modelle bleiben erhalten.
 - Beim Sprung von Version 2.x auf 3.0.0 werden die alten Einstellungen automatisch übernommen (Details in den [Häufigen Fragen](#13-häufige-fragen)).
 - Voraussetzung dafür ist derselbe **Signaturschlüssel**: Alle offiziellen Releases werden mit demselben Schlüssel signiert. Meldet Android „App nicht installiert" oder „Paket steht in Konflikt", stammt die bereits installierte Version aus einer anders signierten Quelle (z. B. ein selbst gebautes Debug-APK). Dann bleibt nur: alte Version deinstallieren (Einstellungen gehen dabei verloren) und das Release neu installieren.
@@ -75,13 +76,13 @@ WhisperBar wird nicht über den Play Store verteilt, sondern als APK-Datei über
 
 ## 3. Erste Einrichtung — der Assistent Schritt für Schritt
 
-Beim ersten Start öffnet WhisperBar die **Einrichtung** — einen Assistenten mit bis zu sieben Schritten. Die Kopfzeile zeigt „Schritt x von y" (7 Schritte ab Android 13, sonst 6, weil es dort keinen Benachrichtigungs-Schritt gibt). Über das Listen-Symbol oben rechts („Alle Schritte anzeigen") kannst du jederzeit zu einem anderen Schritt springen. Jeder Schritt trägt einen Status-Chip: **Erledigt**, **Fehlt noch**, **Optional** oder **Übersprungen**.
+Beim ersten Start öffnet Vox die **Einrichtung** — einen Assistenten mit bis zu sieben Schritten. Die Kopfzeile zeigt „Schritt x von y" (7 Schritte ab Android 13, sonst 6, weil es dort keinen Benachrichtigungs-Schritt gibt). Über das Listen-Symbol oben rechts („Alle Schritte anzeigen") kannst du jederzeit zu einem anderen Schritt springen. Jeder Schritt trägt einen Status-Chip: **Erledigt**, **Fehlt noch**, **Optional** oder **Übersprungen**.
 
-Der Assistent merkt sich, was erledigt ist. Wenn du ihn verlässt und WhisperBar später wieder öffnest, landest du auf dem ersten noch offenen Pflichtschritt. Kehrst du aus einem Systemdialog zurück, prüft WhisperBar den Status automatisch neu — du musst nichts bestätigen.
+Der Assistent merkt sich, was erledigt ist. Wenn du ihn verlässt und Vox später wieder öffnest, landest du auf dem ersten noch offenen Pflichtschritt. Kehrst du aus einem Systemdialog zurück, prüft Vox den Status automatisch neu — du musst nichts bestätigen.
 
 Vor dem ersten Schritt begrüßt dich eine Willkommensseite („Diktiere in jede App.") mit dem Button **Los geht's**.
 
-### Schritt 1 — Erkennungsweg: „Wie soll WhisperBar Sprache erkennen?"
+### Schritt 1 — Erkennungsweg: „Wie soll Vox Sprache erkennen?"
 
 Zwei Karten, du wählst eine:
 
@@ -100,35 +101,35 @@ Der Inhalt hängt von Schritt 1 ab.
 2. **API-Key** einfügen. Das Feld ist maskiert; das Auge-Symbol zeigt den Key an, das Einfügen-Symbol holt ihn aus der Zwischenablage. „Wird nur auf diesem Gerät gespeichert." Beim Eigenen Server heißt das Feld „API-Key (optional)".
 3. **Modell** wählen. Die Liste zeigt die Modelle des Anbieters mit dem empfohlenen Modell an erster Stelle; der letzte Eintrag **Eigenes Modell …** öffnet ein Feld für eine beliebige Modell-ID („Genau so, wie der Anbieter die ID nennt.").
 4. Du hast noch keinen Key? **Wo bekomme ich einen Key?** öffnet die Kurzanleitung je Anbieter mit Link zur Key-Seite (ausführlich in [Kapitel 7](#7-anbieter-und-api-keys)).
-5. Optional **Zugang prüfen**: WhisperBar schickt eine Sekunde Stille an den Anbieter. Erfolg zeigt „Verbunden · x s", ein Fehler nennt den Grund („Key ungültig (401)", „Limit erreicht (429) — später erneut", „Keine Verbindung", „Server antwortet nicht (Zeitüberschreitung)" …).
+5. Optional **Zugang prüfen**: Vox schickt eine Sekunde Stille an den Anbieter. Erfolg zeigt „Verbunden · x s", ein Fehler nennt den Grund („Key ungültig (401)", „Limit erreicht (429) — später erneut", „Keine Verbindung", „Server antwortet nicht (Zeitüberschreitung)" …).
 
 Darunter steht der Datenschutz-Hinweis „Audio wird zur Erkennung an {Anbieter} gesendet." Sobald Key (bzw. beim Eigenen Server eine gültige URL) vorliegt, wird der Chip **Erledigt** und **Weiter** aktiv.
 
 **2b · Offline-Modell laden** (bei Offline):
 
-„Wähle ein Modell. Empfehlung: Small — gute Qualität für Deutsch bei 190 MB." Die Liste zeigt Tiny, Base, Small und Large v3 Turbo mit Größe, Speicherbedarf und Hinweis. **Laden (190 MB)** startet den Download; er läuft im Hintergrund weiter und zeigt den Fortschritt in einer Benachrichtigung. Über mobile Daten fragt WhisperBar vorher nach („Über mobile Daten laden?"). Alles Weitere zu Modellen in [Kapitel 9](#9-offline-modus). Sobald das gewählte Modell vollständig geladen ist: **Weiter**.
+„Wähle ein Modell. Empfehlung: Small — gute Qualität für Deutsch bei 190 MB." Die Liste zeigt Tiny, Base, Small und Large v3 Turbo mit Größe, Speicherbedarf und Hinweis. **Laden (190 MB)** startet den Download; er läuft im Hintergrund weiter und zeigt den Fortschritt in einer Benachrichtigung. Über mobile Daten fragt Vox vorher nach („Über mobile Daten laden?"). Alles Weitere zu Modellen in [Kapitel 9](#9-offline-modus). Sobald das gewählte Modell vollständig geladen ist: **Weiter**.
 
 ### Schritt 3 — Mikrofon erlauben (Pflicht)
 
 „Ohne Mikrofon kein Diktat. Android fragt dich gleich — bitte „Bei Nutzung der App" wählen." Button **Mikrofon erlauben** öffnet den Android-Dialog.
 
-Hast du das Mikrofon schon zweimal abgelehnt, zeigt Android den Dialog nicht mehr. WhisperBar erkennt das („Du hast das Mikrofon abgelehnt. Bitte in den App-Einstellungen erlauben.") und bietet **App-Einstellungen öffnen** an: dort unter Berechtigungen → Mikrofon → „Nur bei Nutzung der App zulassen".
+Hast du das Mikrofon schon zweimal abgelehnt, zeigt Android den Dialog nicht mehr. Vox erkennt das („Du hast das Mikrofon abgelehnt. Bitte in den App-Einstellungen erlauben.") und bietet **App-Einstellungen öffnen** an: dort unter Berechtigungen → Mikrofon → „Nur bei Nutzung der App zulassen".
 
 ### Schritt 4 — Über anderen Apps anzeigen (Pflicht, mit Alternative)
 
-Der schwebende Mikro-Knopf liegt über anderen Apps — dafür braucht Android deine Erlaubnis. **Einstellung öffnen** führt in die Systemeinstellung; dort den Schalter **„Über anderen Apps anzeigen"** für WhisperBar einschalten und mit der Zurück-Taste zurückkehren. WhisperBar prüft automatisch. Der aufklappbare Text **Was passiert dabei?** beschreibt die drei Schritte.
+Der schwebende Mikro-Knopf liegt über anderen Apps — dafür braucht Android deine Erlaubnis. **Einstellung öffnen** führt in die Systemeinstellung; dort den Schalter **„Über anderen Apps anzeigen"** für Vox einschalten und mit der Zurück-Taste zurückkehren. Vox prüft automatisch. Der aufklappbare Text **Was passiert dabei?** beschreibt die drei Schritte.
 
 **Nur Tastatur nutzen:** Wenn du keinen schwebenden Knopf willst (oder ihn nicht erlauben kannst), überspringst du den Schritt mit diesem Button. Dann funktioniert nur die Tastatur-Variante — Schritt 7 wird deshalb zum Pflichtschritt. Der Chip zeigt **Übersprungen**; du kannst die Erlaubnis später jederzeit unter Einstellungen → Knopf & Tastatur → Berechtigungen nachholen.
 
 ### Schritt 5 — Text automatisch einfügen (empfohlen)
 
-Die **Bedienungshilfe** „WhisperBar Text-Einfügen" fügt den diktierten Text ins gerade fokussierte Feld ein, damit du beim Diktieren nicht die Tastatur wechseln musst. Es wird nichts mitgelesen oder gespeichert.
+Die **Bedienungshilfe** „Vox Text-Einfügen" fügt den diktierten Text ins gerade fokussierte Feld ein, damit du beim Diktieren nicht die Tastatur wechseln musst. Es wird nichts mitgelesen oder gespeichert.
 
 Ohne diesen Schritt landet der Text in der **Zwischenablage** — du fügst ihn dann selbst ein (langes Drücken im Textfeld → Einfügen). Das funktioniert, ist aber ein Handgriff mehr.
 
-**Bedienungshilfe aktivieren** öffnet die Bedienungshilfe-Einstellungen von Android: Installierte Apps (bzw. „Heruntergeladene Apps") → WhisperBar → Ein → Bestätigen.
+**Bedienungshilfe aktivieren** öffnet die Bedienungshilfe-Einstellungen von Android: Installierte Apps (bzw. „Heruntergeladene Apps") → Vox → Ein → Bestätigen.
 
-**„Eingeschränkte Einstellung":** Bei Apps, die nicht aus dem Play Store stammen, blockiert Android ab Version 13 das Einschalten einer Bedienungshilfe zunächst mit diesem Hinweis. Lösung: App-Info von WhisperBar öffnen (in den Android-Einstellungen → Apps → WhisperBar, oder App-Symbol lange drücken → ⓘ) → Menü **⋮** oben rechts → **Eingeschränkte Einstellungen zulassen** → danach die Bedienungshilfe erneut aktivieren. Der aufklappbare Text „Was passiert dabei?" im Assistenten nennt genau diese Reihenfolge.
+**„Eingeschränkte Einstellung":** Bei Apps, die nicht aus dem Play Store stammen, blockiert Android ab Version 13 das Einschalten einer Bedienungshilfe zunächst mit diesem Hinweis. Lösung: App-Info von Vox öffnen (in den Android-Einstellungen → Apps → Vox, oder App-Symbol lange drücken → ⓘ) → Menü **⋮** oben rechts → **Eingeschränkte Einstellungen zulassen** → danach die Bedienungshilfe erneut aktivieren. Der aufklappbare Text „Was passiert dabei?" im Assistenten nennt genau diese Reihenfolge.
 
 Dieser Schritt lässt sich mit **Überspringen** auslassen; auf dem Startbildschirm erinnert dann ein Banner daran.
 
@@ -140,7 +141,7 @@ Dieser Schritt lässt sich mit **Überspringen** auslassen; auf dem Startbildsch
 
 Zwei Zeilen, in dieser Reihenfolge:
 
-1. **1 · Tastatur aktivieren** → **Aktivieren** öffnet die Android-Tastatureinstellungen. Dort „WhisperBar Diktat" einschalten (Android warnt bei jeder Drittanbieter-Tastatur, dass sie Eingaben sehen könnte — WhisperBar liest nichts mit).
+1. **1 · Tastatur aktivieren** → **Aktivieren** öffnet die Android-Tastatureinstellungen. Dort „Vox Diktat" einschalten (Android warnt bei jeder Drittanbieter-Tastatur, dass sie Eingaben sehen könnte — Vox liest nichts mit).
 2. **2 · Tastatur auswählen** → **Auswählen** öffnet die Tastatur-Auswahl von Android. Dieser Button ist erst aktiv, wenn Schritt 1 erledigt ist.
 
 Darunter ein Probierfeld („Zum Diktieren hierher tippen …"), um die Tastatur gleich zu testen. Als erledigt gilt der Schritt, sobald die Tastatur aktiviert ist.
@@ -157,7 +158,7 @@ Die Abschlussseite fasst unter **Deine Einrichtung** alles zusammen (Erkennung, 
 
 ### Der Startbildschirm
 
-Danach zeigt WhisperBar beim Öffnen den Startbildschirm:
+Danach zeigt Vox beim Öffnen den Startbildschirm:
 
 - Ganz oben die Karte **Schwebender Mikro-Knopf** mit dem großen Button **Mikro-Knopf starten** bzw. **Mikro-Knopf beenden**. Fehlt eine Pflicht-Berechtigung, ist der Button gesperrt und ein Chip („Mikrofon fehlt — beheben" / „„Über anderen Apps anzeigen" fehlt — beheben") führt in den passenden Schritt.
 - Ein Banner **Noch nicht optimal** mit Button **Beheben**, wenn die Bedienungshilfe aus ist, Offline gewählt aber kein Modell geladen ist, oder Benachrichtigungen verweigert sind.
@@ -165,13 +166,13 @@ Danach zeigt WhisperBar beim Öffnen den Startbildschirm:
 - Ein Hinweis auf das Abtippen von Sprachnachrichten und ganz unten **Einrichtung erneut öffnen**.
 - Oben rechts: **?** (Anleitung und Hilfe) und **⚙** (Einstellungen).
 
-Die **Einstellungen** sind in sechs Gruppen geteilt: **Erkennung** · **Text** · **Knopf & Tastatur** · **Offline-Modelle** · **Anleitung & Hilfe** · **Über WhisperBar**. Änderungen werden sofort gespeichert; es gibt keinen „Speichern"-Button.
+Die **Einstellungen** sind in sechs Gruppen geteilt: **Erkennung** · **Text** · **Knopf & Tastatur** · **Offline-Modelle** · **Anleitung & Hilfe** · **Über Vox**. Änderungen werden sofort gespeichert; es gibt keinen „Speichern"-Button.
 
 ---
 
 ## 4. Diktieren mit dem schwebenden Knopf
 
-Der Knopf (68 dp groß) schwebt über allen Apps, solange er läuft. Er startet über **Mikro-Knopf starten** auf dem Startbildschirm oder am Ende des Assistenten und läuft weiter, wenn du WhisperBar verlässt. Solange er läuft, zeigt Android die stille Benachrichtigung „WhisperBar-Diktat aktiv" mit der Aktion **Beenden**; ein Tipp auf die Benachrichtigung öffnet WhisperBar.
+Der Knopf (68 dp groß) schwebt über allen Apps, solange er läuft. Er startet über **Mikro-Knopf starten** auf dem Startbildschirm oder am Ende des Assistenten und läuft weiter, wenn du Vox verlässt. Solange er läuft, zeigt Android die stille Benachrichtigung „Vox-Diktat aktiv" mit der Aktion **Beenden**; ein Tipp auf die Benachrichtigung öffnet Vox.
 
 ### 4.1 Die vier Zustände
 
@@ -182,9 +183,9 @@ Der Knopf (68 dp groß) schwebt über allen Apps, solange er läuft. Er startet 
 | **Sendet** | dunkeltürkiser Kreis mit rotierendem Bogen, Label „sendet …" | (wird ignoriert) | Knopf verschieben |
 | **Fehler** | dunkelroter Kreis, Wiederholen-Symbol, Label „tippen = erneut" | erneut senden — das Audio ist noch da | aufs Abbrechen-Ziel ziehen = verwerfen |
 
-Der Ablauf im Normalfall: **antippen → sprechen → nochmal antippen**. Kurz darauf steht der Text im Feld, in dem der Cursor stand. Wichtig: Der Cursor muss in einem Textfeld stehen, *bevor* du die Aufnahme beendest — WhisperBar fügt dort ein, wo gerade der Fokus ist.
+Der Ablauf im Normalfall: **antippen → sprechen → nochmal antippen**. Kurz darauf steht der Text im Feld, in dem der Cursor stand. Wichtig: Der Cursor muss in einem Textfeld stehen, *bevor* du die Aufnahme beendest — Vox fügt dort ein, wo gerade der Fokus ist.
 
-Beim Diktieren gilt: normal sprechen, ohne Kunstpausen. Satzzeichen musst du nicht diktieren — die Online-Modelle setzen sie selbst; mit der Stufe „Glätten" der Textverbesserung ([Kapitel 8](#8-textverbesserung)) werden Zeichensetzung und Groß-/Kleinschreibung zusätzlich korrigiert. Vor dem Senden schneidet WhisperBar Stille am Anfang und Ende weg.
+Beim Diktieren gilt: normal sprechen, ohne Kunstpausen. Satzzeichen musst du nicht diktieren — die Online-Modelle setzen sie selbst; mit der Stufe „Glätten" der Textverbesserung ([Kapitel 8](#8-textverbesserung)) werden Zeichensetzung und Groß-/Kleinschreibung zusätzlich korrigiert. Vor dem Senden schneidet Vox Stille am Anfang und Ende weg.
 
 ### 4.2 Verschieben und Abbrechen
 
@@ -196,11 +197,11 @@ Beim Diktieren gilt: normal sprechen, ohne Kunstpausen. Satzzeichen musst du nic
 
 Schlägt die Erkennung fehl — kein Netz, Server überlastet, Zeitüberschreitung —, wechselt der Knopf in den Fehlerzustand, wackelt kurz und zeigt „tippen = erneut". **Das Diktat geht nicht verloren:** Das Audio bleibt gepuffert, ein Tipp sendet es erneut. Erst das Ziehen aufs ✕ verwirft es.
 
-Bei Fehlern, die sich durch Wiederholen nicht beheben lassen (z. B. ungültiger Key, unbekanntes Modell), zeigt WhisperBar den Grund als kurze Meldung; in dem Fall hilft ein Blick in Einstellungen → Erkennung ([Kapitel 12](#12-wenn-etwas-nicht-klappt)).
+Bei Fehlern, die sich durch Wiederholen nicht beheben lassen (z. B. ungültiger Key, unbekanntes Modell), zeigt Vox den Grund als kurze Meldung; in dem Fall hilft ein Blick in Einstellungen → Erkennung ([Kapitel 12](#12-wenn-etwas-nicht-klappt)).
 
 ### 4.4 Ohne Bedienungshilfe: Zwischenablage
 
-Ist die Bedienungshilfe nicht aktiv, kann WhisperBar den Text nicht direkt einfügen. Er wird stattdessen in die **Zwischenablage** kopiert; der Knopf zeigt zwei Sekunden lang „Kopiert — einfügen". Dann im Textfeld lange drücken → Einfügen. Auf dem Startbildschirm erinnert das Banner „Ohne Bedienungshilfe landet der Text nur in der Zwischenablage." mit **Beheben** an den fehlenden Schritt.
+Ist die Bedienungshilfe nicht aktiv, kann Vox den Text nicht direkt einfügen. Er wird stattdessen in die **Zwischenablage** kopiert; der Knopf zeigt zwei Sekunden lang „Kopiert — einfügen". Dann im Textfeld lange drücken → Einfügen. Auf dem Startbildschirm erinnert das Banner „Ohne Bedienungshilfe landet der Text nur in der Zwischenablage." mit **Beheben** an den fehlenden Schritt.
 
 ### 4.5 Beenden
 
@@ -210,11 +211,11 @@ Ist die Bedienungshilfe nicht aktiv, kann WhisperBar den Text nicht direkt einf�
 
 ## 5. Diktieren mit der Tastatur
 
-Die **Diktat-Tastatur** ist eine eigene Android-Eingabemethode („WhisperBar Diktat"). Sie ersetzt deine normale Tastatur nicht — du wechselst bei Bedarf hin und wieder zurück.
+Die **Diktat-Tastatur** ist eine eigene Android-Eingabemethode („Vox Diktat"). Sie ersetzt deine normale Tastatur nicht — du wechselst bei Bedarf hin und wieder zurück.
 
 ### 5.1 Aktivieren und wechseln
 
-Aktivieren und auswählen wie in [Schritt 7](#schritt-7--diktat-tastatur-optional-pflicht-wenn-du-in-schritt-4-nur-tastatur-nutzen-gewählt-hast) des Assistenten, oder später unter Einstellungen → Knopf & Tastatur → **Diktier-Tastatur**. Zwischen den Tastaturen wechselst du wie bei jeder Android-Tastatur: über das Tastatur-Symbol in der Navigationsleiste, oder direkt in der WhisperBar-Tastatur über die Globus-Taste („Eingabemethode wechseln").
+Aktivieren und auswählen wie in [Schritt 7](#schritt-7--diktat-tastatur-optional-pflicht-wenn-du-in-schritt-4-nur-tastatur-nutzen-gewählt-hast) des Assistenten, oder später unter Einstellungen → Knopf & Tastatur → **Diktier-Tastatur**. Zwischen den Tastaturen wechselst du wie bei jeder Android-Tastatur: über das Tastatur-Symbol in der Navigationsleiste, oder direkt in der Vox-Tastatur über die Globus-Taste („Eingabemethode wechseln").
 
 ### 5.2 Bedienung
 
@@ -222,7 +223,7 @@ Die Tastatur besteht aus drei Zonen:
 
 - **Statuszeile** oben: „Halte das Mikrofon gedrückt und sprich" — während der Aufnahme „Höre zu … loslassen zum Beenden", dann „Wird übertragen …". Fehlt das Mikrofon oder der Zugang, steht dort ein Warntext („Mikrofon-Berechtigung fehlt — tippe zum Einrichten" / „Kein Zugang eingerichtet — tippe zum Einrichten"); ein Tipp darauf öffnet den passenden Schritt der Einrichtung.
 - **Pegelband und Mikrofon-Taste**: Die große Taste in der Mitte funktioniert mit **Halten-zum-Sprechen** — gedrückt halten, sprechen, loslassen. Das Pegelband darüber zeigt während der Aufnahme deine Lautstärke. Die Taste zeigt dieselben vier Zustände wie der schwebende Knopf (bereit, nimmt auf, sendet, Fehler).
-- **Tastenreihe** unten: Globus (Eingabemethode wechseln) · Komma · Leertaste · Punkt · Löschen · Eingabe · (nur nach einem Fehler:) **Erneut senden** · Zahnrad (WhisperBar-Einstellungen).
+- **Tastenreihe** unten: Globus (Eingabemethode wechseln) · Komma · Leertaste · Punkt · Löschen · Eingabe · (nur nach einem Fehler:) **Erneut senden** · Zahnrad (Vox-Einstellungen).
 
 Der erkannte Text wird direkt an der Cursor-Position eingefügt — die Bedienungshilfe ist bei der Tastatur nicht nötig. Nach einem Fehler („Fehler bei der Erkennung — erneut versuchen") bleibt das Audio erhalten; die Taste **Erneut senden** wiederholt den Versuch.
 
@@ -232,27 +233,27 @@ Wenn du „Leerzeichen nach Diktat anhängen" (Einstellungen → Text → Regeln
 
 ## 6. Sprachnachrichten abtippen
 
-WhisperBar erscheint im **Teilen-Menü** von Android für Audiodateien („Mit WhisperBar transkribieren"). Damit lässt sich jede Sprachnachricht in Text verwandeln — ideal für lange Nachrichten oder wenn du gerade nicht hören kannst.
+Vox erscheint im **Teilen-Menü** von Android für Audiodateien („Mit Vox transkribieren"). Damit lässt sich jede Sprachnachricht in Text verwandeln — ideal für lange Nachrichten oder wenn du gerade nicht hören kannst.
 
 ### 6.1 So geht's
 
-- **WhatsApp:** Sprachnachricht lange drücken → **Teilen** (bzw. ⋮ → Teilen) → **WhisperBar**.
-- **Telegram, Signal:** Nachricht lange drücken → Teilen → WhisperBar. Wo genau der Teilen-Eintrag sitzt, unterscheidet sich je App und Version — er heißt aber überall „Teilen".
+- **WhatsApp:** Sprachnachricht lange drücken → **Teilen** (bzw. ⋮ → Teilen) → **Vox**.
+- **Telegram, Signal:** Nachricht lange drücken → Teilen → Vox. Wo genau der Teilen-Eintrag sitzt, unterscheidet sich je App und Version — er heißt aber überall „Teilen".
 - Genauso mit Aufnahmen aus Rekorder-Apps oder Dateien aus dem Dateimanager. Mehrere Dateien auf einmal gehen auch.
 
-WhisperBar öffnet den Bildschirm **Transkription**. Oben steht die Quelle mit Dauer („Sprachnachricht · 0:42 · 1 Datei"), darunter der Fortschritt („Audio wird entpackt …", „Wird übertragen …"; bei mehreren oder langen Dateien „Datei 1 von 3 · Stück 1 von 2 · …"). Fertige Dateien erscheinen sofort, auch wenn weitere noch laufen.
+Vox öffnet den Bildschirm **Transkription**. Oben steht die Quelle mit Dauer („Sprachnachricht · 0:42 · 1 Datei"), darunter der Fortschritt („Audio wird entpackt …", „Wird übertragen …"; bei mehreren oder langen Dateien „Datei 1 von 3 · Stück 1 von 2 · …"). Fertige Dateien erscheinen sofort, auch wenn weitere noch laufen.
 
 ### 6.2 Das Ergebnis
 
-- Der Text erscheint in **Absätzen** — WhisperBar setzt sie an Satzgrenzen, bevorzugt vor Wörtern wie „Also", „Außerdem", „Dann". Bei mehreren Dateien gibt es je Datei einen Abschnitt mit Quelle und Dauer. Der Text ist markierbar.
-- Schalter **Füllwörter ausblenden** (standardmäßig **an**): Blendet „ähm, äh …" aus. Ausgeschaltet zeigt WhisperBar den Text **wortgetreu, 100 %** — bei fremden Nachrichten will man manchmal genau wissen, was gesagt wurde. Der Schalter wirkt sofort auf die Anzeige und auf Kopieren/Teilen; es wird nichts neu hochgeladen.
+- Der Text erscheint in **Absätzen** — Vox setzt sie an Satzgrenzen, bevorzugt vor Wörtern wie „Also", „Außerdem", „Dann". Bei mehreren Dateien gibt es je Datei einen Abschnitt mit Quelle und Dauer. Der Text ist markierbar.
+- Schalter **Füllwörter ausblenden** (standardmäßig **an**): Blendet „ähm, äh …" aus. Ausgeschaltet zeigt Vox den Text **wortgetreu, 100 %** — bei fremden Nachrichten will man manchmal genau wissen, was gesagt wurde. Der Schalter wirkt sofort auf die Anzeige und auf Kopieren/Teilen; es wird nichts neu hochgeladen.
 - **Kopieren** legt den angezeigten Text in die Zwischenablage („In die Zwischenablage kopiert"); **Teilen** gibt ihn als Text an eine andere App weiter. Die Zwischenablage wird nie automatisch überschrieben.
 - Ist eine Datei fehlgeschlagen, steht der Grund bei ihr („Fehlgeschlagen: …") mit **Erneut** nur für diese Datei; bei mehreren Fehlern gibt es zusätzlich **Alles erneut**.
 - Ist noch kein Zugang eingerichtet, zeigt der Bildschirm „Kein Zugang eingerichtet" mit **Einrichtung öffnen**.
 
 ### 6.3 Lange Nachrichten
 
-WhisperBar wandelt geteiltes Audio auf dem Gerät in das Format um, das die Erkennung braucht (16 kHz, Mono) — deshalb funktionieren auch WhatsApp-Nachrichten (Opus in OGG), die viele Online-Dienste nicht direkt annehmen. Lange Aufnahmen werden in **Stücke von höchstens 5 Minuten** geteilt; geschnitten wird an einer leisen Stelle (einer Sprechpause), damit kein Wort zerteilt wird. Jedes Stück wird einzeln erkannt, der Text hinterher zusammengesetzt; die Fortschrittsanzeige zählt die Stücke mit. Das gilt für Online-Dienste wie für den Offline-Modus.
+Vox wandelt geteiltes Audio auf dem Gerät in das Format um, das die Erkennung braucht (16 kHz, Mono) — deshalb funktionieren auch WhatsApp-Nachrichten (Opus in OGG), die viele Online-Dienste nicht direkt annehmen. Lange Aufnahmen werden in **Stücke von höchstens 5 Minuten** geteilt; geschnitten wird an einer leisen Stelle (einer Sprechpause), damit kein Wort zerteilt wird. Jedes Stück wird einzeln erkannt, der Text hinterher zusammengesetzt; die Fortschrittsanzeige zählt die Stücke mit. Das gilt für Online-Dienste wie für den Offline-Modus.
 
 Beim Offline-Modus dauern lange Nachrichten entsprechend länger; Schließen des Bildschirms bricht die laufende Erkennung ab.
 
@@ -264,13 +265,13 @@ Geteilte Nachrichten werden **nicht** durch die KI-Textverbesserung geschickt �
 
 ## 7. Anbieter und API-Keys
 
-WhisperBar spricht die **OpenAI-kompatible API**, die inzwischen viele Anbieter anbieten. Du brauchst ein Konto beim Anbieter deiner Wahl und einen **API-Key** — einen persönlichen Zugangsschlüssel, mit dem der Anbieter die Nutzung abrechnet. Du bezahlst nur, was du nutzt; ein Diktat kostet meist unter einem Cent.
+Vox spricht die **OpenAI-kompatible API**, die inzwischen viele Anbieter anbieten. Du brauchst ein Konto beim Anbieter deiner Wahl und einen **API-Key** — einen persönlichen Zugangsschlüssel, mit dem der Anbieter die Nutzung abrechnet. Du bezahlst nur, was du nutzt; ein Diktat kostet meist unter einem Cent.
 
 Alle Angaben in diesem Kapitel: **Stand 09/2026, ohne Gewähr.** Preise in US-Dollar, wie von den Anbietern ausgewiesen.
 
 ### 7.1 Übersicht
 
-Die Spalte „Modelle" nennt die Einträge, wie sie in WhisperBar im Dropdown stehen (erster Eintrag = Voreinstellung).
+Die Spalte „Modelle" nennt die Einträge, wie sie in Vox im Dropdown stehen (erster Eintrag = Voreinstellung).
 
 | Anbieter (Dropdown) | Für | Modelle (Erkennung) | Modelle (Textverbesserung) | Preis Erkennung | Kostenlos? | Key holen |
 |---|---|---|---|---|---|---|
@@ -290,20 +291,20 @@ Textverbesserung kostet zusätzlich, aber deutlich weniger als die Erkennung —
 ### 7.2 Empfehlungen
 
 - **Kostenlos anfangen: Groq.** Free-Plan ohne Kreditkarte, 8 Stunden Audio pro Tag, „Whisper Large v3 Turbo" ist für Deutsch gut und sehr schnell. Mit demselben Key läuft auch die Textverbesserung (GPT-OSS 20B) — ein Konto, alles gratis.
-- **Beste Qualität: OpenAI „GPT Transcribe".** Das aktuelle Modell mit den besten dokumentierten Erkennungsraten; $0,0045 pro Minute, dafür ist eine Mindestaufladung von $5 nötig. Das Standardmodell in WhisperBar.
+- **Beste Qualität: OpenAI „GPT Transcribe".** Das aktuelle Modell mit den besten dokumentierten Erkennungsraten; $0,0045 pro Minute, dafür ist eine Mindestaufladung von $5 nötig. Das Standardmodell in Vox.
 - **Europäischer Anbieter: Mistral „Voxtral Mini Transcribe 2".** Server in der EU, Deutsch als Kernsprache, $0,003/min.
 - **Sehr günstig:** DeepInfra ab $0,0002/min oder Together AI $0,0015/min — beide mit Whisper Large v3.
 - **Ein Key für alles:** OpenRouter bündelt viele Modelle unter einem Konto; für lange Aufnahmen ungünstig (60-Sekunden-Limit je Anfrage beim Anbieter).
 
 ### 7.3 Modelle, die auslaufen
 
-OpenAI hat die älteren Erkennungsmodelle **GPT-4o Transcribe, GPT-4o mini Transcribe und Whisper v2 zum 2027-02-26 abgekündigt**; die Textmodelle GPT-5 mini und GPT-5 nano enden am 2026-12-11. WhisperBar kennzeichnet solche Einträge im Dropdown mit „(Auslauf 02/2027)" bzw. „(Auslauf 12/2026)". Wer aus Version 2.x umsteigt, behält sein bisheriges Modell (meist GPT-4o Transcribe) — es funktioniert bis zur Abschaltung, danach unter Erkennung → Modell auf „GPT Transcribe (empfohlen)" wechseln.
+OpenAI hat die älteren Erkennungsmodelle **GPT-4o Transcribe, GPT-4o mini Transcribe und Whisper v2 zum 2027-02-26 abgekündigt**; die Textmodelle GPT-5 mini und GPT-5 nano enden am 2026-12-11. Vox kennzeichnet solche Einträge im Dropdown mit „(Auslauf 02/2027)" bzw. „(Auslauf 12/2026)". Wer aus Version 2.x umsteigt, behält sein bisheriges Modell (meist GPT-4o Transcribe) — es funktioniert bis zur Abschaltung, danach unter Erkennung → Modell auf „GPT Transcribe (empfohlen)" wechseln.
 
 ### 7.4 Key besorgen — Schritt für Schritt
 
-Dieselben Schritte zeigt WhisperBar unter **Wo bekomme ich einen Key?** (im Assistenten und unter Erkennung) und unter Anleitung & Hilfe → **API-Key bekommen**; von dort führt jeweils ein Link direkt zur Key-Seite. Der Key wird beim Erzeugen meist **nur einmal angezeigt** — direkt kopieren und in WhisperBar einfügen (Einfügen-Symbol im Key-Feld).
+Dieselben Schritte zeigt Vox unter **Wo bekomme ich einen Key?** (im Assistenten und unter Erkennung) und unter Anleitung & Hilfe → **API-Key bekommen**; von dort führt jeweils ein Link direkt zur Key-Seite. Der Key wird beim Erzeugen meist **nur einmal angezeigt** — direkt kopieren und in Vox einfügen (Einfügen-Symbol im Key-Feld).
 
-**OpenAI** — 1) https://platform.openai.com registrieren. 2) *Settings → Billing* → Zahlungsmittel + Prepaid-Guthaben (mind. $5). 3) https://platform.openai.com/api-keys → *Create new secret key* → kopieren. 4) In WhisperBar: Anbieter „OpenAI", Key einfügen.
+**OpenAI** — 1) https://platform.openai.com registrieren. 2) *Settings → Billing* → Zahlungsmittel + Prepaid-Guthaben (mind. $5). 3) https://platform.openai.com/api-keys → *Create new secret key* → kopieren. 4) In Vox: Anbieter „OpenAI", Key einfügen.
 
 **Groq** — 1) https://console.groq.com registrieren (Google/GitHub/E-Mail). 2) https://console.groq.com/keys → *Create API Key*. 3) Kostenlos nutzbar ohne Zahlungsmittel (Free-Plan). Optional *Billing → Developer* für höhere Limits und 100-MB-Dateien.
 
@@ -315,11 +316,11 @@ Dieselben Schritte zeigt WhisperBar unter **Wo bekomme ich einen Key?** (im Assi
 
 **OpenRouter** — 1) https://openrouter.ai anmelden. 2) *Credits* aufladen (ab $10 Guthaben steigt das Limit der „:free"-Modelle auf 1.000 Anfragen/Tag). 3) https://openrouter.ai/settings/keys → *Create Key*.
 
-**Anthropic** (nur Textverbesserung) — 1) https://platform.claude.com registrieren. 2) *Billing* → Guthaben (kleines Startguthaben vorhanden). 3) https://platform.claude.com/settings/keys → *Create Key*. WhisperBar zeigt dazu den Hinweis „OpenAI-Kompatibilitätsschicht — von Anthropic als Test-Werkzeug eingestuft."
+**Anthropic** (nur Textverbesserung) — 1) https://platform.claude.com registrieren. 2) *Billing* → Guthaben (kleines Startguthaben vorhanden). 3) https://platform.claude.com/settings/keys → *Create Key*. Vox zeigt dazu den Hinweis „OpenAI-Kompatibilitätsschicht — von Anthropic als Test-Werkzeug eingestuft."
 
-**Google Gemini** (nur Textverbesserung) — 1) https://aistudio.google.com/apikey öffnen, mit Google-Konto anmelden, Bedingungen akzeptieren. 2) *Create API key*. 3) Gratis nutzbar — aber: **Im Free-Tier darf Google die Inhalte zum Training nutzen.** Diktate sind oft privat; entweder Billing aktivieren oder den Anbieter meiden. WhisperBar zeigt die Warnung „Free-Tier: Google darf Inhalte zum Training nutzen."
+**Google Gemini** (nur Textverbesserung) — 1) https://aistudio.google.com/apikey öffnen, mit Google-Konto anmelden, Bedingungen akzeptieren. 2) *Create API key*. 3) Gratis nutzbar — aber: **Im Free-Tier darf Google die Inhalte zum Training nutzen.** Diktate sind oft privat; entweder Billing aktivieren oder den Anbieter meiden. Vox zeigt die Warnung „Free-Tier: Google darf Inhalte zum Training nutzen."
 
-**DeepSeek** (nur Textverbesserung) — 1) https://platform.deepseek.com registrieren. 2) *Top up* (kein Free-Tier). 3) https://platform.deepseek.com/api_keys → *Create new API key*. Hinweis in WhisperBar: „Server in China — Datenschutz beachten."
+**DeepSeek** (nur Textverbesserung) — 1) https://platform.deepseek.com registrieren. 2) *Top up* (kein Free-Tier). 3) https://platform.deepseek.com/api_keys → *Create new API key*. Hinweis in Vox: „Server in China — Datenschutz beachten."
 
 ### 7.5 Eigenes Modell und Zugang prüfen
 
@@ -357,13 +358,13 @@ Standardmäßig nutzt die Textverbesserung **Anbieter und Key der Erkennung** (S
 
 Dann erscheinen eigene Felder: **Anbieter** (OpenAI · Groq · Mistral · OpenRouter · Anthropic (Claude) · Google Gemini · DeepSeek · Eigener Server), bei Eigener Server die **Base-URL**, der **API-Key** und das **Modell**. Der Key der Erkennung wird dabei nie an den anderen Anbieter geschickt. Beim Eigenen Server (z. B. Ollama) und bei Together/DeepInfra ist das Modellfeld ein Freitext („z. B. qwen3:8b").
 
-**Anbieter nur für Text** — mit Hinweisen, die WhisperBar direkt an der Auswahl zeigt:
+**Anbieter nur für Text** — mit Hinweisen, die Vox direkt an der Auswahl zeigt:
 
 - **Anthropic (Claude)**: gute Textqualität; „OpenAI-Kompatibilitätsschicht — von Anthropic als Test-Werkzeug eingestuft." (funktional, aber offiziell nicht als Dauerlösung gedacht).
 - **Google Gemini**: gratis, aber „Free-Tier: Google darf Inhalte zum Training nutzen."
 - **DeepSeek**: „Server in China — Datenschutz beachten."
 
-Auch hier gibt es **Zugang prüfen** — WhisperBar schickt dem Modell eine Mini-Anfrage und wertet die Antwort aus.
+Auch hier gibt es **Zugang prüfen** — Vox schickt dem Modell eine Mini-Anfrage und wertet die Antwort aus.
 
 ### 8.3 Regeln ohne KI
 
@@ -378,18 +379,18 @@ Immer aktiv, lokal, kostenlos:
 
 Unter Einstellungen → **Erkennung** → Karte **Sprache & Kontext**:
 
-- **Sprache**: Automatisch erkennen · Deutsch (Voreinstellung) · Englisch · Spanisch · Französisch · Italienisch. Eine feste Sprache ist schneller und genauer als „Automatisch erkennen" — vor allem bei kurzen Diktaten; sie bestimmt auch, welche Füllwort-Liste gilt. Bei „Automatisch erkennen" nimmt WhisperBar die vom Modell erkannte Sprache für die Nachbearbeitung.
-- **Kontext: Namen, Fachbegriffe, Schreibweisen** — ein Freitextfeld, das als Prompt mitgeschickt wird und der Erkennung bei Eigennamen und Fachwörtern hilft. Kostet nichts extra. Beispiel: „Christof Treitges, WhisperBar, Lieferschein-Processor, SvelteKit". Der Kontext wirkt online **und** offline (dort als Start-Prompt des Modells). Mistral und OpenRouter unterstützen das Prompt-Feld nicht — dort wird der Kontext nicht mitgeschickt; das Feld zeigt dann den Hinweis „Dieser Anbieter nimmt keinen Kontext entgegen …" und wirkt weiter bei anderen Anbietern und offline.
+- **Sprache**: Automatisch erkennen · Deutsch (Voreinstellung) · Englisch · Spanisch · Französisch · Italienisch. Eine feste Sprache ist schneller und genauer als „Automatisch erkennen" — vor allem bei kurzen Diktaten; sie bestimmt auch, welche Füllwort-Liste gilt. Bei „Automatisch erkennen" nimmt Vox die vom Modell erkannte Sprache für die Nachbearbeitung.
+- **Kontext: Namen, Fachbegriffe, Schreibweisen** — ein Freitextfeld, das als Prompt mitgeschickt wird und der Erkennung bei Eigennamen und Fachwörtern hilft. Kostet nichts extra. Beispiel: „Christof Treitges, Vox, Lieferschein-Processor, SvelteKit". Der Kontext wirkt online **und** offline (dort als Start-Prompt des Modells). Mistral und OpenRouter unterstützen das Prompt-Feld nicht — dort wird der Kontext nicht mitgeschickt; das Feld zeigt dann den Hinweis „Dieser Anbieter nimmt keinen Kontext entgegen …" und wirkt weiter bei anderen Anbietern und offline.
 
 ---
 
 ## 9. Offline-Modus
 
-Im Offline-Modus erkennt WhisperBar Sprache direkt auf dem Gerät — mit whisper.cpp und einem Whisper-Modell, das du einmalig herunterlädst. Danach braucht die Erkennung kein Internet, keinen Key und schickt nichts weg.
+Im Offline-Modus erkennt Vox Sprache direkt auf dem Gerät — mit whisper.cpp und einem Whisper-Modell, das du einmalig herunterlädst. Danach braucht die Erkennung kein Internet, keinen Key und schickt nichts weg.
 
 ### 9.1 Voraussetzungen
 
-- **Prozessor:** 64-Bit-ARM (arm64-v8a) mit FP16-Vektorrechnung und DotProd (Armv8.2 — Cortex-A55/A75 und neuer, also praktisch alle Geräte ab etwa 2018). Ältere Chips (Cortex-A53/A72, z. B. Snapdragon 835/660) fehlen diese Befehle; dort meldet WhisperBar „Offline-Erkennung wird von diesem Gerät nicht unterstützt (CPU ohne FP16/DotProd)" bzw. bietet Offline gar nicht erst an. Diese Geräte wären für die Erkennung ohnehin zu langsam.
+- **Prozessor:** 64-Bit-ARM (arm64-v8a) mit FP16-Vektorrechnung und DotProd (Armv8.2 — Cortex-A55/A75 und neuer, also praktisch alle Geräte ab etwa 2018). Ältere Chips (Cortex-A53/A72, z. B. Snapdragon 835/660) fehlen diese Befehle; dort meldet Vox „Offline-Erkennung wird von diesem Gerät nicht unterstützt (CPU ohne FP16/DotProd)" bzw. bietet Offline gar nicht erst an. Diese Geräte wären für die Erkennung ohnehin zu langsam.
 - **Arbeitsspeicher:** Für Small etwa 430 MB frei; Geräte mit weniger als etwa 3 GB RAM sind ungeeignet. **Large v3 Turbo** braucht rund 1 GB und wird nur auf Geräten mit mindestens 6 GB angeboten — sonst ist es ausgegraut („Für dieses Gerät zu groß").
 - **Speicherplatz:** 32–574 MB je Modell, dauerhaft im App-Speicher.
 
@@ -408,15 +409,15 @@ Die Modelle sind quantisierte Versionen (q5) der OpenAI-Whisper-Modelle aus dem 
 
 ### 9.3 Laden, auswählen, löschen
 
-- **Laden (190 MB):** Am besten im WLAN. Über mobile Daten fragt WhisperBar: „Über mobile Daten laden? — 190 MB werden heruntergeladen. Im WLAN ist das kostenlos." → **Laden** oder **Abbrechen**.
-- Der Download läuft in einem Hintergrund-Dienst weiter, auch wenn du den Bildschirm verlässt oder WhisperBar schließt. Fortschritt in der Liste („42 % · 80 MB von 190 MB · 3,1 MB/s") und in der Benachrichtigung **Modell wird geladen** (mit **Abbrechen**). Am Ende: „Small ist bereit".
+- **Laden (190 MB):** Am besten im WLAN. Über mobile Daten fragt Vox: „Über mobile Daten laden? — 190 MB werden heruntergeladen. Im WLAN ist das kostenlos." → **Laden** oder **Abbrechen**.
+- Der Download läuft in einem Hintergrund-Dienst weiter, auch wenn du den Bildschirm verlässt oder Vox schließt. Fortschritt in der Liste („42 % · 80 MB von 190 MB · 3,1 MB/s") und in der Benachrichtigung **Modell wird geladen** (mit **Abbrechen**). Am Ende: „Small ist bereit".
 - **Abgebrochen oder Verbindung weg?** Ein Netzabbruch wird bis zu dreimal automatisch wiederholt und setzt an der Stelle fort, an der es aufhörte. Nach einem Fehler zeigt die Zeile „Fehlgeschlagen: …" mit **Erneut** — auch das setzt den Download fort, nicht neu. Nur ein Abbruch durch dich verwirft die Teildatei.
-- Nach dem Download prüft WhisperBar Größe und SHA-256-Prüfsumme. Stimmt etwas nicht: „Datei beschädigt — erneut laden".
+- Nach dem Download prüft Vox Größe und SHA-256-Prüfsumme. Stimmt etwas nicht: „Datei beschädigt — erneut laden".
 - **Auswählen:** Der Radio-Button links markiert das aktive Modell (nur bei geladenen Modellen wählbar). Ein Wechsel greift beim nächsten Diktat.
 - **Löschen:** Papierkorb-Symbol → „Small löschen? — 190 MB werden frei. Für die Offline-Erkennung muss dann ein anderes Modell geladen werden." Ist es das aktive und einzige Modell, warnt der Dialog zusätzlich („Dies ist das aktive Modell — Offline ist danach nicht einsatzbereit."); der Startbildschirm zeigt dann das Banner „Offline gewählt, aber kein Modell geladen."
 - Die Zeile „Belegt: … · Frei: …" zeigt, was die Modelle auf dem Gerät belegen.
 
-Unter Erkennung → Offline-Modell steht das aktive Modell mit **Ändern**. Hinweis dort: „Erste Nutzung lädt das Modell in den Speicher (2–5 s)." Danach bleibt es geladen; erst wenn du die WhisperBar-Oberfläche öffnest und wieder verlässt oder der Arbeitsspeicher knapp wird, gibt WhisperBar das Modell frei, und das nächste Diktat lädt es erneut.
+Unter Erkennung → Offline-Modell steht das aktive Modell mit **Ändern**. Hinweis dort: „Erste Nutzung lädt das Modell in den Speicher (2–5 s)." Danach bleibt es geladen; erst wenn du die Vox-Oberfläche öffnest und wieder verlässt oder der Arbeitsspeicher knapp wird, gibt Vox das Modell frei, und das nächste Diktat lädt es erneut.
 
 ### 9.4 Genauigkeit
 
@@ -424,7 +425,7 @@ Die Offline-Erkennung arbeitet fest mit Beam-Search (fünf Kandidaten — dersel
 
 ### 9.5 Wie lange dauert es?
 
-Nur eine **grobe Größenordnung** — WhisperBar wurde auf keinem Gerät vermessen; die Werte sind aus Erfahrungsberichten zu whisper.cpp auf Mittelklasse-ARM-Geräten (4 Threads) für etwa 10 Sekunden Sprache extrapoliert:
+Nur eine **grobe Größenordnung** — Vox wurde auf keinem Gerät vermessen; die Werte sind aus Erfahrungsberichten zu whisper.cpp auf Mittelklasse-ARM-Geräten (4 Threads) für etwa 10 Sekunden Sprache extrapoliert:
 
 | Modell | Größenordnung für 10 s Sprache |
 |---|---|
@@ -445,11 +446,11 @@ Die Umschaltung zwischen **Online-Dienst** und **Offline-Modell** steht unter Er
 
 ## 10. Eigener Server
 
-WhisperBar spricht die OpenAI-API. Jeder Server, der `POST /v1/audio/transcriptions` (und optional `POST /v1/chat/completions`) anbietet, funktioniert — also auch ein Rechner bei dir zu Hause oder dein VPS. Das Audio verlässt dann nie deine eigene Infrastruktur.
+Vox spricht die OpenAI-API. Jeder Server, der `POST /v1/audio/transcriptions` (und optional `POST /v1/chat/completions`) anbietet, funktioniert — also auch ein Rechner bei dir zu Hause oder dein VPS. Das Audio verlässt dann nie deine eigene Infrastruktur.
 
 **Du brauchst:** einen Linux-Rechner/VPS mit Docker (x86-64 oder ARM64, ≥ 4 Kerne, ≥ 8 GB RAM; für die Textverbesserung zusätzlich ≈ 6 GB) und eine Verbindung vom Handy dorthin (gleiches WLAN, Tailscale/WireGuard oder HTTPS über Caddy).
 
-Auf CPU-Servern ist die Erkennung deutlich langsamer als bei den Cloud-Anbietern (ein 20-Sekunden-Diktat kann mit dem Modell „medium" 20–40 Sekunden dauern; Schätzwerte, nicht gemessen). WhisperBar rechnet damit: Beim Anbieter „Eigener Server" gilt eine Zeitüberschreitung von **600 Sekunden** statt 90.
+Auf CPU-Servern ist die Erkennung deutlich langsamer als bei den Cloud-Anbietern (ein 20-Sekunden-Diktat kann mit dem Modell „medium" 20–40 Sekunden dauern; Schätzwerte, nicht gemessen). Vox rechnet damit: Beim Anbieter „Eigener Server" gilt eine Zeitüberschreitung von **600 Sekunden** statt 90.
 
 ### Schritt 1 — Spracherkennung starten (speaches)
 
@@ -468,7 +469,7 @@ curl -X POST -H "Authorization: Bearer mein-geheimer-schluessel" \
   http://localhost:8000/v1/models/Systran/faster-whisper-medium
 ```
 
-`API_KEY` weglassen, wenn der Server nur im eigenen Netz erreichbar ist — dann bleibt das Feld „API-Key (optional)" in WhisperBar leer. WhisperBar schickt bei leerem Key gar keinen Authorization-Header (manche Server werten ein leeres Token als ungültig).
+`API_KEY` weglassen, wenn der Server nur im eigenen Netz erreichbar ist — dann bleibt das Feld „API-Key (optional)" in Vox leer. Vox schickt bei leerem Key gar keinen Authorization-Header (manche Server werten ein leeres Token als ungültig).
 
 *Alternative (noch kleiner): whisper.cpp*
 
@@ -481,7 +482,7 @@ cmake -B build && cmake --build build -j --config Release
   --inference-path /v1/audio/transcriptions
 ```
 
-Wichtig: `-l auto` (oder `-l de`), sonst nimmt der Server Englisch an, wenn die App bei „Automatisch erkennen" keine Sprache mitschickt. whisper-server hat **keine** Passwortabfrage — nur im LAN/VPN betreiben oder hinter Caddy (Schritt 3). Das Feld „Modell" ignoriert whisper-server; WhisperBar schickt 16-kHz-Mono-WAV, ein `--convert`/ffmpeg ist nicht nötig.
+Wichtig: `-l auto` (oder `-l de`), sonst nimmt der Server Englisch an, wenn die App bei „Automatisch erkennen" keine Sprache mitschickt. whisper-server hat **keine** Passwortabfrage — nur im LAN/VPN betreiben oder hinter Caddy (Schritt 3). Das Feld „Modell" ignoriert whisper-server; Vox schickt 16-kHz-Mono-WAV, ein `--convert`/ffmpeg ist nicht nötig.
 
 Weitere passende Server: **LocalAI** (`/v1/audio/transcriptions`, Modellname `whisper-1`, Key per `LOCALAI_API_KEY` optional) und **hwdsl2/whisper-server** (faster-whisper, erzeugt bei Neuinstallation mit Volume automatisch einen Key — im Container-Log nachsehen). Nicht kompatibel ist `openai-whisper-asr-webservice` (anderes Schema).
 
@@ -496,17 +497,17 @@ sudo systemctl daemon-reload && sudo systemctl restart ollama
 ollama pull qwen3:8b                  # 5,2 GB; schneller: ollama pull gemma3:4b
 ```
 
-Ollama braucht keinen Key. Auf 4 CPU-Kernen liefert ein 8B-Modell ≈ 5–8 Wörter pro Sekunde — die Textverbesserung eines längeren Diktats dauert also spürbar; bei Bedarf `gemma3:4b` nehmen oder die Stufe auf „Aus" lassen. WhisperBar schaltet beim Eigenen Server das „Nachdenken" von Qwen3 & Co. automatisch ab (`reasoning_effort: none`) und entfernt trotzdem versehentlich mitgelieferte Denk-Blöcke aus der Antwort.
+Ollama braucht keinen Key. Auf 4 CPU-Kernen liefert ein 8B-Modell ≈ 5–8 Wörter pro Sekunde — die Textverbesserung eines längeren Diktats dauert also spürbar; bei Bedarf `gemma3:4b` nehmen oder die Stufe auf „Aus" lassen. Vox schaltet beim Eigenen Server das „Nachdenken" von Qwen3 & Co. automatisch ab (`reasoning_effort: none`) und entfernt trotzdem versehentlich mitgelieferte Denk-Blöcke aus der Antwort.
 
 ### Schritt 3 — Von außen erreichbar machen
 
-**Variante A: Tailscale (empfohlen, kein offener Port).** Tailscale auf Server und Handy installieren, beide im selben Tailnet. Dann in WhisperBar `http://100.x.y.z:8000/v1` eintragen (die Tailscale-IP des Servers). Mit gültigem Zertifikat: `sudo tailscale serve --bg --https=443 localhost:8000` → `https://<server>.<tailnet>.ts.net/v1` (MagicDNS und HTTPS-Zertifikate im Tailscale-Admin aktivieren).
+**Variante A: Tailscale (empfohlen, kein offener Port).** Tailscale auf Server und Handy installieren, beide im selben Tailnet. Dann in Vox `http://100.x.y.z:8000/v1` eintragen (die Tailscale-IP des Servers). Mit gültigem Zertifikat: `sudo tailscale serve --bg --https=443 localhost:8000` → `https://<server>.<tailnet>.ts.net/v1` (MagicDNS und HTTPS-Zertifikate im Tailscale-Admin aktivieren).
 
 **Variante B: Caddy mit TLS + Bearer-Token** (wenn der Server ohnehin öffentlich ist, z. B. VPS mit Domain):
 
 ```caddyfile
 whisper.example.de {
-	@unauth not header Authorization "Bearer {env.WHISPERBAR_TOKEN}"
+	@unauth not header Authorization "Bearer {env.VOX_TOKEN}"
 	respond @unauth "Unauthorized" 401
 
 	handle /v1/audio/* {
@@ -519,7 +520,7 @@ whisper.example.de {
 }
 ```
 
-`WHISPERBAR_TOKEN` als Umgebungsvariable des Caddy-Dienstes setzen (nicht in die Datei schreiben). In WhisperBar: Base-URL `https://whisper.example.de/v1`, API-Key = Token. Vorteil: Erkennung und Textverbesserung laufen hinter **einer** URL — in WhisperBar bleibt „Eigenen Zugang verwenden" dann einfach aus, und die Textverbesserung nutzt automatisch denselben Zugang.
+`VOX_TOKEN` als Umgebungsvariable des Caddy-Dienstes setzen (nicht in die Datei schreiben). In Vox: Base-URL `https://whisper.example.de/v1`, API-Key = Token. Vorteil: Erkennung und Textverbesserung laufen hinter **einer** URL — in Vox bleibt „Eigenen Zugang verwenden" dann einfach aus, und die Textverbesserung nutzt automatisch denselben Zugang.
 
 ### Schritt 4 — Testen (vom Rechner aus)
 
@@ -541,7 +542,7 @@ curl -s http://SERVER:11434/v1/chat/completions -H "Content-Type: application/js
 
 Bei Fehler: `docker logs speaches` bzw. `journalctl -u ollama`.
 
-### Schritt 5 — In WhisperBar eintragen
+### Schritt 5 — In Vox eintragen
 
 **Erkennung** (Einstellungen → Erkennung, oder Schritt 2a im Assistenten) → Anbieter **Eigener Server**:
 
@@ -556,23 +557,23 @@ Dann **Zugang prüfen**.
 
 **Textverbesserung** (Einstellungen → Text): Läuft Ollama auf einem eigenen Port (Variante ohne Caddy), Schalter **Eigenen Zugang verwenden** ein → Anbieter **Eigener Server** → Base-URL `http://SERVER:11434/v1`, Key leer, Modell `qwen3:8b`. Hinter Caddy mit einer gemeinsamen URL bleibt der Schalter aus.
 
-**http oder https?** Unverschlüsseltes `http://` akzeptiert WhisperBar ohne Warnung nur zu privaten Adressen (192.168.x.x, 10.x.x.x, 172.16–31.x.x, 100.64–127.x.x/Tailscale, `localhost`, `*.local`, `*.lan`, `*.home.arpa`, `*.internal`). Bei einer öffentlichen Adresse warnt das Feld „Unverschlüsselt über das Internet — https:// oder VPN (Tailscale) verwenden". Über das Internet immer `https://` oder VPN. Die Cloud-Anbieter aus der Liste sind fest auf https eingestellt.
+**http oder https?** Unverschlüsseltes `http://` akzeptiert Vox ohne Warnung nur zu privaten Adressen (192.168.x.x, 10.x.x.x, 172.16–31.x.x, 100.64–127.x.x/Tailscale, `localhost`, `*.local`, `*.lan`, `*.home.arpa`, `*.internal`). Bei einer öffentlichen Adresse warnt das Feld „Unverschlüsselt über das Internet — https:// oder VPN (Tailscale) verwenden". Über das Internet immer `https://` oder VPN. Die Cloud-Anbieter aus der Liste sind fest auf https eingestellt.
 
 ---
 
 ## 11. Datenschutz
 
-WhisperBar hat keinen eigenen Server, kein Konto, keine Telemetrie. Was mit deinen Daten passiert, hängt allein vom gewählten Erkennungsweg ab:
+Vox hat keinen eigenen Server, kein Konto, keine Telemetrie. Was mit deinen Daten passiert, hängt allein vom gewählten Erkennungsweg ab:
 
-**Online:** Audio und Kontext-Prompt gehen an den gewählten Anbieter. Bei Textverbesserung geht der erkannte Text an das Sprachmodell (denselben oder einen anderen Anbieter). Dein Key bleibt auf dem Gerät. WhisperBar speichert keine Aufnahmen. Unter Erkennung steht immer, an wen gesendet wird („Audio wird zur Erkennung an OpenAI gesendet."). Was der Anbieter mit den Daten macht, regeln dessen Bedingungen — bei Google Gemini im Free-Tier ausdrücklich Trainingsnutzung, bei DeepSeek Server in China; WhisperBar weist an der Auswahl darauf hin.
+**Online:** Audio und Kontext-Prompt gehen an den gewählten Anbieter. Bei Textverbesserung geht der erkannte Text an das Sprachmodell (denselben oder einen anderen Anbieter). Dein Key bleibt auf dem Gerät. Vox speichert keine Aufnahmen. Unter Erkennung steht immer, an wen gesendet wird („Audio wird zur Erkennung an OpenAI gesendet."). Was der Anbieter mit den Daten macht, regeln dessen Bedingungen — bei Google Gemini im Free-Tier ausdrücklich Trainingsnutzung, bei DeepSeek Server in China; Vox weist an der Auswahl darauf hin.
 
 **Offline:** Nichts verlässt das Gerät — nur der Modell-Download geht ins Netz (zu huggingface.co).
 
 **Eigener Server:** Audio und Text gehen nur an deinen Server.
 
-**Bedienungshilfe:** Die Bedienungshilfe „WhisperBar Text-Einfügen" liest nichts mit und speichert nichts; sie fügt nur den diktierten Text in das fokussierte Feld ein. Android zeigt beim Aktivieren die übliche Warnung für Bedienungshilfen („kann Bildschirminhalte lesen") — WhisperBar nutzt davon ausschließlich das Einfügen.
+**Bedienungshilfe:** Die Bedienungshilfe „Vox Text-Einfügen" liest nichts mit und speichert nichts; sie fügt nur den diktierten Text in das fokussierte Feld ein. Android zeigt beim Aktivieren die übliche Warnung für Bedienungshilfen („kann Bildschirminhalte lesen") — Vox nutzt davon ausschließlich das Einfügen.
 
-**Auf dem Gerät gespeichert:** Deine Einstellungen inklusive API-Key (im privaten App-Speicher, für andere Apps unzugänglich), die heruntergeladenen Modelle und die Position des Knopfs. Keine Aufnahmen, keine Texte, keine Verläufe. Ein fehlgeschlagenes Diktat bleibt nur so lange im Arbeitsspeicher gepuffert, bis du es erneut sendest oder verwirfst. WhisperBar ist vom Android-System-Backup ausgenommen (`allowBackup=false`): die Einstellungen inklusive Key landen weder im Google-Backup noch im Geräte-zu-Gerät-Transfer — nach einem Gerätewechsel richtest du den Zugang neu ein.
+**Auf dem Gerät gespeichert:** Deine Einstellungen inklusive API-Key (im privaten App-Speicher, für andere Apps unzugänglich), die heruntergeladenen Modelle und die Position des Knopfs. Keine Aufnahmen, keine Texte, keine Verläufe. Ein fehlgeschlagenes Diktat bleibt nur so lange im Arbeitsspeicher gepuffert, bis du es erneut sendest oder verwirfst. Vox ist vom Android-System-Backup ausgenommen (`allowBackup=false`): die Einstellungen inklusive Key landen weder im Google-Backup noch im Geräte-zu-Gerät-Transfer — nach einem Gerätewechsel richtest du den Zugang neu ein.
 
 **Berechtigungen:** Mikrofon (Aufnahme), Internet (Online-Dienst und Modell-Download), Über anderen Apps anzeigen (Knopf), Benachrichtigungen (Beenden-Aktion und Download-Fortschritt), Netzwerkstatus (Nachfrage vor Downloads über mobile Daten), Vordergrund-Dienste (Knopf und Modell-Download).
 
@@ -583,10 +584,10 @@ WhisperBar hat keinen eigenen Server, kein Konto, keine Telemetrie. Was mit dein
 Die häufigsten Punkte stehen auch in der App unter Anleitung & Hilfe → **Wenn etwas nicht klappt**, jeweils mit einem Button zum passenden Ziel.
 
 **Der Knopf erscheint nicht.**
-„Über anderen Apps anzeigen" muss erlaubt sein (Einstellungen → Knopf & Tastatur → Berechtigungen). Zusätzlich in den Android-Einstellungen die **Akku-Optimierung** für WhisperBar ausschalten (Apps → WhisperBar → Akku → „Nicht eingeschränkt"/„Uneingeschränkt"), sonst beendet Android den Dienst im Hintergrund. Einige Hersteller (Xiaomi, Huawei, Oppo …) haben eigene Autostart-/Hintergrund-Sperren — WhisperBar dort freigeben. Zeigt WhisperBar „„Über anderen Apps anzeigen" wurde entzogen" → **Erlauben**.
+„Über anderen Apps anzeigen" muss erlaubt sein (Einstellungen → Knopf & Tastatur → Berechtigungen). Zusätzlich in den Android-Einstellungen die **Akku-Optimierung** für Vox ausschalten (Apps → Vox → Akku → „Nicht eingeschränkt"/„Uneingeschränkt"), sonst beendet Android den Dienst im Hintergrund. Einige Hersteller (Xiaomi, Huawei, Oppo …) haben eigene Autostart-/Hintergrund-Sperren — Vox dort freigeben. Zeigt Vox „„Über anderen Apps anzeigen" wurde entzogen" → **Erlauben**.
 
 **Der Text landet nur in der Zwischenablage.**
-Die Bedienungshilfe „WhisperBar" ist aus. Aktivieren (Einstellungen → Knopf & Tastatur → Berechtigungen → Bedienungshilfe → **Öffnen**), dann fügt WhisperBar den Text direkt ein. In manchen Apps ist das Feld kein normales Textfeld (etwa in einigen Spielen oder Terminal-Apps) — dann bleibt die Zwischenablage der Weg.
+Die Bedienungshilfe „Vox" ist aus. Aktivieren (Einstellungen → Knopf & Tastatur → Berechtigungen → Bedienungshilfe → **Öffnen**), dann fügt Vox den Text direkt ein. In manchen Apps ist das Feld kein normales Textfeld (etwa in einigen Spielen oder Terminal-Apps) — dann bleibt die Zwischenablage der Weg.
 
 **„Eingeschränkte Einstellung" beim Aktivieren der Bedienungshilfe.**
 Bei manuell installierten Apps: App-Info → ⋮ → **Eingeschränkte Einstellungen zulassen**, dann die Bedienungshilfe erneut aktivieren (siehe [Schritt 5](#schritt-5--text-automatisch-einfügen-empfohlen)).
@@ -604,7 +605,7 @@ Nur beim Eigenen Server: Base-URL ohne `/v1` eingetragen, oder whisper-server l�
 `http://` geht nur zu privaten Adressen (siehe [Kapitel 10](#10-eigener-server)). Für einen Server im Internet `https://` (Caddy, Tailscale Serve) verwenden oder per VPN eine private Adresse nutzen.
 
 **„Zeitüberschreitung — Server zu langsam oder Verbindung schlecht".**
-Beim Eigenen Server (Limit 600 s): ein kleineres Modell auf dem Server verwenden, mehr Threads geben oder kürzer diktieren. Bei Cloud-Anbietern deutet der Fehler auf eine schlechte Verbindung — WhisperBar puffert das Diktat, Tippen sendet erneut.
+Beim Eigenen Server (Limit 600 s): ein kleineres Modell auf dem Server verwenden, mehr Threads geben oder kürzer diktieren. Bei Cloud-Anbietern deutet der Fehler auf eine schlechte Verbindung — Vox puffert das Diktat, Tippen sendet erneut.
 
 **„Server nicht erreichbar — läuft er, stimmt der Port, gleiches WLAN/VPN?" / „Server nicht gefunden — Hostname/IP prüfen".**
 Nur beim Eigenen Server: Läuft der Container? Stimmt der Port (speaches 8000, whisper-server 8080, Ollama 11434)? Sind Handy und Server im selben Netz bzw. Tailnet? Test mit `curl` von einem Rechner aus (Kapitel 10, Schritt 4).
@@ -613,12 +614,12 @@ Nur beim Eigenen Server: Läuft der Container? Stimmt der Port (speaches 8000, w
 Ein kleineres Modell wählen (Base oder Small) oder auf den Online-Dienst wechseln. Auch andere gleichzeitig laufende Apps bremsen — die Erkennung nutzt alle Performance-Kerne.
 
 **„Datei beschädigt — erneut laden" / „Offline-Modell konnte nicht geladen werden".**
-Modell unter Offline-Modelle löschen und neu laden. Tritt der Fehler direkt nach dem Download auf, war die Übertragung fehlerhaft; WhisperBar lädt das Modell beim nächsten Versuch neu.
+Modell unter Offline-Modelle löschen und neu laden. Tritt der Fehler direkt nach dem Download auf, war die Übertragung fehlerhaft; Vox lädt das Modell beim nächsten Versuch neu.
 
 **Der Modell-Download bricht ab.**
-„Netzwerkfehler beim Laden": WhisperBar wiederholt bis zu dreimal automatisch und setzt dann mit **Erneut** an derselben Stelle fort (Teildatei bleibt erhalten). „Nicht genug Speicherplatz": Platz schaffen. „Zeitlimit für Hintergrund-Downloads erreicht — bitte erneut starten": Android begrenzt Hintergrund-Downloads dieser Art auf sechs Stunden pro Tag — erneut starten, der Download läuft weiter.
+„Netzwerkfehler beim Laden": Vox wiederholt bis zu dreimal automatisch und setzt dann mit **Erneut** an derselben Stelle fort (Teildatei bleibt erhalten). „Nicht genug Speicherplatz": Platz schaffen. „Zeitlimit für Hintergrund-Downloads erreicht — bitte erneut starten": Android begrenzt Hintergrund-Downloads dieser Art auf sechs Stunden pro Tag — erneut starten, der Download läuft weiter.
 
-**„Kein Zugang eingerichtet — in WhisperBar einrichten" / „Kein Offline-Modell geladen — unter Offline-Modelle laden".**
+**„Kein Zugang eingerichtet — in Vox einrichten" / „Kein Offline-Modell geladen — unter Offline-Modelle laden".**
 Die Erkennung ist nicht vollständig eingerichtet: online fehlt Key oder URL, offline das Modell. Der Startbildschirm zeigt den Grund in der Karte Status.
 
 **„Offline-Erkennung wird von diesem Gerät nicht unterstützt (CPU ohne FP16/DotProd)".**
@@ -634,11 +635,11 @@ Einstellungen aus 2.x werden übernommen (Key, URL, Modell, Sprache, Regeln). Of
 
 ## 13. Häufige Fragen
 
-**Was kostet WhisperBar?**
+**Was kostet Vox?**
 Die App ist kostenlos und quelloffen (MIT-Lizenz). Kosten entstehen nur beim Online-Anbieter — mit Groq gar keine, mit OpenAI GPT Transcribe etwa $0,0045 pro Diktat-Minute (Stand 09/2026, ohne Gewähr). Der Offline-Modus ist komplett kostenlos.
 
 **Brauche ich Google Play oder ein Google-Konto?**
-Nein. WhisperBar wird als APK installiert und braucht keine Google-Dienste. Nur wenn du Google Gemini für die Textverbesserung wählst, brauchst du ein Google-Konto für den Key.
+Nein. Vox wird als APK installiert und braucht keine Google-Dienste. Nur wenn du Google Gemini für die Textverbesserung wählst, brauchst du ein Google-Konto für den Key.
 
 **Muss ich meine Tastatur wechseln?**
 Nein. Der schwebende Knopf arbeitet mit jeder Tastatur zusammen (Gboard, SwiftKey, …) — die Tastatur bleibt, wie sie ist. Die Diktat-Tastatur ist nur eine Alternative.
@@ -647,15 +648,15 @@ Nein. Der schwebende Knopf arbeitet mit jeder Tastatur zusammen (Gboard, SwiftKe
 Ja. Beide Zugänge bleiben gespeichert; unter Erkennung schaltest du mit einem Tipp um.
 
 **Welche Sprachen?**
-Deutsch (Voreinstellung), Englisch, Spanisch, Französisch, Italienisch oder „Automatisch erkennen". Die Erkennungsmodelle selbst beherrschen deutlich mehr Sprachen; die Auswahl in WhisperBar umfasst die fünf Sprachen, für die eingebaute Füllwort-Listen mitkommen. Für andere Sprachen „Automatisch erkennen" wählen.
+Deutsch (Voreinstellung), Englisch, Spanisch, Französisch, Italienisch oder „Automatisch erkennen". Die Erkennungsmodelle selbst beherrschen deutlich mehr Sprachen; die Auswahl in Vox umfasst die fünf Sprachen, für die eingebaute Füllwort-Listen mitkommen. Für andere Sprachen „Automatisch erkennen" wählen.
 
 **Wie lang darf ein Diktat sein?**
-Ein Diktat per Knopf oder Tastatur wird am Stück an die Erkennung geschickt; die Online-Anbieter nehmen höchstens 25 MB pro Anfrage (etwa 13 Minuten bei WhisperBars Audioformat). Für die Praxis: einzelne Sätze bis wenige Minuten. Geteilte Sprachnachrichten dürfen beliebig lang sein — sie werden in 5-Minuten-Stücke geteilt.
+Ein Diktat per Knopf oder Tastatur wird am Stück an die Erkennung geschickt; die Online-Anbieter nehmen höchstens 25 MB pro Anfrage (etwa 13 Minuten bei Voxs Audioformat). Für die Praxis: einzelne Sätze bis wenige Minuten. Geteilte Sprachnachrichten dürfen beliebig lang sein — sie werden in 5-Minuten-Stücke geteilt.
 
 **Warum ist die Erkennung offline so viel langsamer als online?**
 Die Online-Anbieter rechnen auf Grafikkarten-Servern; auf dem Telefon läuft das Modell auf der CPU. Dafür geht offline nichts nach außen. Small ist der Kompromiss; wer Geduld hat, bekommt mit Large v3 Turbo fast Online-Qualität.
 
-**Speichert WhisperBar meine Diktate?**
+**Speichert Vox meine Diktate?**
 Nein — weder Audio noch Text. Siehe [Kapitel 11](#11-datenschutz).
 
 **Kann ich Namen und Fachbegriffe hinterlegen?**
@@ -664,14 +665,14 @@ Ja: Erkennung → Sprache & Kontext → „Kontext: Namen, Fachbegriffe, Schreib
 **Was passiert beim Update von 2.x auf 3.0.0?**
 Deine Einstellungen werden automatisch übernommen: Base-URL, Key, Modell und Kontext-Prompt landen unter Erkennung (Anbieter „OpenAI" bzw. „Eigener Server", je nach URL), die Option „Text von der KI glätten lassen" wird zur Stufe **Glätten**, die Füllwort-/Groß-Schreib-/Leerzeichen-Regeln bleiben. Dein bisheriges Modell bleibt eingetragen (GPT-4o Transcribe wird als Auslauf-Modell gekennzeichnet); neue Installationen starten mit **GPT Transcribe**. Da 3.0.0 mehr Berechtigungen kennt (Benachrichtigungen ab Android 13), kann der Assistent einmalig die noch offenen Schritte zeigen.
 
-**Warum fragt WhisperBar nach „Über anderen Apps anzeigen" und einer Bedienungshilfe?**
-Der Knopf muss über anderen Apps liegen (Overlay), und um Text in ein fremdes Textfeld zu schreiben, ohne die Tastatur zu wechseln, gibt es unter Android nur den Weg über eine Bedienungshilfe. Beides ist optional: Mit „Nur Tastatur nutzen" kommt WhisperBar ohne beides aus.
+**Warum fragt Vox nach „Über anderen Apps anzeigen" und einer Bedienungshilfe?**
+Der Knopf muss über anderen Apps liegen (Overlay), und um Text in ein fremdes Textfeld zu schreiben, ohne die Tastatur zu wechseln, gibt es unter Android nur den Weg über eine Bedienungshilfe. Beides ist optional: Mit „Nur Tastatur nutzen" kommt Vox ohne beides aus.
 
 **Was passiert beim Drehen des Bildschirms?**
-Der Knopf bleibt im sichtbaren Bereich; eine im Querformat gemerkte Position wird im Hochformat korrigiert. Auf Tablets ist WhisperBar nicht gesondert getestet.
+Der Knopf bleibt im sichtbaren Bereich; eine im Querformat gemerkte Position wird im Hochformat korrigiert. Auf Tablets ist Vox nicht gesondert getestet.
 
 **Wo finde ich diese Anleitung in der App?**
 Einstellungen → **Anleitung & Hilfe** (oder das **?** oben rechts auf dem Startbildschirm): So funktioniert's · Einrichtung Schritt für Schritt · API-Key bekommen · Eigener Server · Offline-Modus · Datenschutz · Wenn etwas nicht klappt.
 
 **Wo melde ich Fehler?**
-Auf der GitHub-Seite des Projekts (Link unter Einstellungen → Über WhisperBar → „Quellcode auf GitHub"). Hilfreich sind Android-Version, Gerät, Erkennungsweg (online/offline, Anbieter, Modell) und die genaue Fehlermeldung aus der App.
+Auf der GitHub-Seite des Projekts (Link unter Einstellungen → Über Vox → „Quellcode auf GitHub"). Hilfreich sind Android-Version, Gerät, Erkennungsweg (online/offline, Anbieter, Modell) und die genaue Fehlermeldung aus der App.

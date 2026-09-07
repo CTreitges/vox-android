@@ -1,0 +1,45 @@
+package com.chris.vox.ui.home
+
+import com.chris.vox.Engine
+import com.chris.vox.ui.components.Tone
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+/** Home-Statuslogik (UX-Spec §2.1): Sperre, Banner-Prioritaet, Status-Farben, Tastatur-Zeile. */
+class HomeStatusTest {
+
+    @Test fun heroSperreMikrofonVorOverlay() {
+        assertEquals(HomeStatus.Blocked.NONE, HomeStatus.blocked(micGranted = true, canDrawOverlays = true))
+        assertEquals(HomeStatus.Blocked.MIC, HomeStatus.blocked(micGranted = false, canDrawOverlays = false))
+        assertEquals(HomeStatus.Blocked.OVERLAY, HomeStatus.blocked(micGranted = true, canDrawOverlays = false))
+    }
+
+    @Test fun bannerZeigtNurDenErstenOffenenPunkt() {
+        assertEquals(HomeStatus.Banner.NONE, HomeStatus.banner(true, Engine.ONLINE, false, true, true))
+        assertEquals(HomeStatus.Banner.A11Y, HomeStatus.banner(false, Engine.OFFLINE, false, true, false))
+        assertEquals(HomeStatus.Banner.MODEL, HomeStatus.banner(true, Engine.OFFLINE, false, true, false))
+        assertEquals(HomeStatus.Banner.NOTIF, HomeStatus.banner(true, Engine.OFFLINE, true, true, false))
+        assertEquals(HomeStatus.Banner.NONE, HomeStatus.banner(true, Engine.ONLINE, false, false, false))
+    }
+
+    @Test fun statusFarben() {
+        assertEquals(Tone.SUCCESS, HomeStatus.recognitionTone(Engine.ONLINE, false))
+        assertEquals(Tone.ERROR, HomeStatus.recognitionTone(Engine.OFFLINE, false))
+        assertEquals(Tone.SUCCESS, HomeStatus.recognitionTone(Engine.OFFLINE, true))
+        assertEquals(Tone.ERROR, HomeStatus.recognitionTone(null, true))
+        assertEquals(Tone.SUCCESS, HomeStatus.permissionsTone(true, true, true))
+        assertEquals(Tone.WARNING, HomeStatus.permissionsTone(true, true, false))
+        assertEquals(Tone.ERROR, HomeStatus.permissionsTone(true, false, true))
+    }
+
+    @Test fun tastaturZeileUndModelleZeile() {
+        assertEquals(HomeStatus.Keyboard.ACTIVE, HomeStatus.keyboard(true, true))
+        assertEquals(HomeStatus.Keyboard.ENABLED, HomeStatus.keyboard(true, false))
+        assertEquals(HomeStatus.Keyboard.OFF, HomeStatus.keyboard(false, true))
+        assertTrue(HomeStatus.showModelsRow(1, Engine.ONLINE))
+        assertTrue(HomeStatus.showModelsRow(0, Engine.OFFLINE))
+        assertFalse(HomeStatus.showModelsRow(0, Engine.ONLINE))
+    }
+}

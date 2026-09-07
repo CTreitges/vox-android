@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tasten der Diktier-Tastatur (UX-Spec §5.3): Radius 12, Fuellung wb_surfaceContainerHigh,
-     gedrueckt wb_surfaceContainerHighest, Ripple wb_onSurface @ 12 %. -->
+<!-- Tasten der Diktier-Tastatur (UX-Spec §5.3): Radius 12, Fuellung vox_surfaceContainerHigh,
+     gedrueckt vox_surfaceContainerHighest, Ripple vox_onSurface @ 12 %. -->
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="@color/key_ripple">
     <item>
         <selector>
             <item android:state_pressed="true">
                 <shape android:shape="rectangle">
-                    <solid android:color="@color/wb_surfaceContainerHighest" />
+                    <solid android:color="@color/vox_surfaceContainerHighest" />
                     <corners android:radius="12dp" />
                 </shape>
             </item>
             <item>
                 <shape android:shape="rectangle">
-                    <solid android:color="@color/wb_surfaceContainerHigh" />
+                    <solid android:color="@color/vox_surfaceContainerHigh" />
                     <corners android:radius="12dp" />
                 </shape>
             </item>

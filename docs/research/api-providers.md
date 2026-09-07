@@ -1,7 +1,7 @@
-# WhisperBar — Provider- und Modell-Katalog (Stand 2026-09-06)
+# Vox — Provider- und Modell-Katalog (Stand 2026-09-06)
 
 Recherche gegen aktuelle Anbieter-Doku für die Dropdowns „Transkription" (`POST {baseUrl}/audio/transcriptions`, multipart WAV, Felder `model/language/prompt/response_format`) und „Textverbesserung" (`POST {baseUrl}/chat/completions`, aktuell mit `temperature: 0`).
-Bezug im Code: `app/src/main/java/com/chris/whisperbar/api/ApiTranscriber.kt`, `api/TextRefiner.kt`, `Prefs.kt` (Defaults `DEFAULT_API_URL = https://api.openai.com/v1`, `DEFAULT_API_MODEL = gpt-4o-transcribe`, `DEFAULT_LLM_MODEL = gpt-4o-mini`).
+Bezug im Code: `app/src/main/java/com/chris/vox/api/ApiTranscriber.kt`, `api/TextRefiner.kt`, `Prefs.kt` (Defaults `DEFAULT_API_URL = https://api.openai.com/v1`, `DEFAULT_API_MODEL = gpt-4o-transcribe`, `DEFAULT_LLM_MODEL = gpt-4o-mini`).
 
 Legende: **[belegt]** = aus offizieller Doku zitiert · **[sekundär]** = nur Drittquelle · **[unsicher]** = widersprüchlich/nicht auffindbar, vor Release testen.
 
@@ -189,7 +189,7 @@ LLM-Kosten sind gegenüber STT um Faktor 10–30 kleiner — der Preisvergleich 
 
 ## 7. „Wo bekomme ich einen Key?" — Schritte je Provider (für die Anleitung)
 
-**OpenAI** — 1) https://platform.openai.com registrieren. 2) *Settings → Billing* → Zahlungsmittel + Prepaid-Guthaben (**mind. $5**, damit Tier 1). 3) https://platform.openai.com/api-keys → *Create new secret key* → kopieren (wird nur einmal angezeigt). 4) In WhisperBar: Provider „OpenAI", Key einfügen.
+**OpenAI** — 1) https://platform.openai.com registrieren. 2) *Settings → Billing* → Zahlungsmittel + Prepaid-Guthaben (**mind. $5**, damit Tier 1). 3) https://platform.openai.com/api-keys → *Create new secret key* → kopieren (wird nur einmal angezeigt). 4) In Vox: Provider „OpenAI", Key einfügen.
 
 **Groq** — 1) https://console.groq.com registrieren (Google/GitHub/E-Mail). 2) https://console.groq.com/keys → *Create API Key*. 3) Kostenlos nutzbar ohne Zahlungsmittel (Free-Plan). Optional *Billing → Developer* für höhere Limits/100-MB-Dateien.
 
