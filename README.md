@@ -75,7 +75,7 @@ Zielplattform: compileSdk 37, targetSdk 35, minSdk 26. Compose BOM 2026.08.00 (u
 ### Lokal
 
 ```bash
-git clone --recurse-submodules <repo-url>     # whisper.cpp kommt als Submodul (v1.9.3)
+git clone --recurse-submodules https://github.com/CTreitges/whisperbar-android.git     # whisper.cpp kommt als Submodul (v1.9.3)
 cd whisperbar-android
 ./gradlew assembleDebug                        # Debug-APK: app/build/outputs/apk/debug/app-debug.apk
 ./gradlew testDebugUnitTest lintDebug          # Tests + Lint
