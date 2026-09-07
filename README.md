@@ -1,122 +1,171 @@
-# WhisperBar — Diktier-Tastatur für Android
+# WhisperBar — Diktieren in jede Android-App
 
-Diktieren in **jede** App: halte den Mikro-Knopf, sprich, und der erkannte Text landet direkt
-im aktiven Textfeld (WhatsApp, Gmail, Browser …). Eine schlanke Alternative zu
-[Wispr Flow](https://wisprflow.ai/) und der Mac-App [Whisper Bar](https://whisperbar.app/)
-(Kevin Chromik) — als Android-**Tastatur (IME)** *und* als schwebender Knopf über allen Apps.
+Sprechen statt tippen: WhisperBar nimmt auf, erkennt den Text und schreibt ihn in das Feld, in dem gerade der Cursor steht — über einen **schwebenden Mikro-Knopf** (die gewohnte Tastatur bleibt), als eigene **Diktat-Tastatur** oder für **Sprachnachrichten** aus WhatsApp & Co. per Teilen-Menü.
 
-Die Erkennung läuft über **deinen eigenen API-Zugang** (OpenAI-kompatibel: OpenAI, Groq,
-self-hosted). Du brauchst also einmalig einen API-Key; dein Audio geht zur Erkennung an den
-Anbieter, den du einträgst.
+Die Erkennung läuft wahlweise **online** über deinen eigenen Zugang bei einem OpenAI-kompatiblen Anbieter (OpenAI, Groq, Mistral, Together AI, DeepInfra, OpenRouter oder ein eigener Server) oder **offline** auf dem Gerät mit whisper.cpp und einem einmalig heruntergeladenen Modell. Eine optionale KI-Textverbesserung glättet, verschönert oder fasst zusammen.
 
-> **Hinweis zur Version 2.0:** Der frühere On-Device-Betrieb (whisper.cpp im APK, ~154 MB) ist
-> raus — er lieferte auf dem Telefon zu schlechte Ergebnisse. Der letzte Stand mit lokalem Modell
-> liegt als Tag [`offline-v1`](../../tree/offline-v1) im Repo.
+Version **3.0.0** — Nutzer-Anleitung: [docs/ANLEITUNG.md](docs/ANLEITUNG.md) · Änderungen: [CHANGELOG.md](CHANGELOG.md).
 
-## Features
+Inspiriert von [Wispr Flow](https://wisprflow.ai/) und der Mac-App [Whisper Bar](https://whisperbar.app/) (Kevin Chromik) — eigenständige, unabhängige Implementierung.
 
-- 🎤 **Zwei Diktat-Wege**: (a) eigene **Tastatur (IME)** mit Mikro, (b) **schwebender Mikro-Knopf**
-  (Overlay + Bedienungshilfe), der Text ins Fokus-Feld schreibt — **ohne** Gboard zu verlassen.
-- 🔵 **Sichtbare Zustände** am schwebenden Knopf: bereit · nimmt auf (mit Timer) · sendet · Fehler.
-  Ziehen aufs ✕ am unteren Rand verwirft das Diktat, der Knopf merkt sich seine Position.
-- ↻ **Kein Diktat geht verloren**: Scheitert die Anfrage (kein Netz, Server-Aussetzer), bleibt das
-  Audio gepuffert — ein Tipp sendet erneut.
-- ✨ **Textveredelung**: Füllwörter entfernen, Sätze groß schreiben, Whitespace/Satzzeichen fixen
-  (lokal, ohne Extra-Kosten) — optional zusätzlich **KI-Glättung** für Zeichensetzung, Grammatik
-  und Absätze, wahlweise mit **intelligenter Füllwort-Entfernung** (die KI entscheidet selbst,
-  statt fester Wortliste).
-- 📩 **Sprachnachrichten aus anderen Apps**: WhisperBar taucht im Teilen-Menü auf. Eine
-  WhatsApp-Sprachnachricht (oder Telegram, Signal, Aufnahme-App, Dateimanager) teilen und
-  den Text lesen, kopieren oder weiterleiten. Mehrere Dateien auf einmal gehen auch.
-  Geteiltes Audio wird **wortgetreu** ausgegeben — bei fremden Nachrichten will man wissen,
-  was gesagt wurde, nicht eine geglättete Fassung.
-- 🏷️ **Kontext-Prompt**: Eigennamen und Fachbegriffe hinterlegen — verbessert die Erkennung, kostet nichts.
-- 🌍 **Mehrsprachig** — Default **Deutsch**, oder auto / en / es / fr / it.
-- 🆓 MIT-lizenziert · APK ~2 MB · kein AndroidX/Compose
+## Features (3.0.0)
+
+- **Drei Diktat-Wege:** schwebender Mikro-Knopf über allen Apps (Overlay + Bedienungshilfe fügt direkt ins Feld ein, Zwischenablage als Fallback) · Diktat-Tastatur mit Halten-zum-Sprechen und Pegelband · Sprachnachrichten aus WhatsApp/Telegram/Signal per Teilen-Menü abtippen (Absätze, Schalter „Füllwörter ausblenden", mehrere Dateien, lange Aufnahmen gestückelt).
+- **Online oder offline:** Anbieter-Katalog mit Modellen, Preisen und Key-Links; Offline-Erkennung mit whisper.cpp v1.9.3 und Modellen Tiny/Base/Small/Large v3 Turbo (Download bei Bedarf mit Fortsetzen und SHA-256-Prüfung, kein Modell im APK).
+- **Geführte Einrichtung:** Assistent mit sieben Schritten (Erkennungsweg, Zugang oder Modell, Mikrofon, Über anderen Apps anzeigen, Bedienungshilfe, Benachrichtigungen, Diktat-Tastatur), „Zugang prüfen", Startbildschirm mit Status und Hinweisen.
+- **Textverbesserung in Stufen:** Aus · Glätten · Verschönern · Zusammenfassen; „Füllwörter intelligent entfernen"; getrennter Zugang für die Textverbesserung (auch Anthropic, Google Gemini, DeepSeek); lokale Regeln ohne KI (Füllwörter mit bearbeitbarer Liste, Groß-Schreibung, Leerzeichen).
+- **Eigener Server:** speaches, whisper.cpp-server, LocalAI, Ollama — Key optional, `http://` im privaten Netz, 600-s-Timeout, lesbare Netzfehler.
+- **Kein Diktat geht verloren:** Fehlgeschlagene Anfragen bleiben gepuffert, ein Tipp sendet erneut; Ziehen aufs ✕ verwirft.
+- **Kontext-Prompt** für Eigennamen und Fachbegriffe (online und offline), Sprachen de/en/es/fr/it/auto.
+- Dunkles Material-3-Design (Jetpack Compose), adaptives App-Icon, MIT-Lizenz.
+
+## Schnellstart
+
+1. **APK installieren:** Release von der GitHub-Releases-Seite laden, „Unbekannte Apps installieren" erlauben, öffnen.
+2. **Einrichtung durchlaufen:** Erkennungsweg wählen — *Online-Dienst* (API-Key eintragen, z. B. kostenlos bei Groq) oder *Offline auf dem Gerät* (Modell „Small", 190 MB, laden) — dann Mikrofon, „Über anderen Apps anzeigen" und Bedienungshilfe erlauben.
+3. **Diktieren:** „Knopf starten & los" → in einer beliebigen App den Knopf antippen, sprechen, nochmal antippen. Der Text steht im Feld.
+
+Alles Weitere — Anbieter und Keys, Textverbesserung, Offline-Modelle, eigener Server, Datenschutz, Fehlerbehebung — in [docs/ANLEITUNG.md](docs/ANLEITUNG.md).
 
 ## Architektur
 
-| Schicht | Umsetzung |
+```
+UI (Compose, MainActivity + State-Navigation)      IME (Views)      Overlay (Views)      Share (Compose)
+        │                                              │                 │                    │
+        └──────────────── TranscriptionEngine (Pipeline) ────────────────┘                    │
+                 trimSilence → Backend → Refine(LLM, Modus) → TextPolisher                    │
+                 Backend = OnlineBackend(ApiTranscriber) | OfflineBackend(WhisperEngine/JNI)   │
+                                                                                              │
+                 SharedAudioTranscriber: decode → chunks → Backend → Paragrapher → (Filler-Toggle)
+Daten: Prefs (SharedPreferences) · ProviderCatalog (Kotlin-Objekte) · ModelCatalog/ModelStore (filesDir/models)
+Dienste: FloatingMicService (FGS microphone) · ModelDownloadService (FGS dataSync) · TextInserterAccessibilityService
+```
+
+Grundsätze: reine Logik in Android-freien Kotlin-Objekten (JVM-testbar), Compose nur in `ui/`, klassische Views nur in IME und Overlay. Bewusst **ohne** ViewModel-, Navigation- oder DI-Bibliothek, ohne HTTP-Client-Bibliothek (`HttpURLConnection`) und ohne `material-icons-*` (Icons als eigene Vektor-XML).
+
+| Schicht | Paket / Dateien (`app/src/main/java/com/chris/whisperbar/`) |
 |---|---|
-| Aufnahme | `AudioRecorder.kt` — 16 kHz Mono PCM16 → Float, `AudioUtils.trimSilence` |
-| Upload | `WavEncoder.kt` — WAV im Speicher, `api/Http.kt` — HttpURLConnection, typisierte Fehler |
-| Erkennung | `api/ApiTranscriber.kt` — `POST /audio/transcriptions` (multipart, mit `prompt`) |
-| Geteilte Audios | `ShareTranscribeActivity.kt` + `SharedAudioTranscriber`; `AudioDecoder.kt` (MediaCodec → 16 kHz Mono), `AudioConvert.kt`, `AudioChunks.kt` |
-| KI-Glättung | `api/TextRefiner.kt` — optional, `POST /chat/completions`; Anweisung in `RefinePrompt` |
-| Pipeline | `TranscriptionEngine.kt` — Stille schneiden → erkennen → glätten → polieren |
-| Textveredelung | `TextPolisher.kt` + `PolishPlan` — reines Kotlin, JVM-unit-getestet |
-| Tastatur | `ime/WhisperBarInputMethodService.kt` — `InputMethodService`, Wiederholen-Taste |
-| Schwebender Knopf | `overlay/FloatingMicService.kt` + `BubbleState`/`BubbleUi`/`BubblePosition` |
-| Text einfügen | `a11y/TextInserterAccessibilityService.kt` + `TextInsertion` (clipboard-frei) |
-| Onboarding/Settings | `SetupActivity.kt`, `SettingsActivity.kt` (reines Framework, kein AppCompat) |
+| Oberfläche | `ui/` — Compose (Material 3, festes dunkles Theme): `MainActivity` mit State-Navigation; Screens Home, Einrichtungs-Assistent, Einstellungen (Erkennung, Text, Knopf & Tastatur, Offline-Modelle, Anleitung & Hilfe, Über); Farb-Tokens in `ui/theme/Color.kt`, `ui/theme/Theme.kt` (eine Farbwahrheit: `res/values/colors.xml`, Präfix `wb_`) |
+| Online-Erkennung / LLM | `api/` — `ProviderCatalog` (Anbieter, Modelle, Flags), `ApiAccess` + `AccessResolver` (getrennte STT-/LLM-Zugänge), `Http` (Bearer nur bei Key, Read-Timeout), `ApiErrors` (lesbare Netz-/Statusfehler, `isRetryable`), `TranscriptionRequest` (Multipart-Felder je Anbieter, `languages[]` bei GPT Transcribe), `ApiTranscriber`, `WavUpload`, `ChatPayload` (`temperature` vs. `reasoning_effort`), `RefinePrompt` (Modi Glätten/Verschönern/Zusammenfassen/Absätze), `TextRefiner`, `ServerUrlCheck` (private Hosts, http-Regeln) |
+| Offline-Erkennung | `whisper/` — `WhisperLib` (JNI-Bindings), `WhisperContext` (ein nativer Kontext, Single-Thread), `WhisperEngine` (prozessweit, Modellwechsel, Freigabe bei Speicherdruck), `OfflineBackend`, `OfflineSupport` (CPU-Guard fphp+asimddp, Performance-Kerne, RAM), `ModelCatalog` (Datei, Bytes, SHA-256), `ModelStore` (`filesDir/models`, `.part`), `ModelDownloader` (Range-Resume, SHA-256 streamend, Retry), `ModelDownloads` (StateFlow), `ModelDownloadService` (Foreground-Service `dataSync`); nativ: `app/src/main/cpp/CMakeLists.txt`, `whisper_jni.cpp`; Submodul `whisper.cpp` @ v1.9.3 |
+| Schwebender Knopf | `overlay/` — `FloatingMicService` (Overlay, Drag/Tap, Retry-Puffer, Clipboard-Fallback), `BubbleUi`/`BubbleVisuals`/`BubbleMotion` (Zustände, Timer, Motion — reine Logik), `BubbleRenderer`, `BubbleAnimators`, `MicViews`, `CancelTarget` (Abbrechen-Ziel mit Scrim), `BubblePosition` (Clamping, Magnet-Radius), `BubbleNotification` |
+| Diktat-Tastatur | `ime/` — `WhisperBarInputMethodService`, `LevelBand` + `LevelBandView` (21-Balken-Pegel), `ImeMetrics` |
+| Text einfügen | `a11y/` — `TextInserterAccessibilityService`, `TextInsertion` (Cursor/Auswahl, leeres Feld) |
+| Pipeline & Audio | `TranscriptionEngine` (trimSilence → Backend → Refine → Polish; `SharedAudioTranscriber` für geteilte Audios), `TranscriptionBackend` (`OnlineBackend`), `AudioRecorder`, `AudioUtils`, `WavEncoder`, `AudioDecoder` (MediaCodec → 16 kHz Mono), `AudioConvert`, `AudioChunks` (5-Minuten-Stücke an Sprechpausen), `Formats` |
+| Textveredelung | `TextPolisher` + `PolishPlan` (Füllwörter eingebaut/eigene/abgewählte, Groß-Schreibung, Whitespace), `Paragrapher` (Absatz-Heuristik) |
+| Daten & Start | `Prefs` (SharedPreferences, Migration v2 → v3), `SetupState` (Zugang vollständig?; „eingerichtet?" entscheidet `ui/nav/SetupRouter`), `AppNav` (Deep-Link-Intents route/step), `WhisperBarApp` (Application: Engine-Init, `onTrimMemory`), `ShareTranscribeActivity` (Teilen-Ziel) |
 
-Bewusst **kein AndroidX/Compose** im App-Code und keine HTTP-Bibliothek → schlank, wenige Build-Risiken.
-Die gesamte Rechen-Logik ohne Android-Abhängigkeit (Einfügen, Position, Formatierung, Polish-Plan,
-Prompt-Bau) liegt in reinen Kotlin-Objekten und ist damit ohne Emulator testbar.
-
-## Einrichten
-
-1. APK installieren, App **WhisperBar** öffnen.
-2. **API-Key eintragen** (Einstellungen): Base-URL, Key, Modell.
-   - OpenAI: `https://api.openai.com/v1`, Modell `gpt-4o-transcribe` (Default) oder `whisper-1`
-   - Groq: `https://api.groq.com/openai/v1`, Modell `whisper-large-v3-turbo`
-   Der Key wird nur lokal auf dem Gerät gespeichert.
-3. Mikrofon erlauben.
-4. Entweder Tastatur aktivieren + als Eingabemethode wählen — **oder** (empfohlen) „Über anderen
-   Apps anzeigen" + Bedienungshilfe „WhisperBar" aktivieren und den schwebenden Knopf starten.
-
-**Sprachnachricht transkribieren:** in WhatsApp die Nachricht lang antippen → Teilen →
-WhisperBar. Der Text erscheint zum Lesen, Kopieren und Weiterleiten.
-
-**Schwebender Knopf:** antippen = aufnehmen, nochmal antippen = senden, ziehen = verschieben,
-auf das ✕ ziehen = verwerfen. Nach einem Fehler bedeutet ein Tipp „erneut senden".
+Weitere Unterlagen: [docs/design/ux-spec-v3.md](docs/design/ux-spec-v3.md) (verbindliche UX-Spezifikation der v3-Oberfläche) und [docs/research/](docs/research/README.md) (Recherche-Reports zu Compose-Stack, Anbietern, whisper.cpp und Self-Hosting).
 
 ## Bauen
 
-### Per GitHub Actions (empfohlen)
-`.github/workflows/build.yml` baut bei jedem Push: Unit-Tests + Lint, Debug-APK und
-Release-signiertes APK → Artefakte `whisperbar-debug-apk` / `whisperbar-release-apk`.
+### Voraussetzungen
 
-**Release-Signierung:** Ein persistenter PKCS12-Keystore liegt als GitHub-Secrets
-`WB_KEYSTORE_B64` + `WB_KEYSTORE_PASSWORD` (nicht im Repo). Die CI dekodiert ihn und
-signiert `assembleRelease`. Derselbe Key signiert jeden Release → Updates sind installierbar.
-Für lokale Release-Builds: Keystore unter `keystore/whisperbar-release.p12` ablegen und
-`WB_KEYSTORE`/`WB_KEYSTORE_PASSWORD`/`WB_KEY_ALIAS` als Env setzen (fehlt er, bleibt release unsigniert).
+| Komponente | Version |
+|---|---|
+| JDK | 17 |
+| Android SDK Platform | 37 (`platforms;android-37.0`) |
+| Build-Tools | 36.0.0 |
+| NDK | 28.2.13676358 (r28c) — nur für die Offline-Engine |
+| CMake | 3.22.1 — nur für die Offline-Engine |
+| Gradle / AGP | Wrapper 9.6.1 / 9.4.0 (Kotlin 2.2.10 built-in, Compose-Compiler-Plugin 2.2.10) |
 
-**Warum lokal dekodiert wird:** Die Transkriptions-API nennt mp3, mp4, mpeg, mpga, m4a, wav
-und webm als unterstützte Formate — WhatsApp-Sprachnachrichten sind aber Opus im OGG-Container.
-Deshalb wird geteiltes Audio mit Androids eigenen Decodern nach 16 kHz Mono WAV umgewandelt.
-Das deckt alles ab, was das Gerät abspielen kann, und erlaubt das Stückeln langer Aufnahmen
-(die API nimmt höchstens 25 MB pro Datei, also gut 13 Minuten — geschnitten wird bei 5 Minuten
-an einer Sprechpause).
+Zielplattform: compileSdk 37, targetSdk 35, minSdk 26. Compose BOM 2026.08.00 (ui 1.12.0, material3 1.4.0), activity-compose 1.13.0, lifecycle-runtime-compose 2.11.0.
 
 ### Lokal
+
 ```bash
-git clone <repo-url>
+git clone --recurse-submodules https://github.com/CTreitges/whisperbar-android.git     # whisper.cpp kommt als Submodul (v1.9.3)
 cd whisperbar-android
-./gradlew assembleDebug
+./gradlew assembleDebug                        # Debug-APK: app/build/outputs/apk/debug/app-debug.apk
+./gradlew testDebugUnitTest lintDebug          # Tests + Lint
 ```
-Voraussetzungen: JDK 17, Android SDK 35. Kein NDK, kein CMake, kein Submodul mehr.
+
+Fehlt das Submodul (Clone ohne `--recurse-submodules`): `git submodule update --init --recursive`.
+
+**Ohne NDK bauen** (z. B. auf einem aarch64-Linux-Host, für den es kein NDK gibt):
+
+```bash
+./gradlew -Pwb.skipNative=true assembleDebug
+```
+
+Damit entfällt der komplette Native-Build — Kotlin, Tests und ein APK entstehen trotzdem, aber **ohne `libwhisperbar.so`**: Die Offline-Engine meldet auf dem Gerät „nicht unterstützt", der Online-Modus funktioniert. Die Property kann auch dauerhaft in `~/.gradle/gradle.properties` stehen (`wb.skipNative=true`).
+
+Native-Konfiguration (nur ohne `wb.skipNative`): nur `arm64-v8a`, `GGML_CPU_ARM_ARCH=armv8.2-a+fp16+dotprod` mit Laufzeit-Guard in `OfflineSupport`, `c++_static` (eine `.so`), Debug-Buildtyp baut den Native-Teil trotzdem als Release (whisper.cpp PR #3913 — sonst unbrauchbar langsam), 16-KB-Page-Alignment, `debugSymbolLevel = SYMBOL_TABLE` im Release. `tools/check_jni_symbols.py` gleicht die `external fun`-Deklarationen in `WhisperLib.kt` mit den `JNIEXPORT`-Symbolen in `whisper_jni.cpp` ab (derselbe Abgleich läuft als `JniSymbolsTest`).
+
+### CI (GitHub Actions)
+
+`.github/workflows/build.yml` läuft bei jedem Push und Pull Request:
+
+1. Checkout mit Submodulen, JDK 17, Gradle-Cache, Android-SDK; `sdkmanager` installiert NDK 28.2.13676358, CMake 3.22.1, Build-Tools 36.0.0 und Platform 37.
+2. CMake-Zwischenstand (`app/.cxx`) wird gecacht (Key: Submodul-Commit + `cpp/**` + `build.gradle.kts`).
+3. `tools/check_jni_symbols.py`, dann `testDebugUnitTest lintDebug`, `assembleDebug`.
+4. Signiertes `assembleRelease` mit dem Keystore aus den Secrets.
+5. Prüfung des Release-APKs: `lib/arm64-v8a/libwhisperbar.so` vorhanden, **kein** `assets/*.bin` (Modelle kommen nur per Download), keine anderen ABIs, `zipalign -P 16` und `llvm-readelf` bestätigen 16-KB-Alignment aller `LOAD`-Segmente.
+6. Artefakte: `whisperbar-debug-apk`, `whisperbar-release-apk`, `whisperbar-release-mapping` (R8-`mapping.txt` zum Entschlüsseln von Stacktraces), `unit-and-lint-reports`.
+
+### Release-Signierung
+
+Ein persistenter PKCS12-Keystore liegt als GitHub-Secrets `WB_KEYSTORE_B64` (Base64) und `WB_KEYSTORE_PASSWORD` (nicht im Repo). Die CI dekodiert ihn und signiert `assembleRelease`; derselbe Schlüssel signiert jedes Release, damit Updates über die installierte Version gehen. Für lokale Release-Builds: Keystore unter `keystore/whisperbar-release.p12` ablegen (per `.gitignore` ausgeschlossen) und `WB_KEYSTORE`, `WB_KEYSTORE_PASSWORD`, `WB_KEY_ALIAS` (Standard `whisperbar`) als Umgebungsvariablen setzen — fehlt der Keystore, bleibt das Release-APK unsigniert. Release-Builds laufen mit R8 (Full Mode) und Resource-Shrinking; einzige Keep-Regel: `com.chris.whisperbar.whisper.WhisperLib` (JNI-Symbole).
 
 ## Tests
 
-Alle Tests laufen ohne Gerät (`./gradlew testDebugUnitTest`):
+Alle Tests laufen ohne Gerät und ohne Emulator (`./gradlew testDebugUnitTest`): reine JVM-Tests für die Logik, Robolectric (SDK 35) für alles, was Android-Ressourcen, `org.json`, SharedPreferences oder Layout-Inflation braucht. HTTP-Pfade werden gegen einen lokalen JDK-`HttpServer` getestet. Stand 3.0.0: 58 Testklassen in 55 Dateien, 403 `@Test`-Methoden.
 
-| Datei | Deckt ab |
+| Testklasse | Deckt ab |
 |---|---|
-| `TextPolisherTest` | Füllwörter, Groß-Schreibung, Whitespace/Satzzeichen |
-| `PolishPlanTest` | Regex-Filter weicht der KI-Entscheidung |
-| `WavEncoderTest` | WAV-Header und PCM-Konvertierung |
+| `AppNavTest` | Deep-Link-Intents aus Overlay/IME/Notification (`route`, `step`, `NEW_TASK`) |
+| `AudioChunksTest` | Stückelung langer Aufnahmen: Schnitt an der leisesten Stelle, nie vor der halben Höchstlänge, keine Winz-Stücke |
+| `AudioConvertTest` | Downmix, Resampling, RMS-Profil geteilter Audios |
 | `AudioUtilsTest` | Stille-Trimmen |
-| `a11y/TextInsertionTest` | Einfügen an Cursor/Auswahl, leeres Feld |
-| `overlay/BubblePositionTest` | Clamping, Abbrechen-Trefferfläche |
-| `overlay/BubbleUiTest` | Timer-Formatierung |
-| `api/RefinePromptTest` | Anweisung für die KI-Glättung |
-| `api/ApiErrorsTest` | Welche Fehler einen zweiten Versuch verdienen |
-| `AudioChunksTest` | Stückeln langer Aufnahmen, Schnitt an Sprechpausen |
-| `AudioConvertTest` | Downmix, Resampling, Lautstärke-Profil |
-| `FormatsTest` | Dauer-Formatierung |
+| `FormatsTest` | Dauer-Formatierung (Timer, Überschriften) |
+| `ManifestBackupTest` | `allowBackup=false` + Backup-/Extraktionsregeln schließen die Prefs-Datei (API-Keys) aus |
+| `NetworkSecurityConfigTest` | Jeder Cloud-Anbieter des Katalogs ist in der https-Pflicht-Liste; Klartext nur global |
+| `ParagrapherTest` | Absatz-Heuristik: Satzgrenzen, Diskursmarker, Abkürzungen, Wortlaut bleibt |
+| `PolishPlanTest` | Welche Nachbearbeitung greift: Wortliste vs. KI-Entscheidung, verbatim/cleaned |
+| `PrefsTest` | Migration v2 → v3 (einmalig), neue Schlüssel, Timeout-Grenzen, StringSets, Flags |
+| `SetupStateTest` | Transkriptions-Zugang vollständig (URL, Key je nach Anbieter) |
+| `TextPolisherTest` | Füllwörter (eingebaut, eigene, abgewählte, mehrwortig), Groß-Schreibung, Whitespace, Zeilenumbrüche |
+| `TranscriptionEngineTest` | Backend-Wahl und kompletter Diktat-Pfad gegen einen lokalen „eigenen Server": Multipart-Felder, kein Header ohne Key, Ollama-Body, Politur, Offline-Konfiguration |
+| `WavEncoderTest`, `WavHeaderTest`, `WavSamplesTest` | WAV-Header und PCM-Kodierung, getrennter Kopf fürs Streaming, Rückweg PCM → Float |
+| `a11y/TextInsertionTest` | Einfügen an Cursor/Auswahl, leeres Feld (Hint-Regression), Leerzeichen-Logik |
+| `api/AccessResolverTest` | STT-/LLM-Zugänge: Defaults, `same`, nie der STT-Key an einen anderen Anbieter |
+| `api/ApiErrorsTest` | Wiederholbarkeit (Netz, 408/429/5xx) und lesbare Netz-/Status-Meldungen |
+| `api/ChatPayloadTest`, `api/ChatPayloadJsonTest` | `temperature` vs. `reasoning_effort` je Modell/Anbieter, JSON-Body, Escaping |
+| `api/HttpTest` | Authorization-Header nur mit Key, Fehlerstatus lesbar, Read-Timeout, Verbindung verweigert, URL-Trimmen |
+| `api/ProviderCatalogTest` | IDs eindeutig, Cloud = https + Key, Defaults existieren, Auslauf-Kennzeichnung, Flags, Dropdown-Reihenfolge |
+| `api/RefinePromptTest` | Anweisungen je Modus (DE/EN), smartFillers, nie übersetzen oder erfinden |
+| `api/ServerUrlCheckTest` | Private/öffentliche Hosts, http-Regeln je Anbieter, `/v1`-Hinweis, ungültige Eingaben |
+| `api/TranscriptionRequestTest` | Multipart-Felder je Anbieter: `languages[]`, `prompt`, `response_format`, `auto`, Pfad-Override |
+| `api/WavUploadTest` | Upload → Samples (Diktat und gestreamtes Stück) |
+| `ime/ImeMetricsTest` | Tastenhöhe ab fontScale 1,3, Level der Mikro-Taste |
+| `ime/KeyboardLayoutTest` | `keyboard_view.xml` inflatet, IDs, keine Emoji, contentDescriptions, vier Zustände, Pegelband |
+| `ime/LevelBandTest` | 21 Balken, Attack 50 ms / Release 250 ms, Wertebereich |
+| `overlay/BubbleMotionTest` | Motion-Dauern und -Kurven, Shake, Reduce-Motion, Haptik je API |
+| `overlay/BubbleNotificationTest` | Silhouetten-Icon, Farbe je Zustand, Beenden-Aktion, Tipp → Home |
+| `overlay/BubblePositionTest`, `overlay/CancelTargetTest` | Clamping am Bildschirmrand, Maße nach Spec, Magnet-Radius des Abbrechen-Ziels |
+| `overlay/BubbleUiTest` | Timer „● m:ss", Blinken mit 1 Hz |
+| `overlay/BubbleVisualsTest` | Die vier Zustände unterscheiden sich in Füllung, Ring, Icon und Label |
+| `overlay/OverlayLayoutsTest` | `floating_mic`/`floating_cancel` inflaten, Renderer zeichnet jeden Zustand |
+| `ui/theme/WhisperBarThemeTest` | Compose-Smoke, Spec-Tokens im Farbschema, Palette == `colors.xml` |
+| `whisper/DownloadStateTest` | Prozent-Rechnung, Zustands-Map je Modell |
+| `whisper/JniSymbolsTest` | `external fun` ↔ `JNIEXPORT`-Symbole (Name, Präfix, Parameterzahl), kein Asset-Loader |
+| `whisper/ModelCatalogTest` | Bytes/SHA-256/URLs der vier Modelle, Small = Default und Empfehlung |
+| `whisper/ModelDownloadServiceTest` | Intents, Sofort-Stopp bei unbekannter ID, Fehlertexte |
+| `whisper/ModelDownloaderTest` | Kompletter Download, Resume (206), Server ohne Range, Checksum-Mismatch, Cancel, Netzabbruch + Retry, 404/503, Speicherplatz |
+| `whisper/ModelStoreTest` | `.part`-Konvention, installierte Modelle, Löschen, belegter Platz |
+| `whisper/OfflineSupportTest` | CPU-Features aus `/proc/cpuinfo`, Performance-Kerne, RAM-Toleranz für Large |
+
+Nicht durch Tests abgedeckt und nur auf dem Gerät prüfbar: Overlay-/IME-Darstellung und Animationen, Offline-Laufzeit und -Qualität, das Live-Verhalten der einzelnen Anbieter.
+
+## Versionen
+
+Aktuell **3.0.0** (2026-09-07). Alle Änderungen seit 1.0 im [CHANGELOG.md](CHANGELOG.md). Der letzte Stand der ersten Offline-Generation (Modell im APK) liegt als Tag `offline-v1` im Repo.
 
 ## Lizenz / Credits
-MIT (siehe `LICENSE`).
-Inspiriert von Wispr Flow und Whisper Bar (Kevin Chromik) — eigenständige, unabhängige Implementierung.
+
+- WhisperBar: **MIT** (siehe [LICENSE](LICENSE)).
+- [whisper.cpp](https://github.com/ggml-org/whisper.cpp) (MIT) — Offline-Erkennung; Modelle aus [huggingface.co/ggerganov/whisper.cpp](https://huggingface.co/ggerganov/whisper.cpp).
+- Jetpack Compose / AndroidX (Apache 2.0).
+- Icons: [Material Symbols](https://fonts.google.com/icons) (Apache 2.0).
+- Inspiration: Wispr Flow und Whisper Bar (Kevin Chromik) — eigenständige, unabhängige Implementierung.

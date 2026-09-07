@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monochrom-Ebene des Share-Ziel-Icons (UX-Spec §4.2, analog §4.1): alles #FFFFFF, ohne Grill,
+     Strichstaerken +0,5. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 1 Kapsel -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M46,34 a9,9 0 0 1 9,9 v12 a9,9 0 0 1 -18,0 v-12 a9,9 0 0 1 9,-9 z" />
+    <!-- 3 Buegel -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:pathData="M31,54 a15,15 0 0 0 30,0" />
+    <!-- 4 Stiel + Fuss -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4.5"
+        android:strokeLineCap="round"
+        android:pathData="M46,69 v7 M38,76 h16" />
+    <!-- Textzeilen -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M64,42 h16 a2,2 0 0 1 0,4 h-16 a2,2 0 0 1 0,-4 z M64,50 h12 a2,2 0 0 1 0,4 h-12 a2,2 0 0 1 0,-4 z M64,58 h6 a2,2 0 0 1 0,4 h-6 a2,2 0 0 1 0,-4 z" />
+</vector>

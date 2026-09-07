@@ -1,90 +1,384 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Texte laut UX-Spec §6 (verbindlich). Anfuehrungszeichen „…“, Ellipsen als …, Platzhalter %1$s / %1$d. -->
+
+    <!-- §6.1 Allgemein / gemeinsam -->
     <string name="app_name">WhisperBar</string>
     <string name="ime_label">WhisperBar Diktat</string>
-    <string name="settings_title">WhisperBar Einstellungen</string>
-
     <string name="subtype_de">Deutsch</string>
     <string name="subtype_en">Englisch</string>
+    <string name="common_next">Weiter</string>
+    <string name="common_back">Zurück</string>
+    <string name="common_close">Schließen</string>
+    <string name="common_cancel">Abbrechen</string>
+    <string name="common_done">Fertig</string>
+    <string name="common_apply">Übernehmen</string>
+    <string name="common_open">Öffnen</string>
+    <string name="common_change">Ändern</string>
+    <string name="common_delete">Löschen</string>
+    <string name="common_retry">Erneut</string>
+    <string name="common_copy_link">Link kopieren</string>
+    <string name="common_more">Mehr</string>
+    <string name="cd_back">Zurück</string>
+    <string name="cd_close">Schließen</string>
+    <string name="cd_key_show">API-Key anzeigen</string>
+    <string name="cd_key_hide">API-Key verbergen</string>
+    <string name="cd_paste">Aus Zwischenablage einfügen</string>
+    <string name="cd_open_link">Link im Browser öffnen</string>
+    <string name="cd_add_word">Wort hinzufügen</string>
+    <string name="cd_remove_word">%1$s entfernen</string>
+    <string name="err_net">Keine Verbindung</string>
+    <string name="err_timeout">Server antwortet nicht (Zeitüberschreitung)</string>
+    <string name="err_401">Key ungültig (401)</string>
+    <string name="err_429">Limit erreicht (429) — später erneut</string>
+    <string name="err_server">Server-Fehler %1$d</string>
+    <string name="err_unknown">Unbekannter Fehler: %1$s</string>
+    <string name="err_no_browser">Kein Browser gefunden</string>
+    <string name="err_url_invalid">Ungültige URL</string>
+    <string name="err_url_scheme">URL muss mit http:// oder https:// beginnen</string>
+    <string name="err_url_https_required">Dieser Anbieter braucht https://</string>
+    <string name="err_url_cleartext_public">Unverschlüsselt über das Internet — https:// oder VPN verwenden</string>
+    <string name="err_url_v1">Base-URL endet normalerweise auf /v1</string>
+    <string name="err_storage_full">Nicht genug Speicherplatz</string>
+    <string name="err_download_net">Netzwerkfehler beim Laden</string>
+    <string name="err_model_checksum">Datei beschädigt — erneut laden</string>
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_groq">Groq (kostenlos)</string>
+    <string name="provider_mistral">Mistral</string>
+    <string name="provider_together">Together AI</string>
+    <string name="provider_deepinfra">DeepInfra</string>
+    <string name="provider_openrouter">OpenRouter</string>
+    <string name="provider_anthropic">Anthropic (Claude)</string>
+    <string name="provider_gemini">Google Gemini</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_custom">Eigener Server</string>
+    <string name="level_off">Aus</string>
+    <string name="level_smooth">Glätten</string>
+    <string name="level_beautify">Verschönern</string>
+    <string name="level_summarize">Zusammenfassen</string>
 
-    <!-- Setup -->
-    <string name="setup_title">WhisperBar einrichten</string>
-    <string name="setup_intro">Diktiere in jede App. Die Erkennung läuft über deinen eigenen API-Zugang — dafür brauchst du einmalig einen API-Key.</string>
-    <string name="setup_step_api">1. API-Key hinterlegen</string>
-    <string name="setup_step_mic">2. Mikrofon erlauben</string>
-    <string name="setup_step_enable">3. WhisperBar als Tastatur aktivieren</string>
-    <string name="setup_step_select">4. WhisperBar als Eingabemethode wählen</string>
-    <string name="setup_api_btn">API-Key eintragen</string>
-    <string name="setup_grant_mic">Mikrofon erlauben</string>
-    <string name="setup_open_settings">Tastatur-Einstellungen öffnen</string>
-    <string name="setup_pick_ime">Eingabemethode wählen</string>
-    <string name="setup_try">Hier ausprobieren — tippe rein und wechsle zur WhisperBar-Tastatur:</string>
+    <!-- §6.2 Home (H) -->
+    <string name="home_cd_help">Anleitung und Hilfe</string>
+    <string name="home_cd_settings">Einstellungen</string>
+    <string name="home_hero_title">Schwebender Mikro-Knopf</string>
+    <string name="home_hero_sub_off">Aus — startet den Knopf über allen Apps</string>
+    <string name="home_hero_sub_on">Läuft — antippen zum Diktieren, ziehen zum Verschieben</string>
+    <string name="home_hero_btn_start">Mikro-Knopf starten</string>
+    <string name="home_hero_btn_stop">Mikro-Knopf beenden</string>
+    <string name="home_state_running">Läuft</string>
+    <string name="home_state_stopped">Aus</string>
+    <string name="home_blocked_mic">Mikrofon fehlt — beheben</string>
+    <string name="home_blocked_overlay">„Über anderen Apps anzeigen“ fehlt — beheben</string>
+    <string name="home_banner_title">Noch nicht optimal</string>
+    <string name="home_banner_a11y">Ohne Bedienungshilfe landet der Text nur in der Zwischenablage.</string>
+    <string name="home_banner_model">Offline gewählt, aber kein Modell geladen.</string>
+    <string name="home_banner_notif">Ohne Benachrichtigung kannst du den Knopf nur hier beenden.</string>
+    <string name="home_banner_fix">Beheben</string>
+    <string name="home_status_title">Status</string>
+    <string name="home_row_recognition">Erkennung</string>
+    <string name="home_row_refine">Textverbesserung</string>
+    <string name="home_row_permissions">Berechtigungen</string>
+    <string name="home_row_keyboard">Diktat-Tastatur</string>
+    <string name="home_row_models">Offline-Modelle</string>
+    <string name="home_val_online">Online · %1$s · %2$s</string>
+    <string name="home_val_offline">Offline · %1$s (%2$s)</string>
+    <string name="home_val_offline_missing">Offline · kein Modell geladen</string>
+    <string name="home_val_refine_off">Aus</string>
+    <string name="home_val_refine">%1$s · %2$s</string>
+    <string name="home_val_perms_ok">Mikrofon ✓ · Über Apps ✓ · Bedienungshilfe ✓</string>
+    <string name="home_val_perms_a11y_missing">Mikrofon ✓ · Über Apps ✓ · Bedienungshilfe ✗ (Zwischenablage)</string>
+    <string name="home_val_perms_missing">Pflicht-Berechtigung fehlt</string>
+    <string name="home_val_kb_active">Aktiv</string>
+    <string name="home_val_kb_enabled">Aktiviert, nicht ausgewählt</string>
+    <string name="home_val_kb_off">Nicht aktiviert (optional)</string>
+    <string name="home_val_models">%1$d geladen · %2$s belegt</string>
+    <string name="home_val_models_none">Keins geladen</string>
+    <string name="home_share_hint">Sprachnachrichten abtippen: in WhatsApp lange drücken → Teilen → WhisperBar.</string>
+    <string name="home_rerun_setup">Einrichtung erneut öffnen</string>
+    <string name="home_version">WhisperBar %1$s</string>
+    <string name="home_snack_overlay_lost">„Über anderen Apps anzeigen“ wurde entzogen</string>
+    <string name="home_snack_fix">Erlauben</string>
+
+    <!-- §6.3 Einrichtungs-Assistent (W) -->
+    <string name="setup_title">Einrichtung</string>
+    <string name="setup_cd_overview">Alle Schritte anzeigen</string>
+    <string name="setup_progress">Schritt %1$d von %2$d</string>
+    <string name="setup_chip_done">Erledigt</string>
+    <string name="setup_chip_open">Fehlt noch</string>
+    <string name="setup_chip_optional">Optional</string>
+    <string name="setup_chip_skipped">Übersprungen</string>
+    <string name="setup_back">Zurück</string>
+    <string name="setup_skip">Überspringen</string>
+    <string name="setup_next">Weiter</string>
+    <string name="setup_working">Bitte warten …</string>
+    <string name="setup_more_info">Was passiert dabei?</string>
+    <string name="setup_open_app_settings">App-Einstellungen öffnen</string>
+    <string name="setup_overview_title">Alle Schritte</string>
+    <string name="setup_step_1">Erkennungsweg</string>
+    <string name="setup_step_2">Zugang oder Modell</string>
+    <string name="setup_step_3">Mikrofon</string>
+    <string name="setup_step_4">Über anderen Apps anzeigen</string>
+    <string name="setup_step_5">Bedienungshilfe</string>
+    <string name="setup_step_6">Benachrichtigungen</string>
+    <string name="setup_step_7">Diktat-Tastatur</string>
+    <string name="setup_status_missing">fehlt</string>
+    <string name="setup_status_skipped">übersprungen</string>
+    <string name="setup_status_done">erledigt</string>
+    <string name="welcome_title">Diktiere in jede App.</string>
+    <string name="welcome_body">WhisperBar nimmt auf, erkennt den Text über deinen eigenen Zugang oder ein Offline-Modell und tippt ihn ins aktuelle Feld. In ein paar Schritten ist alles bereit.</string>
+    <string name="welcome_point_1">Online oder offline — du entscheidest</string>
+    <string name="welcome_point_2">Dein Key bleibt auf dem Gerät</string>
+    <string name="welcome_point_3">Dauert etwa zwei Minuten</string>
+    <string name="welcome_start">Los geht\'s</string>
+    <string name="setup_s1_title">Wie soll WhisperBar Sprache erkennen?</string>
+    <string name="setup_s1_body">Du kannst später jederzeit wechseln.</string>
+    <string name="setup_s1_online">Online-Dienst</string>
+    <string name="setup_s1_online_body">Beste Qualität, schnell. Audio wird an den gewählten Anbieter gesendet. Braucht einen API-Key (bei Groq kostenlos).</string>
+    <string name="setup_s1_recommended">Empfohlen</string>
+    <string name="setup_s1_offline">Offline auf dem Gerät</string>
+    <string name="setup_s1_offline_body">Alles bleibt auf dem Gerät. Modell einmalig laden (32–574 MB), Erkennung dauert einige Sekunden.</string>
+    <string name="setup_s1_offline_unavailable">Auf diesem Gerät nicht verfügbar</string>
+    <string name="setup_s2a_title">Zugang zum Dienst</string>
+    <string name="setup_s2a_body">Wähle den Anbieter und füge deinen API-Key ein. Der Key wird nur auf diesem Gerät gespeichert.</string>
+    <string name="setup_s2b_title">Offline-Modell laden</string>
+    <string name="setup_s2b_body">Wähle ein Modell. Empfehlung: Small — gute Qualität für Deutsch bei 190 MB.</string>
+    <string name="setup_s3_title">Mikrofon erlauben</string>
+    <string name="setup_s3_body">Ohne Mikrofon kein Diktat. Android fragt dich gleich — bitte „Bei Nutzung der App“ wählen.</string>
+    <string name="setup_s3_btn">Mikrofon erlauben</string>
+    <string name="setup_s3_denied">Du hast das Mikrofon abgelehnt. Bitte in den App-Einstellungen erlauben.</string>
+    <string name="setup_s4_title">Über anderen Apps anzeigen</string>
+    <string name="setup_s4_body">Der schwebende Mikro-Knopf liegt über anderen Apps. Dafür braucht Android deine Erlaubnis — du landest gleich in den Systemeinstellungen: dort „WhisperBar“ einschalten und zurück.</string>
+    <string name="setup_s4_step_1">Die Systemeinstellung öffnet sich</string>
+    <string name="setup_s4_step_2">Schalter „Über anderen Apps anzeigen“ einschalten</string>
+    <string name="setup_s4_step_3">Zurück-Taste — WhisperBar prüft automatisch</string>
+    <string name="setup_s4_btn">Einstellung öffnen</string>
+    <string name="setup_s4_keyboard_only">Nur Tastatur nutzen</string>
+    <string name="setup_s4_keyboard_only_hint">Ohne diesen Schritt funktioniert nur die Tastatur-Variante.</string>
+    <string name="setup_s5_title">Text automatisch einfügen</string>
+    <string name="setup_s5_fallback">Ohne diesen Schritt landet der Text in der Zwischenablage — du fügst ihn dann selbst ein.</string>
+    <string name="setup_s5_step_1">Die Bedienungshilfe-Einstellungen öffnen sich</string>
+    <string name="setup_s5_step_2">Installierte Apps → WhisperBar → Ein</string>
+    <string name="setup_s5_step_3">Bei „Eingeschränkte Einstellung“: App-Info → ⋮ → Eingeschränkte Einstellungen zulassen, dann erneut</string>
+    <string name="setup_s5_btn">Bedienungshilfe aktivieren</string>
+    <string name="setup_s6_title">Beenden per Benachrichtigung</string>
+    <string name="setup_s6_body">Solange der Knopf läuft, zeigt Android eine stille Benachrichtigung mit „Beenden“. Ohne Erlaubnis ist sie unsichtbar — beenden kannst du den Knopf dann in der App.</string>
+    <string name="setup_s6_btn">Benachrichtigungen erlauben</string>
+    <string name="setup_s7_title">Diktat-Tastatur</string>
+    <string name="setup_s7_body">Alternative zum Knopf: die WhisperBar-Tastatur mit Halten-zum-Sprechen. Zwei Schritte: aktivieren, dann auswählen.</string>
+    <string name="setup_s7_enable">1 · Tastatur aktivieren</string>
+    <string name="setup_s7_enable_btn">Aktivieren</string>
+    <string name="setup_s7_select">2 · Tastatur auswählen</string>
+    <string name="setup_s7_select_btn">Auswählen</string>
     <string name="setup_try_hint">Zum Diktieren hierher tippen …</string>
-    <string name="setup_open_prefs">Einstellungen</string>
-    <string name="status_done">✓ erledigt</string>
-    <string name="status_open">✗ offen</string>
-
-    <!-- Keyboard -->
-    <string name="kb_hint_hold">Halte das Mikrofon gedrückt und sprich</string>
-    <string name="kb_listening">Höre zu … loslassen zum Beenden</string>
-    <string name="kb_transcribing">Wird übertragen …</string>
-    <string name="kb_need_permission">Mikrofon-Berechtigung fehlt — tippe zum Einrichten</string>
-    <string name="kb_error">Fehler bei der Erkennung</string>
-    <string name="kb_space">Leer</string>
-    <string name="cd_mic">Diktat-Mikrofon</string>
-    <string name="cd_cancel">Diktat verwerfen</string>
-
-    <!-- API -->
-    <string name="api_not_configured">Kein API-Key hinterlegt — in den Einstellungen eintragen</string>
-
-    <!-- Settings -->
-    <string name="pref_recognition">Erkennung</string>
-    <string name="pref_quality">Textqualität</string>
-    <string name="pref_language">Sprache</string>
-    <string name="pref_remove_fillers">Füllwörter entfernen (ähm, äh …)</string>
-    <string name="pref_auto_cap">Automatisch groß schreiben</string>
-    <string name="pref_trailing_space">Leerzeichen nach Diktat anhängen</string>
-    <string name="pref_llm_polish">Text von der KI glätten lassen</string>
-    <string name="pref_llm_polish_info">Zweite Anfrage: korrigiert Zeichensetzung, Groß-/Kleinschreibung und Absätze. Kostet etwas extra und ein bis zwei Sekunden mehr.</string>
-    <string name="pref_smart_fillers">Füllwörter intelligent entfernen</string>
-    <string name="pref_smart_fillers_info">Statt fester Wortliste entscheidet die KI selbst, welche Füllwörter, Versprecher und Wiederholungen weg können. Braucht das Glätten oben.</string>
-    <string name="pref_llm_model_hint">Modell zum Glätten (z. B. gpt-4o-mini)</string>
-
-    <!-- Schwebender Mikro-Button -->
-    <string name="float_channel">WhisperBar Diktat</string>
-    <string name="float_running">WhisperBar-Diktat aktiv</string>
-    <string name="float_running_text">Knopf antippen zum Diktieren, ziehen zum Verschieben</string>
-    <string name="float_stop">Beenden</string>
-    <string name="float_no_overlay">Bitte „Über anderen Apps anzeigen" erlauben</string>
-    <string name="float_clipboard_fallback">Text kopiert — Bedienungshilfe aktivieren zum automatischen Einfügen</string>
-    <string name="float_sending">sendet …</string>
-    <string name="float_retry_hint">tippen = erneut</string>
-    <string name="float_discarded">Diktat verworfen</string>
-
-    <!-- Bedienungshilfe -->
+    <string name="setup_done_title">Bereit zum Diktieren</string>
+    <string name="setup_done_summary">Deine Einrichtung</string>
+    <string name="setup_done_a11y_skipped">übersprungen — Text landet in der Zwischenablage</string>
+    <string name="setup_done_start">Knopf starten &amp; los</string>
+    <string name="setup_done_home">Zum Start</string>
     <string name="a11y_label">WhisperBar Text-Einfügen</string>
     <string name="a11y_description">Fügt diktierten Text ins gerade fokussierte Feld ein, damit du beim Diktieren nicht die Tastatur wechseln musst. Es wird nichts mitgelesen oder gespeichert.</string>
 
-    <!-- Setup: Diktat ohne Tastaturwechsel -->
-    <string name="setup_float_title">Diktat ohne Tastatur-Wechsel (empfohlen)</string>
-    <string name="setup_float_intro">So bleibt Gboard aktiv und du startest das Diktat per schwebendem Knopf:</string>
-    <string name="setup_overlay_btn">Über anderen Apps anzeigen erlauben</string>
-    <string name="setup_a11y_btn">Bedienungshilfe „WhisperBar" aktivieren</string>
-    <string name="setup_start_bubble">Schwebenden Mikro-Button starten</string>
-    <string name="setup_stop_bubble">Schwebenden Mikro-Button beenden</string>
-    <string name="setup_notif_btn">Benachrichtigungen erlauben</string>
+    <!-- §6.4 Einstellungen-Hub (E), Über (E6) -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_group_recognition">Erkennung</string>
+    <string name="settings_group_text">Text</string>
+    <string name="settings_group_button">Knopf &amp; Tastatur</string>
+    <string name="settings_group_models">Offline-Modelle</string>
+    <string name="settings_group_help">Anleitung &amp; Hilfe</string>
+    <string name="settings_group_about">Über WhisperBar</string>
+    <string name="settings_help_sub">Anleitung, API-Keys, Datenschutz</string>
+    <string name="settings_models_none">Keins geladen</string>
+    <string name="settings_val_bubble_on">Knopf läuft</string>
+    <string name="settings_val_bubble_off">Knopf aus</string>
+    <string name="settings_val_kb_on">Tastatur aktiv</string>
+    <string name="settings_val_kb_off">Tastatur nicht aktiviert</string>
+    <string name="settings_val_text">%1$s · %2$s</string>
+    <string name="settings_rule_fillers">Füllwörter</string>
+    <string name="settings_rule_cap">Groß-Schreibung</string>
+    <string name="settings_rule_space">Leerzeichen</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_license">whisper.cpp (MIT) · Jetpack Compose (Apache 2.0) · Material Symbols (Apache 2.0)</string>
+    <string name="about_source">Quellcode auf GitHub</string>
 
-    <!-- API-Zugang -->
-    <string name="pref_api_title">API-Zugang</string>
-    <string name="pref_api_privacy">Achtung: Dein Audio wird zur Erkennung an den eingetragenen Anbieter gesendet.</string>
-    <string name="pref_api_url_hint">Base-URL (z. B. https://api.openai.com/v1)</string>
-    <string name="pref_api_key_hint">API-Key</string>
-    <string name="pref_api_model_hint">Modell (z. B. gpt-4o-transcribe)</string>
+    <!-- §6.5 Erkennung (E1) und Zugangs-Felder (auch Schritt 2a) -->
+    <string name="rec_title">Erkennung</string>
+    <string name="rec_engine_online">Online-Dienst</string>
+    <string name="rec_engine_offline">Offline-Modell</string>
+    <string name="rec_no_model">Kein Modell geladen</string>
+    <string name="rec_load_model">Modell laden</string>
+    <string name="rec_card_transcription">Transkription</string>
+    <string name="rec_card_offline">Offline-Modell</string>
+    <string name="rec_offline_first_use">Erste Nutzung lädt das Modell in den Speicher (2–5 s).</string>
+    <string name="rec_card_language">Sprache &amp; Kontext</string>
+    <string name="rec_language">Sprache</string>
+    <string name="rec_provider">Anbieter</string>
+    <string name="rec_base_url">Base-URL</string>
+    <string name="rec_base_url_hint">Muss auf /v1 enden. http:// nur im eigenen Netz (LAN/VPN).</string>
+    <string name="rec_api_key">API-Key</string>
+    <string name="rec_api_key_optional">API-Key (optional)</string>
+    <string name="rec_key_local">Wird nur auf diesem Gerät gespeichert.</string>
+    <string name="rec_key_pasted">Eingefügt</string>
+    <string name="rec_model">Modell</string>
+    <string name="rec_model_custom">Eigenes Modell …</string>
+    <string name="rec_key_where">Wo bekomme ich einen Key?</string>
+    <string name="rec_test">Zugang prüfen</string>
+    <string name="rec_test_ok">Verbunden · %1$s s</string>
+    <string name="rec_test_fail">Fehler: %1$s</string>
+    <string name="rec_privacy_online">Audio wird zur Erkennung an %1$s gesendet.</string>
+    <string name="rec_privacy_offline">Alles bleibt auf dem Gerät.</string>
+    <string name="rec_context_unsupported">Dieser Anbieter nimmt keinen Kontext entgegen — das Feld wirkt nur bei anderen Anbietern und offline.</string>
     <string name="pref_api_prompt_hint">Kontext: Namen, Fachbegriffe, Schreibweisen</string>
     <string name="pref_api_prompt_info">Wird als Prompt mitgeschickt und hilft der Erkennung bei Eigennamen und Fachwörtern. Kostet nichts extra.</string>
-    <string name="pref_api_examples">Beispiele: OpenAI gpt-4o-transcribe oder whisper-1 · Groq (Base-URL https://api.groq.com/openai/v1, Modell whisper-large-v3-turbo). Der Key wird nur lokal auf dem Gerät gespeichert.</string>
+    <string name="pref_language">Sprache</string>
+    <string name="model_custom_title">Eigenes Modell</string>
+    <string name="model_custom_hint">Modell-ID</string>
+    <string name="model_custom_info">Genau so, wie der Anbieter die ID nennt.</string>
+    <string name="model_deprecated_suffix">(Auslauf %1$s)</string>
+    <string name="key_sheet_title">Wo bekomme ich einen Key?</string>
 
-    <!-- Geteilte Audios (Teilen-Menü aus WhatsApp & Co.) -->
+    <!-- §6.6 Text (E2) und Füllwörter-Sheet (B3) -->
+    <string name="text_title">Text</string>
+    <string name="text_card_refine">Textverbesserung (KI)</string>
+    <string name="text_level_off_sub">Nur die Regeln unten, keine zweite Anfrage.</string>
+    <string name="text_level_smooth_sub">Zeichensetzung, Groß-/Kleinschreibung, Absätze. Inhalt unverändert.</string>
+    <string name="text_level_beautify_sub">Formuliert verständlicher, zieht Sätze zusammen, bewahrt den Inhalt.</string>
+    <string name="text_level_summarize_sub">Kürzt auf die Kernaussagen.</string>
+    <string name="text_level_cost">Zweite Anfrage · ca. 1–2 s länger · geringe Zusatzkosten</string>
+    <string name="pref_smart_fillers">Füllwörter intelligent entfernen</string>
+    <string name="pref_smart_fillers_info">Statt fester Wortliste entscheidet die KI selbst, welche Füllwörter, Versprecher und Wiederholungen weg können. Im Zweifel bleibt das Wort.</string>
+    <string name="text_smart_needs_level">Braucht eine Stufe über „Aus“.</string>
+    <string name="text_card_access">Zugang für die Textverbesserung</string>
+    <string name="text_own_access">Eigenen Zugang verwenden</string>
+    <string name="text_own_access_off">Nutzt Anbieter und Key der Erkennung (%1$s).</string>
+    <string name="text_own_access_on">Eigener Anbieter, Key und Modell.</string>
+    <string name="text_llm_provider">Anbieter</string>
+    <string name="text_llm_model">Modell</string>
+    <string name="text_llm_model_placeholder">z. B. qwen3:8b</string>
+    <string name="text_model_custom">Eigenes Modell …</string>
+    <string name="text_gemini_warning">Free-Tier: Google darf Inhalte zum Training nutzen.</string>
+    <string name="text_deepseek_warning">Server in China — Datenschutz beachten.</string>
+    <string name="text_anthropic_note">OpenAI-Kompatibilitätsschicht — von Anthropic als Test-Werkzeug eingestuft.</string>
+    <string name="text_needs_online">Textverbesserung braucht einen Online-Zugang.</string>
+    <string name="text_add_access">Eigenen Zugang eintragen</string>
+    <string name="text_test">Zugang prüfen</string>
+    <string name="text_card_rules">Regeln ohne KI</string>
+    <string name="pref_remove_fillers">Füllwörter entfernen (ähm, äh …)</string>
+    <string name="text_fillers_sub">Feste Wortliste je Sprache</string>
+    <string name="text_fillers_edit">Liste bearbeiten</string>
+    <string name="pref_auto_cap">Automatisch groß schreiben</string>
+    <string name="pref_trailing_space">Leerzeichen nach Diktat anhängen</string>
+    <string name="text_fillers_paused">Die Wortliste pausiert, solange die KI über Füllwörter entscheidet.</string>
+    <string name="fillers_title">Füllwörter</string>
+    <string name="fillers_builtin">Eingebaut</string>
+    <string name="fillers_custom">Eigene Wörter</string>
+    <string name="fillers_add_hint">Wort hinzufügen</string>
+    <string name="fillers_empty">Noch keine eigenen Wörter</string>
+    <string name="fillers_hint">Nur eindeutige Füllsilben — echte Wörter wie „halt“ bleiben, sonst kaputte Sätze.</string>
+    <string name="fillers_reset">Standard wiederherstellen</string>
+
+    <!-- §6.7 Knopf &amp; Tastatur (E3) -->
+    <string name="button_title">Knopf &amp; Tastatur</string>
+    <string name="button_card_bubble">Schwebender Knopf</string>
+    <string name="button_reset_pos">Position zurücksetzen</string>
+    <string name="button_reset_pos_sub">Setzt den Knopf an die Startposition</string>
+    <string name="button_pos_reset_done">Position zurückgesetzt</string>
+    <string name="button_text_output">Textausgabe</string>
+    <string name="button_text_output_a11y">Bedienungshilfe: fügt direkt ins Feld ein</string>
+    <string name="button_text_output_clip">Zwischenablage (Bedienungshilfe aus)</string>
+    <string name="button_card_permissions">Berechtigungen</string>
+    <string name="perm_mic">Mikrofon</string>
+    <string name="perm_overlay">Über anderen Apps anzeigen</string>
+    <string name="perm_a11y">Bedienungshilfe</string>
+    <string name="perm_a11y_sub">Empfohlen — fügt Text direkt ein</string>
+    <string name="perm_notif">Benachrichtigungen</string>
+    <string name="perm_allow">Erlauben</string>
+    <string name="perm_open">Öffnen</string>
+    <string name="button_card_keyboard">Diktier-Tastatur</string>
+    <string name="button_keyboard_intro">Alternative zum Knopf: WhisperBar als Tastatur mit Halten-zum-Sprechen. Nützlich, wenn eine App kein Overlay erlaubt.</string>
+    <string name="button_card_howto">Kurzanleitung</string>
+    <string name="help_dictate_1">Knopf antippen = Aufnahme</string>
+    <string name="help_dictate_2">Nochmal antippen = fertig &amp; einfügen</string>
+    <string name="help_dictate_3">Auf ✕ ziehen = verwerfen</string>
+    <string name="help_dictate_4">Rot = Fehler, antippen = erneut</string>
+
+    <!-- §6.8 Offline-Modelle (E4, Schritt 2b, D1, D2, Download-Notification) -->
+    <string name="models_title">Offline-Modelle</string>
+    <string name="models_channel">Modell-Downloads</string>
+    <string name="models_intro">Modelle werden einmalig von huggingface.co geladen und bleiben auf dem Gerät. Kein Modell ist in der App enthalten.</string>
+    <string name="models_storage">Belegt: %1$s · Frei: %2$s</string>
+    <string name="models_need_download">Zuerst ein Modell laden</string>
+    <string name="models_load">Laden (%1$s)</string>
+    <string name="models_download_cd">%1$s herunterladen</string>
+    <string name="models_cancel_cd">Download abbrechen</string>
+    <string name="models_delete_cd">%1$s löschen</string>
+    <string name="models_progress">%1$d %% · %2$s von %3$s · %4$s</string>
+    <string name="models_progress_unknown">%1$s geladen</string>
+    <string name="models_failed">Fehlgeschlagen: %1$s</string>
+    <string name="models_too_big">Für dieses Gerät zu groß</string>
+    <string name="models_recommended">Empfohlen</string>
+    <string name="models_installed">Geladen</string>
+    <string name="models_tiny">Tiny</string>
+    <string name="models_tiny_sub">32 MB · ~250 MB RAM · nur zum Ausprobieren</string>
+    <string name="models_base">Base</string>
+    <string name="models_base_sub">60 MB · ~355 MB RAM · schnell, kurze Sätze</string>
+    <string name="models_small">Small</string>
+    <string name="models_small_sub">190 MB · ~430 MB RAM · gute Qualität für Deutsch</string>
+    <string name="models_large">Large v3 Turbo</string>
+    <string name="models_large_sub">574 MB · ~1 GB RAM · beste Qualität, langsam, ab 6 GB Gerätespeicher</string>
+    <string name="models_empty_title">Noch kein Modell geladen</string>
+    <string name="models_empty_body">Empfehlung: Small — gute Qualität für Deutsch bei 190 MB.</string>
+    <string name="models_source">Quelle: huggingface.co/ggerganov/whisper.cpp</string>
+    <string name="models_metered_title">Über mobile Daten laden?</string>
+    <string name="models_metered_body">%1$s werden heruntergeladen. Im WLAN ist das kostenlos.</string>
+    <string name="models_metered_ok">Laden</string>
+    <string name="models_delete_title">%1$s löschen?</string>
+    <string name="models_delete_body">%1$s werden frei. Für die Offline-Erkennung muss dann ein anderes Modell geladen werden.</string>
+    <string name="models_delete_active">Dies ist das aktive Modell — Offline ist danach nicht einsatzbereit.</string>
+    <string name="models_notif_title">Modell wird geladen</string>
+    <string name="models_notif_text">%1$s · %2$d %%</string>
+    <string name="models_notif_done">%1$s ist bereit</string>
+
+    <!-- §6.9 Hilfe (E5, B1) -->
+    <string name="help_title">Anleitung &amp; Hilfe</string>
+    <string name="help_s1_title">So funktioniert\'s</string>
+    <string name="help_s1_bubble">Schwebender Knopf: antippen = Aufnahme, nochmal = fertig &amp; einfügen, auf ✕ ziehen = verwerfen, rot = Fehler, antippen = erneut.</string>
+    <string name="help_s1_keyboard">Diktier-Tastatur: Mikrofon gedrückt halten, sprechen, loslassen.</string>
+    <string name="help_s1_share">Sprachnachrichten: in WhatsApp lange drücken → Teilen → WhisperBar. Der Text erscheint in Absätzen, du kannst ihn kopieren oder weitergeben.</string>
+    <string name="help_s2_title">Einrichtung Schritt für Schritt</string>
+    <string name="help_s3_title">API-Key bekommen</string>
+    <string name="help_s3_intro">Ein API-Key ist ein persönlicher Zugangsschlüssel. Du bezahlst nur, was du nutzt — ein Diktat kostet meist unter einem Cent.</string>
+    <string name="help_key_openai">platform.openai.com registrieren → Billing: Zahlungsmittel + Guthaben (mind. 5 $) → API keys → Create new secret key. GPT Transcribe ≈ 0,0045 $/min.</string>
+    <string name="help_key_groq">console.groq.com registrieren → API Keys → Create API Key. Kostenlos ohne Zahlungsmittel (8 h Audio/Tag).</string>
+    <string name="help_key_mistral">console.mistral.ai registrieren → Plan „Experiment“ (gratis, Telefon-Verifizierung) oder Pay-as-you-go → API Keys → Create new key. Voxtral ≈ 0,003 $/min.</string>
+    <string name="help_key_together">api.together.ai registrieren (Startguthaben) → Settings → API Keys → Create key. Whisper Large v3 ≈ 0,0015 $/min.</string>
+    <string name="help_key_deepinfra">deepinfra.com anmelden → Dashboard → API Keys → New API Key → Guthaben aufladen. Whisper Turbo ≈ 0,0002 $/min.</string>
+    <string name="help_key_openrouter">openrouter.ai anmelden → Credits aufladen → Settings → Keys → Create Key. Ein Key für viele Modelle.</string>
+    <string name="help_key_anthropic">platform.claude.com registrieren → Billing → Settings → Keys → Create Key. Nur Textverbesserung.</string>
+    <string name="help_key_gemini">aistudio.google.com/apikey öffnen → Create API key. Gratis, aber Free-Tier-Inhalte dürfen zum Training genutzt werden. Nur Textverbesserung.</string>
+    <string name="help_key_deepseek">platform.deepseek.com registrieren → Top up → API keys → Create new API key. Nur Textverbesserung.</string>
+    <string name="help_prices_note">Preise Stand 09/2026, ohne Gewähr.</string>
+    <string name="help_s4_title">Eigener Server</string>
+    <string name="help_s4_body">Jeder OpenAI-kompatible Server funktioniert: Endpunkte /v1/audio/transcriptions (Erkennung) und /v1/chat/completions (Textverbesserung). Unter Erkennung → Anbieter „Eigener Server“ die Base-URL eintragen, Key nur wenn der Server einen verlangt. Empfohlene Server: speaches, whisper.cpp-server, LocalAI; für Textverbesserung Ollama. http:// nur im eigenen Netz oder per VPN — sonst https.</string>
+    <string name="help_s5_title">Offline-Modus</string>
+    <string name="help_s5_body">Ein Offline-Modell erkennt Sprache direkt auf dem Gerät. Es wird einmalig geladen (32–574 MB) und liegt im App-Speicher; löschen kannst du es unter Offline-Modelle. Small ist für Deutsch die beste Balance. Die Erkennung dauert je Modell 2–10 Sekunden.</string>
+    <string name="help_s6_title">Datenschutz</string>
+    <string name="help_s6_online">Online: Audio und Kontext-Prompt gehen an den gewählten Anbieter. Bei Textverbesserung geht der erkannte Text an das Sprachmodell. Dein Key bleibt auf dem Gerät. WhisperBar speichert keine Aufnahmen.</string>
+    <string name="help_s6_offline">Offline: Nichts verlässt das Gerät — nur der Modell-Download geht ins Netz.</string>
+    <string name="help_s6_a11y">Die Bedienungshilfe liest nichts mit und speichert nichts; sie fügt nur den diktierten Text ein.</string>
+    <string name="help_s7_title">Wenn etwas nicht klappt</string>
+    <string name="help_p1">Knopf erscheint nicht</string>
+    <string name="help_p1_body">„Über anderen Apps anzeigen“ muss erlaubt sein. Zusätzlich in den Android-Einstellungen die Akku-Optimierung für WhisperBar ausschalten.</string>
+    <string name="help_p2">Text landet nur in der Zwischenablage</string>
+    <string name="help_p2_body">Die Bedienungshilfe „WhisperBar“ ist aus. Aktivieren, dann fügt WhisperBar den Text direkt ein.</string>
+    <string name="help_p3">Key ungültig (401) oder Limit erreicht (429)</string>
+    <string name="help_p3_body">Key beim Anbieter neu erzeugen und einfügen; Guthaben oder Tageslimit prüfen.</string>
+    <string name="help_p4">„Eingeschränkte Einstellung“</string>
+    <string name="help_p4_body">Bei manuell installierten Apps: App-Info → ⋮ → Eingeschränkte Einstellungen zulassen, dann die Bedienungshilfe erneut aktivieren.</string>
+    <string name="help_p5">Offline zu langsam</string>
+    <string name="help_p5_body">Ein kleineres Modell wählen (Base oder Small) oder auf den Online-Dienst wechseln.</string>
+
+    <!-- §6.10 Transkription (S) — bestehende Keys; der Share-Screen (WP5) ergaenzt die neuen. -->
+    <string name="api_not_configured">Anbieter nicht eingerichtet — Base-URL und API-Key in den Einstellungen prüfen</string>
     <string name="share_label">Mit WhisperBar transkribieren</string>
     <string name="share_title">Transkription</string>
     <string name="share_starting">Wird vorbereitet …</string>
@@ -99,4 +393,60 @@
     <string name="share_nothing_recognised">(nichts erkannt)</string>
     <string name="share_one_failed">Fehlgeschlagen: %1$s</string>
     <string name="share_unknown_source">Sprachnachricht</string>
+    <string name="share_progress">Datei %1$d von %2$d · Stück %3$d von %4$d · %5$s</string>
+    <string name="share_head_single">%1$s · 1 Datei</string>
+    <string name="share_head_multi">%1$d Dateien · %2$s gesamt</string>
+    <string name="share_section">%1$s · %2$s</string>
+    <string name="share_no_audio_body">Teile eine Audiodatei oder Sprachnachricht mit WhisperBar.</string>
+    <string name="share_all_failed">Transkription fehlgeschlagen</string>
+    <string name="share_not_configured">Kein Zugang eingerichtet</string>
+    <string name="share_not_configured_body">Richte einen Online-Dienst oder ein Offline-Modell ein, dann klappt es.</string>
+    <string name="share_open_setup">Einrichtung öffnen</string>
+    <string name="share_retry_file">Erneut</string>
+    <string name="share_retry_all">Alles erneut</string>
+    <string name="share_hide_fillers">Füllwörter ausblenden</string>
+    <string name="share_hide_fillers_on">ähm, äh … ausgeblendet</string>
+    <string name="share_hide_fillers_off" formatted="false">Wortgetreu, 100 %</string>
+    <string name="share_cd_copy">Text kopieren</string>
+
+    <!-- Allgemein (UX-Spec §6.1) -->
+
+    <!-- §6.11 Schwebender Knopf (V1) und Notification (N1) -->
+    <string name="float_channel">WhisperBar Diktat</string>
+    <string name="float_running">WhisperBar-Diktat aktiv</string>
+    <string name="float_running_text">Knopf antippen zum Diktieren, ziehen zum Verschieben</string>
+    <string name="float_stop">Beenden</string>
+    <string name="float_no_overlay">Bitte „Über anderen Apps anzeigen" erlauben</string>
+    <string name="float_clipboard_fallback">Text kopiert — Bedienungshilfe aktivieren zum automatischen Einfügen</string>
+    <string name="float_copied_short">Kopiert — einfügen</string>
+    <string name="float_sending">sendet …</string>
+    <string name="float_retry_hint">tippen = erneut</string>
+    <string name="float_discarded">Diktat verworfen</string>
+    <string name="float_cancel_label">Verwerfen</string>
+    <string name="float_cancel_release">Loslassen zum Verwerfen</string>
+    <string name="float_not_configured">Kein Zugang eingerichtet — in WhisperBar einrichten</string>
+    <string name="cd_bubble_idle">Diktat starten</string>
+    <string name="cd_bubble_recording">Aufnahme läuft, %1$s — antippen zum Beenden</string>
+    <string name="cd_bubble_sending">Wird übertragen</string>
+    <string name="cd_bubble_error">Fehler — antippen für erneuten Versuch</string>
+    <string name="cd_cancel">Diktat verwerfen</string>
+
+    <!-- §6.12 IME-Tastatur (V2) -->
+    <string name="kb_hint_hold">Halte das Mikrofon gedrückt und sprich</string>
+    <string name="kb_listening">Höre zu … loslassen zum Beenden</string>
+    <string name="kb_transcribing">Wird übertragen …</string>
+    <string name="kb_need_permission">Mikrofon-Berechtigung fehlt — tippe zum Einrichten</string>
+    <string name="kb_not_configured">Kein Zugang eingerichtet — tippe zum Einrichten</string>
+    <string name="kb_error">Fehler bei der Erkennung — erneut versuchen</string>
+    <string name="refine_skipped">Textverbesserung übersprungen: %1$s</string>
+    <string name="kb_space">Leer</string>
+    <string name="cd_mic">Diktat-Mikrofon — halten zum Sprechen</string>
+    <string name="cd_kb_switch">Eingabemethode wechseln</string>
+    <string name="cd_kb_comma">Komma</string>
+    <string name="cd_kb_space">Leerzeichen</string>
+    <string name="cd_kb_period">Punkt</string>
+    <string name="cd_kb_backspace">Löschen</string>
+    <string name="cd_kb_enter">Eingabe</string>
+    <string name="cd_kb_retry">Erneut senden</string>
+    <string name="cd_kb_settings">WhisperBar-Einstellungen</string>
 </resources>

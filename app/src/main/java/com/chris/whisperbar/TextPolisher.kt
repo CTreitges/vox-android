@@ -12,6 +12,15 @@ data class PolishOptions(
     val autoCapitalize: Boolean = true,
     /** "auto" | "de" | "en" | ... — steuert die Fuellwort-Liste. */
     val language: String = "auto",
+    /** Eigene Fuellwoerter des Nutzers, zusaetzlich zur Sprachliste (ganze Woerter). */
+    val customFillers: Collection<String> = emptyList(),
+    /** Woerter der eingebauten Sprachliste, die stehen bleiben sollen (klein geschrieben). */
+    val disabledFillers: Set<String> = emptySet(),
+    /**
+     * Zeilenumbrueche behalten statt alles auf eine Zeile zu ziehen — fuer Text, den
+     * das Sprachmodell bewusst in Absaetze oder Stichpunkte gegliedert hat.
+     */
+    val keepLineBreaks: Boolean = false,
 )
 
 /**
@@ -31,6 +40,19 @@ object PolishPlan {
         language = language,
     )
 
+    /** Wortgetreu, aber ohne Fuellwoerter — die zweite Fassung der Share-Ansicht. */
+    fun cleaned(
+        language: String,
+        customFillers: Collection<String> = emptyList(),
+        disabledFillers: Set<String> = emptySet(),
+    ) = PolishOptions(
+        removeFillers = true,
+        autoCapitalize = false,
+        language = language,
+        customFillers = customFillers,
+        disabledFillers = disabledFillers,
+    )
+
     /**
      * Wenn ein Sprachmodell selbst ueber Fuellwoerter entscheidet, darf die feste
      * Wortliste nicht nochmal daruebergehen — sonst wuerde zweimal gefiltert und die
@@ -41,16 +63,30 @@ object PolishPlan {
         removeFillers: Boolean,
         autoCapitalize: Boolean,
         language: String,
-        llmPolish: Boolean,
+        refineMode: RefineMode,
         smartFillers: Boolean,
+        customFillers: Collection<String> = emptyList(),
+        disabledFillers: Set<String> = emptySet(),
     ): PolishOptions {
-        val aiDecidesFillers = llmPolish && smartFillers
+        val refined = refineMode != RefineMode.OFF
+        val aiDecidesFillers = refined && smartFillers
         return PolishOptions(
             removeFillers = removeFillers && !aiDecidesFillers,
             autoCapitalize = autoCapitalize,
             language = language,
+            customFillers = customFillers,
+            disabledFillers = disabledFillers,
+            // Das Sprachmodell setzt Absaetze/Stichpunkte bewusst — nicht plattziehen.
+            keepLineBreaks = refined,
         )
     }
+
+    /** Klein geschrieben, getrimmt, ohne Leeres und Duplikate — so werden Fuellwoerter gespeichert. */
+    fun normalizeFillers(words: Iterable<String>): Set<String> =
+        words.map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toSet()
+
+    /** "Ähm, halt,sozusagen" -> {"ähm", "halt", "sozusagen"} — fuer die Texteingabe im UI. */
+    fun parseFillers(raw: String): Set<String> = normalizeFillers(raw.split(',', '\n', ';'))
 }
 
 /**
@@ -73,34 +109,48 @@ object TextPolisher {
     )
 
     private val MULTI_WS = Pattern.compile("\\s+")
+    private val MANY_BLANK_LINES = Pattern.compile("\\n{3,}")
     private val SPACE_BEFORE_PUNCT = Pattern.compile("\\s+([,.;:!?…])")
+    private val COMMA_BEFORE_END = Pattern.compile(",\\s*(?=[.!?…])")
 
     fun polish(raw: String, options: PolishOptions = PolishOptions()): String {
         var text = raw.trim()
         if (text.isEmpty()) return ""
 
-        text = MULTI_WS.matcher(text).replaceAll(" ")
+        text = normalizeWhitespace(text, options.keepLineBreaks)
 
         if (options.removeFillers) {
-            for (filler in fillersFor(options.language)) {
+            val fillers = builtinFillers(options.language).filter { it !in options.disabledFillers } +
+                options.customFillers
+            for (filler in fillers) {
+                if (filler.isBlank()) continue
                 // (?<!\p{L}) ... (?!\p{L}) = ganze-Wort-Grenze, unicode-tauglich (ae, oe...).
                 // Optionales folgendes Komma mitnehmen, damit keine ", ," Reste bleiben.
                 val p = Pattern.compile(
-                    "(?<!\\p{L})" + Pattern.quote(filler) + "(?!\\p{L}),?",
+                    "(?<!\\p{L})" + Pattern.quote(filler.trim()) + "(?!\\p{L}),?",
                     Pattern.CASE_INSENSITIVE or Pattern.UNICODE_CASE,
                 )
                 text = p.matcher(text).replaceAll(" ")
             }
-            text = MULTI_WS.matcher(text).replaceAll(" ").trim()
+            // "gut, ähm." -> "gut, ." -> "gut." — ein Komma direkt vor dem Satzende ist nie gewollt.
+            text = COMMA_BEFORE_END.matcher(text).replaceAll("")
+            text = normalizeWhitespace(text, options.keepLineBreaks)
         }
 
         text = SPACE_BEFORE_PUNCT.matcher(text).replaceAll("$1")
-        text = MULTI_WS.matcher(text).replaceAll(" ").trim()
+        text = normalizeWhitespace(text, options.keepLineBreaks)
 
         if (options.autoCapitalize) {
             text = capitalizeSentences(text)
         }
         return text
+    }
+
+    /** Alles auf eine Zeile — oder je Zeile normalisieren und hoechstens eine Leerzeile lassen. */
+    private fun normalizeWhitespace(text: String, keepLineBreaks: Boolean): String {
+        if (!keepLineBreaks) return MULTI_WS.matcher(text).replaceAll(" ").trim()
+        val lines = text.split('\n').joinToString("\n") { MULTI_WS.matcher(it).replaceAll(" ").trim() }
+        return MANY_BLANK_LINES.matcher(lines).replaceAll("\n\n").trim()
     }
 
     // Im auto-Modus NUR sprachuebergreifend eindeutige Disfluenzen — niemals Woerter,
@@ -110,7 +160,8 @@ object TextPolisher {
         "ähm", "äh", "öhm", "ähem", "öh", "uh", "uhm", "erm", "euh", "ehm", "hmm", "mmm",
     )
 
-    private fun fillersFor(language: String): List<String> {
+    /** Eingebaute Liste je Sprache (klein geschrieben) — fuer das Bearbeiten-Sheet im UI. */
+    fun builtinFillers(language: String): List<String> {
         if (language == "auto") return AUTO_FILLERS
         return FILLERS[language] ?: emptyList()
     }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Label-Pille im Zustand ERROR ("tippen = erneut"): wb_errorContainer, Text wb_onErrorContainer. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/wb_errorContainer" />
+    <corners android:radius="11dp" />
+</shape>

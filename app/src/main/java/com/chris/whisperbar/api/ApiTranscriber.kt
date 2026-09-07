@@ -1,14 +1,13 @@
 package com.chris.whisperbar.api
 
-import com.chris.whisperbar.AudioUtils
-import com.chris.whisperbar.Transcriber
+import com.chris.whisperbar.TranscriptResult
 import com.chris.whisperbar.WavEncoder
 import org.json.JSONObject
 
 /**
  * Transkribiert per OpenAI-kompatibler HTTP-API (POST /audio/transcriptions,
- * multipart/form-data). Funktioniert mit OpenAI, Groq und selbst gehosteten
- * Whisper-Servern — Base-URL, Modell und Key sind konfigurierbar.
+ * multipart/form-data). Funktioniert mit OpenAI, Groq, Mistral & Co. und selbst
+ * gehosteten Whisper-Servern — Endpunkt, Felder und Key kommen aus dem [ApiAccess].
  *
  * Hochgeladen wird immer WAV: die dokumentierten Formate der API sind mp3, mp4, mpeg,
  * mpga, m4a, wav und webm — ogg/opus (WhatsApp-Sprachnachrichten) ist NICHT dabei.
@@ -17,39 +16,34 @@ import org.json.JSONObject
  * Das aufgenommene Audio wird an den Anbieter gesendet.
  */
 class ApiTranscriber(
-    private val baseUrl: String,
-    private val apiKey: String,
-    private val model: String,
+    private val access: ApiAccess,
     /**
      * Optionaler Kontext fuer die Erkennung (Eigennamen, Fachbegriffe, Stil der
      * Zeichensetzung). Die API nimmt ihn als `prompt` entgegen; er kostet nichts
      * extra und verbessert vor allem Namen und Schreibweisen spuerbar.
      */
     private val prompt: String = "",
-) : Transcriber {
+) {
 
-    override fun transcribe(samples: FloatArray, language: String): String =
-        transcribe(WavUpload.fromSamples(samples, AudioUtils.SAMPLE_RATE), language)
-
-    fun transcribe(upload: WavUpload, language: String): String {
-        if (apiKey.isBlank()) throw ApiNotConfiguredException()
+    /**
+     * @throws ApiNotConfiguredException wenn der Anbieter einen Key braucht und keiner da ist.
+     */
+    fun transcribe(upload: WavUpload, language: String): TranscriptResult {
+        if (access.provider.needsKey && access.apiKey.isBlank()) throw ApiNotConfiguredException()
         val boundary = "----whisperbar${System.nanoTime()}"
 
         val body = Http.post(
-            url = Http.endpoint(baseUrl, "/audio/transcriptions"),
-            apiKey = apiKey,
+            url = TranscriptionRequest.url(access),
+            apiKey = access.apiKey,
             contentType = "multipart/form-data; boundary=$boundary",
+            readTimeoutMs = access.readTimeoutMs,
         ) { os ->
-            fun field(name: String, value: String) {
+            for ((name, value) in TranscriptionRequest.fields(access, language, prompt)) {
                 os.write("--$boundary\r\n".toByteArray())
                 os.write(
                     "Content-Disposition: form-data; name=\"$name\"\r\n\r\n$value\r\n".toByteArray(),
                 )
             }
-            field("model", model)
-            field("response_format", "json")
-            if (language.isNotBlank() && language != "auto") field("language", language)
-            if (prompt.isNotBlank()) field("prompt", prompt)
 
             os.write("--$boundary\r\n".toByteArray())
             os.write(
@@ -61,8 +55,11 @@ class ApiTranscriber(
             os.write("\r\n--$boundary--\r\n".toByteArray())
         }
 
-        return JSONObject(body).optString("text", "").trim()
+        val json = JSONObject(body)
+        return TranscriptResult(
+            text = json.optString("text", "").trim(),
+            // Nur verbose_json/eigene Server liefern die erkannte Sprache; sonst null.
+            detectedLanguage = json.optString("language", "").takeIf { it.isNotBlank() },
+        )
     }
-
-    override fun release() { /* zustandslos */ }
 }

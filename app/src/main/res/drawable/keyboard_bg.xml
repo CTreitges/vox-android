@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Grund der Diktier-Tastatur (UX-Spec §5.3): wb_background mit 1-dp-Linie wb_outlineVariant oben. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/wb_background" />
+        </shape>
+    </item>
+    <item android:height="1dp" android:gravity="top">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/wb_outlineVariant" />
+        </shape>
+    </item>
+</layer-list>

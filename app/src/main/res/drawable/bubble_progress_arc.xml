@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sende-Bogen des Knopfs (UX-Spec §5.1): 76 dp, 270 Grad, Stroke 3 dp wb_primary.
+     Dreht sich per BubbleAnimators.spin() einmal pro Sekunde. Viewport = dp, damit der
+     Strich exakt 3 dp bleibt. Start oben (38,1.5), im Uhrzeigersinn bis links (1.5,38). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="76dp"
+    android:height="76dp"
+    android:viewportWidth="76"
+    android:viewportHeight="76">
+    <path
+        android:strokeColor="@color/wb_primary"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M38,1.5 A36.5,36.5 0 1 1 1.5,38" />
+</vector>

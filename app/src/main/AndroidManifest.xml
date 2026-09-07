@@ -6,27 +6,57 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <!-- Modell-Download-Dienst (whisper.cpp-Modelle, 32-574 MB) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- Nachfrage vor Downloads ueber mobile Daten (ConnectivityManager.isActiveNetworkMetered) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- allowBackup=false: die Einstellungen enthalten API-Keys im Klartext (shared_prefs/whisperbar.xml).
+         Ohne Backup-Regeln landeten sie im Google-Auto-Backup und beim Geraetewechsel — die App
+         verspricht "Dein Key bleibt auf dem Geraet". Modelle (32-574 MB) sind ohnehin zu gross fuers Backup. -->
     <application
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:name=".WhisperBarApp"
+        android:allowBackup="false"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- Einzige Compose-Activity (UX-Spec §0.2): Router, Home, Assistent, Einstellungen.
+             singleTask: Deep-Links aus IME/Overlay/Notification (AppNav) landen per onNewIntent. -->
         <activity
+            android:name=".ui.MainActivity"
+            android:exported="false"
+            android:launchMode="singleTask" />
+
+        <!-- Launcher-Alias unter dem alten Namen: bestehende Startbildschirm-Verknuepfungen bleiben gueltig. -->
+        <activity-alias
             android:name=".SetupActivity"
+            android:targetActivity=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <!-- Einstellungen-Alias: Ziel von xml/method.xml (settingsActivity) und alten Intents.
+             MainActivity erkennt den Alias am Komponentennamen und oeffnet den Einstellungen-Hub. -->
+        <activity-alias
+            android:name=".SettingsActivity"
+            android:targetActivity=".ui.MainActivity"
+            android:exported="true"
+            android:label="@string/settings_title" />
 
         <activity
             android:name=".ShareTranscribeActivity"
             android:exported="true"
+            android:icon="@mipmap/ic_launcher_share"
             android:label="@string/share_label"
             android:excludeFromRecents="true"
             android:configChanges="orientation|screenSize|keyboardHidden">
@@ -47,11 +77,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:label="@string/settings_title" />
-
         <service
             android:name=".ime.WhisperBarInputMethodService"
             android:exported="true"
@@ -69,6 +94,11 @@
             android:name=".overlay.FloatingMicService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
+
+        <service
+            android:name=".whisper.ModelDownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <service
             android:name=".a11y.TextInserterAccessibilityService"

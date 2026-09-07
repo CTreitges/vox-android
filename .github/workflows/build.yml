@@ -13,19 +13,46 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NDK_VERSION: 28.2.13676358
+  CMAKE_VERSION: 3.22.1
+  BUILD_TOOLS_VERSION: 36.0.0
+
 jobs:
   build-and-unit:
     name: Build APK + Unit-Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive # whisper.cpp @ v1.9.3
 
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      # Gradle-Distribution + Dependency-Cache (auch Robolectrics android-all-Jar, ~100 MB)
+      - uses: gradle/actions/setup-gradle@v4
+
       - uses: android-actions/setup-android@v3
+
+      - name: NDK, CMake, Build-Tools, Platform installieren
+        run: sdkmanager --install "ndk;${NDK_VERSION}" "cmake;${CMAKE_VERSION}" "build-tools;${BUILD_TOOLS_VERSION}" "platforms;android-37.0"
+
+      - name: Submodul-Commit ermitteln (Cache-Key)
+        id: sub
+        run: echo "whisper=$(git -C whisper.cpp rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      # Native-Zwischenstand (whisper/ggml-Objekte) — Key an Submodul-Commit, CMake-Dateien und Gradle-Config gebunden
+      - name: CMake-Build cachen
+        uses: actions/cache@v4
+        with:
+          path: app/.cxx
+          key: cxx-${{ runner.os }}-ndk${{ env.NDK_VERSION }}-${{ steps.sub.outputs.whisper }}-${{ hashFiles('app/src/main/cpp/**', 'app/build.gradle.kts') }}
+
+      - name: JNI-Symbole abgleichen (Kotlin <-> C++)
+        run: python3 tools/check_jni_symbols.py
 
       - name: Unit-Tests + Lint
         run: ./gradlew --no-daemon testDebugUnitTest lintDebug
@@ -52,11 +79,43 @@ jobs:
           WB_KEY_ALIAS: whisperbar
         run: ./gradlew --no-daemon assembleRelease
 
+      - name: Release-APK pruefen (Native-Lib da, kein Modell im APK, 16-KB-Alignment)
+        run: |
+          set -euo pipefail
+          APK=app/build/outputs/apk/release/app-release.apk
+          unzip -l "$APK" | tee /tmp/apk-list.txt | grep -E ' (lib|assets)/' || true
+          grep -qE ' lib/arm64-v8a/libwhisperbar\.so$' /tmp/apk-list.txt \
+            || { echo "::error::lib/arm64-v8a/libwhisperbar.so fehlt im Release-APK"; exit 1; }
+          if grep -qE ' assets/.*\.bin$' /tmp/apk-list.txt; then
+            echo "::error::Modell-Datei (assets/*.bin) im APK — Modelle kommen nur per Download"; exit 1
+          fi
+          if grep -qE ' lib/(armeabi-v7a|x86|x86_64)/' /tmp/apk-list.txt; then
+            echo "::error::unerwartete ABI im APK (nur arm64-v8a vorgesehen)"; exit 1
+          fi
+          ZA="$ANDROID_HOME/build-tools/${BUILD_TOOLS_VERSION}/zipalign"
+          "$ZA" -c -P 16 -v 4 "$APK" | tail -n 3
+          READELF="$ANDROID_HOME/ndk/${NDK_VERSION}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf"
+          rm -rf /tmp/apk && unzip -o -q "$APK" 'lib/arm64-v8a/*.so' -d /tmp/apk
+          for so in /tmp/apk/lib/arm64-v8a/*.so; do
+            echo "== $so ($(stat -c %s "$so") Bytes)"
+            "$READELF" -lW "$so" | awk '$1=="LOAD"{print "  LOAD align", $NF}'
+            "$READELF" -lW "$so" | awk '$1=="LOAD" && $NF!="0x4000"{bad=1} END{exit bad}' \
+              || { echo "::error::$so ist nicht 16-KB-aligned"; exit 1; }
+          done
+
       - name: Release-APK als Artefakt hochladen
         uses: actions/upload-artifact@v4
         with:
           name: whisperbar-release-apk
           path: app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+      # R8-Mapping zum Entschluesseln von Stacktraces des signierten Builds
+      - name: R8-Mapping als Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: whisperbar-release-mapping
+          path: app/build/outputs/mapping/release/mapping.txt
           if-no-files-found: error
 
       - name: Testberichte hochladen

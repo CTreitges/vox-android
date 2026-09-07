@@ -1,5 +1,6 @@
 package com.chris.whisperbar
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -11,14 +12,18 @@ class PolishPlanTest {
 
     private fun plan(
         removeFillers: Boolean = true,
-        llmPolish: Boolean = false,
+        refineMode: RefineMode = RefineMode.OFF,
         smartFillers: Boolean = false,
+        customFillers: List<String> = emptyList(),
+        disabledFillers: Set<String> = emptySet(),
     ) = PolishPlan.options(
         removeFillers = removeFillers,
         autoCapitalize = true,
         language = "de",
-        llmPolish = llmPolish,
+        refineMode = refineMode,
         smartFillers = smartFillers,
+        customFillers = customFillers,
+        disabledFillers = disabledFillers,
     )
 
     @Test fun ohneKiGreiftDieWortliste() {
@@ -31,22 +36,49 @@ class PolishPlanTest {
 
     @Test fun kiEntscheidungSchaltetDieWortlisteAb() {
         // Sonst wuerde zweimal gefiltert und das "im Zweifel behalten" der KI
-        // waere wieder ausgehebelt.
-        assertFalse(plan(removeFillers = true, llmPolish = true, smartFillers = true).removeFillers)
+        // waere wieder ausgehebelt — in jedem Modus, nicht nur beim Glaetten.
+        for (mode in listOf(RefineMode.POLISH, RefineMode.BEAUTIFY, RefineMode.SUMMARIZE)) {
+            assertFalse(mode.name, plan(removeFillers = true, refineMode = mode, smartFillers = true).removeFillers)
+        }
     }
 
     @Test fun glaettenAlleinLaesstDieWortlisteAktiv() {
-        assertTrue(plan(removeFillers = true, llmPolish = true, smartFillers = false).removeFillers)
+        assertTrue(plan(removeFillers = true, refineMode = RefineMode.POLISH, smartFillers = false).removeFillers)
     }
 
-    @Test fun intelligenteFilterOhneGlaettenBleibtWirkungslos() {
+    @Test fun intelligenteFilterOhneKiBleibtWirkungslos() {
         // smartFillers braucht den zweiten Aufruf — ohne ihn muss die Wortliste ran.
-        assertTrue(plan(removeFillers = true, llmPolish = false, smartFillers = true).removeFillers)
+        assertTrue(plan(removeFillers = true, refineMode = RefineMode.OFF, smartFillers = true).removeFillers)
+    }
+
+    @Test fun kiTextBehaeltSeineAbsaetze() {
+        assertFalse(plan().keepLineBreaks)
+        assertTrue(plan(refineMode = RefineMode.POLISH).keepLineBreaks)
+        assertTrue(plan(refineMode = RefineMode.SUMMARIZE).keepLineBreaks)
     }
 
     @Test fun uebrigeOptionenWerdenDurchgereicht() {
-        val o = plan()
+        val o = plan(customFillers = listOf("halt"), disabledFillers = setOf("hmm"))
         assertTrue(o.autoCapitalize)
-        org.junit.Assert.assertEquals("de", o.language)
+        assertEquals("de", o.language)
+        assertEquals(listOf("halt"), o.customFillers.toList())
+        assertEquals(setOf("hmm"), o.disabledFillers)
+    }
+
+    @Test fun verbatimUndCleaned() {
+        val v = PolishPlan.verbatim("de")
+        assertFalse(v.removeFillers)
+        assertFalse(v.autoCapitalize)
+        val c = PolishPlan.cleaned("de", listOf("halt"), setOf("hmm"))
+        assertTrue(c.removeFillers)
+        assertFalse(c.autoCapitalize)
+        assertEquals(listOf("halt"), c.customFillers.toList())
+        assertEquals(setOf("hmm"), c.disabledFillers)
+    }
+
+    @Test fun fuellwoerterWerdenNormalisiert() {
+        assertEquals(setOf("ähm", "halt", "sozusagen"), PolishPlan.parseFillers("Ähm, halt,sozusagen ; HALT\n"))
+        assertEquals(emptySet<String>(), PolishPlan.parseFillers("  , ,\n"))
+        assertEquals(setOf("halt"), PolishPlan.normalizeFillers(listOf(" Halt ", "halt", "")))
     }
 }

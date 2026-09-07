@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Klartext-HTTP nur, damit ein eigener Whisper-/Ollama-Server im LAN oder per
+     Tailscale (100.64.0.0/10) ohne TLS erreichbar ist. Android kennt keine IP-Bereiche
+     in <domain>, deshalb global erlaubt; die App akzeptiert http:// nur zu privaten
+     Adressen ohne Warnung (ServerUrlCheck). Die Cloud-Anbieter aus dem ProviderCatalog
+     bleiben strikt https (NetworkSecurityConfigTest haelt beides synchron). -->
+<network-security-config xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="InsecureBaseConfiguration">
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">openai.com</domain>
+        <domain includeSubdomains="true">groq.com</domain>
+        <domain includeSubdomains="true">mistral.ai</domain>
+        <domain includeSubdomains="true">together.ai</domain>
+        <domain includeSubdomains="true">together.xyz</domain>
+        <domain includeSubdomains="true">deepinfra.com</domain>
+        <domain includeSubdomains="true">openrouter.ai</domain>
+        <domain includeSubdomains="true">anthropic.com</domain>
+        <domain includeSubdomains="true">googleapis.com</domain>
+        <domain includeSubdomains="true">deepseek.com</domain>
+    </domain-config>
+</network-security-config>

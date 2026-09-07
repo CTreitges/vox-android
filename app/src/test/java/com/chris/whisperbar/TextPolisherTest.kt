@@ -1,6 +1,7 @@
 package com.chris.whisperbar
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -110,5 +111,83 @@ class TextPolisherTest {
             "Ich denke ja.",
             TextPolisher.polish("ich ähm denke uh ja.", PolishOptions(language = "auto")),
         )
+    }
+
+    // --- eigene und abgewaehlte Fuellwoerter -----------------------------------
+
+    @Test fun eigeneFuellwoerterWerdenEntfernt() {
+        assertEquals(
+            "Das ist gut.",
+            TextPolisher.polish(
+                "das ist halt gut, sozusagen.",
+                PolishOptions(language = "de", customFillers = listOf("halt", "sozusagen")),
+            ),
+        )
+    }
+
+    @Test fun fuellwortVorSatzendeLaesstKeinKommaZurueck() {
+        assertEquals("Das ist gut.", TextPolisher.polish("das ist gut, ähm.", PolishOptions(language = "de")))
+        assertEquals("Echt, ja?", TextPolisher.polish("echt, ähm, ja?", PolishOptions(language = "de")))
+        // Ohne Fuellwort-Entfernung bleibt der Wortlaut samt Kommas unangetastet.
+        assertEquals("Gut, ähm.", TextPolisher.polish("gut, ähm.", PolishOptions(removeFillers = false, language = "de")))
+    }
+
+    @Test fun eigeneFuellwoerterNurAlsGanzeWoerterUndOhneGrossKlein() {
+        val o = PolishOptions(language = "de", customFillers = listOf("halt"))
+        assertEquals("Haltestelle bleibt.", TextPolisher.polish("Haltestelle bleibt.", o))
+        assertEquals("Das bleibt.", TextPolisher.polish("das HALT bleibt.", o))
+        // Unicode: Wortgrenze vor/nach Umlauten.
+        assertEquals("Schön so.", TextPolisher.polish("schön äh so.", PolishOptions(language = "de", customFillers = listOf("äh"))))
+    }
+
+    @Test fun leereEigeneEintraegeWerdenIgnoriert() {
+        assertEquals(
+            "Das bleibt.",
+            TextPolisher.polish("das bleibt.", PolishOptions(language = "de", customFillers = listOf("", "   "))),
+        )
+    }
+
+    @Test fun mehrwortFuellerFunktionieren() {
+        assertEquals(
+            "I think so.",
+            TextPolisher.polish("I think you know so.", PolishOptions(language = "en", customFillers = listOf("you know"))),
+        )
+    }
+
+    @Test fun abgewaehlteStandardwoerterBleibenStehen() {
+        assertEquals(
+            "Ich hmm denke ja.",
+            TextPolisher.polish("ich hmm denke ähm ja.", PolishOptions(language = "de", disabledFillers = setOf("hmm"))),
+        )
+    }
+
+    @Test fun eingebauteListenSindOeffentlich() {
+        assertTrue(TextPolisher.builtinFillers("de").contains("ähm"))
+        assertTrue(TextPolisher.builtinFillers("en").contains("um"))
+        assertTrue(TextPolisher.builtinFillers("auto").contains("ähm"))
+        assertTrue(TextPolisher.builtinFillers("auto").none { it == "um" })
+        assertEquals(emptyList<String>(), TextPolisher.builtinFillers("xx"))
+        for (lang in listOf("de", "en", "es", "fr", "it", "auto")) {
+            for (w in TextPolisher.builtinFillers(lang)) assertEquals(w, w.lowercase())
+        }
+    }
+
+    // --- Zeilenumbrueche ----------------------------------------------------------
+
+    @Test fun kiAbsaetzeBleibenErhalten() {
+        val o = PolishOptions(language = "de", keepLineBreaks = true)
+        assertEquals(
+            "Erster Absatz.\n\nZweiter Absatz.",
+            TextPolisher.polish("Erster   Absatz. \n\n\n\n Zweiter Absatz.  ", o),
+        )
+        assertEquals(
+            "- Punkt eins\n- Punkt zwei",
+            TextPolisher.polish("- Punkt eins\n- Punkt zwei", o),
+        )
+    }
+
+    @Test fun fuellwortAmZeilenendeLaesstKeinenRest() {
+        val o = PolishOptions(language = "de", keepLineBreaks = true)
+        assertEquals("Ich denke.\nJa.", TextPolisher.polish("ich denke ähm.\näh ja.", o))
     }
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android < 12 (fullBackupContent): die Einstellungen enthalten API-Keys im Klartext und bleiben
+     auf dem Geraet (Zusage "Dein Key bleibt auf dem Geraet"). Modelle sind fuers Backup ohnehin zu gross. -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="whisperbar.xml" />
+    <exclude domain="file" path="models" />
+</full-backup-content>

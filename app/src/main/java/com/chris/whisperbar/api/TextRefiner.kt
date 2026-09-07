@@ -1,95 +1,42 @@
 package com.chris.whisperbar.api
 
-import org.json.JSONArray
+import com.chris.whisperbar.RefineMode
 import org.json.JSONObject
 
 /**
- * Baut die Anweisung fuer die Textveredelung. Rein (ohne Android/Netz), damit
- * JVM-unit-testbar — die Anweisung entscheidet ueber die Textqualitaet und darf
- * nicht unbemerkt verrutschen.
- */
-object RefinePrompt {
-
-    /**
-     * @param german Anweisung auf Deutsch (bei deutscher Diktatsprache) statt Englisch.
-     * @param smartFillers Wenn true, entscheidet das Modell selbst, welche Fuellwoerter,
-     *   Versprecher und Wiederholungen weg koennen — statt einer festen Wortliste.
-     */
-    fun build(german: Boolean, smartFillers: Boolean): String {
-        val sb = StringBuilder()
-        if (german) {
-            sb.append(
-                "Du korrigierst diktierten Text. Setze Zeichensetzung, Gross- und " +
-                    "Kleinschreibung sowie Absaetze richtig. Aendere den Inhalt nicht, " +
-                    "uebersetze nicht, ergaenze nichts und kommentiere nicht. " +
-                    "Antworte ausschliesslich mit dem korrigierten Text.",
-            )
-            if (smartFillers) {
-                sb.append(
-                    " Entferne ausserdem Fuellwoerter, Versprecher, Stotterer und " +
-                        "unbeabsichtigte Wiederholungen, wenn sie erkennbar nicht gemeint " +
-                        "waren. Im Zweifel behalte das Wort.",
-                )
-            }
-        } else {
-            sb.append(
-                "You clean up dictated text. Fix punctuation, capitalisation and " +
-                    "paragraphs. Do not change the meaning, do not translate, do not add " +
-                    "anything and do not comment. Reply with the corrected text only.",
-            )
-            if (smartFillers) {
-                sb.append(
-                    " Also remove filler words, false starts, stutters and unintended " +
-                        "repetitions where they were clearly not meant. When in doubt, keep it.",
-                )
-            }
-        }
-        return sb.toString()
-    }
-}
-
-/**
- * Optionale zweite Runde: laesst ein Sprachmodell den Rohtext zu sauberen Saetzen
- * glaetten (Zeichensetzung, Grammatik, Absaetze). Kostet eine zusaetzliche Anfrage
- * und etwas Latenz — deshalb in den Einstellungen abschaltbar.
+ * Optionale zweite Runde: laesst ein Sprachmodell den Rohtext bearbeiten (glaetten,
+ * verschoenern, zusammenfassen, in Absaetze gliedern). Kostet eine zusaetzliche
+ * Anfrage und etwas Latenz — deshalb in den Einstellungen abschaltbar.
  *
- * Nutzt denselben OpenAI-kompatiblen Endpunkt wie die Transkription
- * (POST /chat/completions).
+ * Spricht POST /chat/completions des [ApiAccess] — das kann ein anderer Anbieter
+ * als bei der Transkription sein (z. B. Groq-STT + Ollama-LLM).
  */
-class TextRefiner(
-    private val baseUrl: String,
-    private val apiKey: String,
-    private val model: String,
-) {
+class TextRefiner(private val access: ApiAccess) {
 
     /**
-     * Liefert den geglaetteten Text. Bei leerer Eingabe oder leerer Antwort wird der
-     * Originaltext zurueckgegeben — die Veredelung darf ein Diktat niemals verschlucken.
+     * Liefert den bearbeiteten Text. Bei leerer Eingabe, [RefineMode.OFF] oder leerer
+     * Antwort wird der Originaltext zurueckgegeben. Fehler des Sprachmodells (HTTP, Netz)
+     * werden geworfen — [com.chris.whisperbar.TranscriptionEngine] faengt sie und faellt
+     * auf den Rohtext zurueck: die Veredelung darf ein Diktat niemals verschlucken.
+     *
+     * @throws ApiNotConfiguredException wenn die Base-URL leer ist (eigener Server ohne URL) —
+     *   sonst ginge die Anfrage an "/chat/completions" ohne Host.
      */
-    fun refine(raw: String, language: String, smartFillers: Boolean): String {
-        if (raw.isBlank()) return raw
-        if (apiKey.isBlank()) throw ApiNotConfiguredException()
+    fun refine(raw: String, language: String, mode: RefineMode, smartFillers: Boolean): String {
+        if (raw.isBlank() || mode == RefineMode.OFF) return raw
+        if (access.baseUrl.isBlank()) throw ApiNotConfiguredException()
 
-        val payload = JSONObject().apply {
-            put("model", model)
-            put("temperature", 0)
-            put(
-                "messages",
-                JSONArray().apply {
-                    put(
-                        JSONObject()
-                            .put("role", "system")
-                            .put("content", RefinePrompt.build(language == "de", smartFillers)),
-                    )
-                    put(JSONObject().put("role", "user").put("content", raw))
-                },
-            )
-        }.toString()
+        val payload = ChatPayload.build(
+            access = access,
+            systemPrompt = RefinePrompt.build(mode, german = language == "de", smartFillers = smartFillers),
+            userText = raw,
+        )
 
         val body = Http.post(
-            url = Http.endpoint(baseUrl, "/chat/completions"),
-            apiKey = apiKey,
+            url = Http.endpoint(access.baseUrl, "/chat/completions"),
+            apiKey = access.apiKey,
             contentType = "application/json",
+            readTimeoutMs = access.readTimeoutMs,
         ) { os -> os.write(payload.toByteArray(Charsets.UTF_8)) }
 
         val text = JSONObject(body)
@@ -97,8 +44,17 @@ class TextRefiner(
             ?.optJSONObject(0)
             ?.optJSONObject("message")
             ?.optString("content")
+            ?.let { stripThinking(it) }
             ?.trim()
 
         return if (text.isNullOrBlank()) raw else text
+    }
+
+    companion object {
+        // Qwen3 & Co. schreiben ihr Nachdenken als <think>…</think> in den Text, wenn
+        // der Server reasoning_effort ignoriert. Das gehoert nie ins Diktat.
+        private val THINK_BLOCK = Regex("(?s)^\\s*<think>.*?</think>\\s*")
+
+        fun stripThinking(content: String): String = THINK_BLOCK.replace(content, "")
     }
 }

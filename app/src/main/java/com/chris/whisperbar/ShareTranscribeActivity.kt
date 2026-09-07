@@ -1,65 +1,72 @@
 package com.chris.whisperbar
 
-import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.view.View
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
-import com.chris.whisperbar.api.ApiNotConfiguredException
-import java.util.concurrent.Executors
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import com.chris.whisperbar.ui.share.SharePhase
+import com.chris.whisperbar.ui.share.ShareController
+import com.chris.whisperbar.ui.share.ShareScreen
+import com.chris.whisperbar.ui.theme.WhisperBarTheme
 
 /**
  * Nimmt aus anderen Apps geteilte Audiodateien entgegen (Teilen-Menue) und transkribiert
- * sie — der Hauptfall sind WhatsApp-Sprachnachrichten.
+ * sie — der Hauptfall sind WhatsApp-Sprachnachrichten. Ablauf in [ShareController],
+ * Darstellung in [ShareScreen] (UX-Spec §2.9).
  *
- * Der Text wird WORTGETREU ausgegeben: keine Fuellwort-Entfernung, keine KI-Glaettung.
- * Bei einer fremden Nachricht will man wissen, was gesagt wurde.
- *
+ * Der Text wird WORTGETREU erkannt; "Fuellwoerter ausblenden" ist ein Schalter in der Ansicht.
  * Die Zwischenablage wird bewusst NICHT automatisch ueberschrieben — nur auf Knopfdruck.
  */
-class ShareTranscribeActivity : Activity() {
+class ShareTranscribeActivity : ComponentActivity() {
 
-    private val io = Executors.newSingleThreadExecutor { r -> Thread(r, "wb-share-io") }
-    private val main = Handler(Looper.getMainLooper())
-
-    @Volatile private var cancelled = false
-
-    private lateinit var progressView: ProgressBar
-    private lateinit var statusView: TextView
-    private lateinit var resultView: TextView
-    private lateinit var actions: View
-
-    private var uris: List<Uri> = emptyList()
-    private var results: List<SharedTranscript> = emptyList()
+    private lateinit var controller: ShareController
+    private var wasPaused = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_share)
-
-        progressView = findViewById(R.id.share_progress)
-        statusView = findViewById(R.id.share_status)
-        resultView = findViewById(R.id.share_result)
-        actions = findViewById(R.id.share_actions)
-
-        findViewById<Button>(R.id.share_copy).setOnClickListener { copyToClipboard() }
-        findViewById<Button>(R.id.share_forward).setOnClickListener { forward() }
-        findViewById<Button>(R.id.share_retry).setOnClickListener { start() }
-
-        uris = incomingUris(intent)
-        if (uris.isEmpty()) {
-            fail(getString(R.string.share_no_audio))
-            return
+        // Fest dunkel, Systemleisten transparent (Spec §0.2); Scaffold und Aktionsleiste tragen die Insets.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+        )
+        controller = ShareController(this, incomingUris(intent))
+        controller.start()
+        setContent {
+            WhisperBarTheme {
+                ShareScreen(
+                    state = controller.state,
+                    onClose = ::close,
+                    onCopy = ::copyToClipboard,
+                    onShare = ::forward,
+                    onRetryFile = controller::retryFile,
+                    onRetryAll = controller::retryAll,
+                    onHideFillersChange = controller::setHideFillers,
+                    onOpenSetup = ::openSetup,
+                )
+            }
         }
-        start()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        wasPaused = true
+    }
+
+    /** Zurueck aus der Einrichtung: bei "Kein Zugang" gleich noch einmal versuchen. */
+    override fun onResume() {
+        super.onResume()
+        if (wasPaused && controller.state.phase == SharePhase.NOT_CONFIGURED) controller.start()
+    }
+
+    override fun onDestroy() {
+        controller.dispose()
+        super.onDestroy()
     }
 
     /** ACTION_SEND liefert eine Datei, ACTION_SEND_MULTIPLE mehrere. */
@@ -74,106 +81,20 @@ class ShareTranscribeActivity : Activity() {
         }
     }
 
-    // --- Ablauf ---------------------------------------------------------------
-
-    private fun start() {
-        cancelled = false
-        results = emptyList()
-        actions.visibility = View.GONE
-        resultView.text = ""
-        progressView.visibility = View.VISIBLE
-        statusView.visibility = View.VISIBLE
-        statusView.setText(R.string.share_starting)
-
-        io.submit {
-            val done = mutableListOf<SharedTranscript>()
-            val failures = mutableListOf<String>()
-            for ((index, uri) in uris.withIndex()) {
-                if (cancelled) return@submit
-                try {
-                    val t = SharedAudioTranscriber.transcribe(
-                        context = this,
-                        uri = uri,
-                        onProgress = { step, total, label ->
-                            main.post { showProgress(index, step, total, label) }
-                        },
-                        isCancelled = { cancelled },
-                    )
-                    done.add(t)
-                    // Zwischenergebnis sofort zeigen — bei mehreren Dateien wartet man
-                    // sonst bis zum Schluss auf den ersten Text.
-                    main.post { showResults(done, failures, partial = true) }
-                } catch (e: ApiNotConfiguredException) {
-                    main.post { fail(getString(R.string.api_not_configured)) }
-                    return@submit
-                } catch (e: Exception) {
-                    Log.e(TAG, "Geteiltes Audio fehlgeschlagen", e)
-                    failures.add(e.message ?: getString(R.string.kb_error))
-                }
-            }
-            if (cancelled) return@submit
-            main.post {
-                if (done.isEmpty()) {
-                    fail(failures.firstOrNull() ?: getString(R.string.kb_error))
-                } else {
-                    showResults(done, failures, partial = false)
-                }
-            }
-        }
-    }
-
-    private fun showProgress(fileIndex: Int, step: Int, total: Int, label: String) {
-        val prefix = if (uris.size > 1) {
-            getString(R.string.share_file_of, fileIndex + 1, uris.size) + " · "
-        } else {
-            ""
-        }
-        val chunkPart = if (total > 1) " ${step + 1}/$total" else ""
-        statusView.text = "$prefix$label$chunkPart"
-    }
-
-    private fun showResults(
-        done: List<SharedTranscript>,
-        failures: List<String>,
-        partial: Boolean,
-    ) {
-        results = done.toList()
-        progressView.visibility = if (partial) View.VISIBLE else View.GONE
-        statusView.visibility = if (partial) View.VISIBLE else View.GONE
-        actions.visibility = if (partial) View.GONE else View.VISIBLE
-        resultView.text = render(done, failures)
-    }
-
-    /** Bei mehreren Dateien je Abschnitt eine Ueberschrift mit Quelle und Dauer. */
-    private fun render(done: List<SharedTranscript>, failures: List<String>): String {
-        val sb = StringBuilder()
-        for (t in done) {
-            if (done.size > 1 || failures.isNotEmpty()) {
-                if (sb.isNotEmpty()) sb.append("\n\n")
-                sb.append("— ${t.source} · ${Formats.duration(t.durationMs)} —\n")
-            }
-            sb.append(t.text.ifBlank { getString(R.string.share_nothing_recognised) })
-        }
-        for (f in failures) {
-            if (sb.isNotEmpty()) sb.append("\n\n")
-            sb.append(getString(R.string.share_one_failed, f))
-        }
-        return sb.toString()
-    }
-
-    private fun fail(message: String) {
-        progressView.visibility = View.GONE
-        statusView.visibility = View.GONE
-        actions.visibility = View.VISIBLE
-        resultView.text = message
-        results = emptyList()
-    }
-
     // --- Aktionen -------------------------------------------------------------
 
-    /** Nur der reine Text, ohne die Ueberschriften der Ergebnis-Ansicht. */
-    private fun plainText(): String =
-        results.joinToString("\n\n") { it.text }.ifBlank { resultView.text.toString() }
+    /** Schliessen bricht laufende Arbeit ab. */
+    private fun close() {
+        controller.cancel()
+        finish()
+    }
+
+    /** Ausweg "Einrichtung oeffnen" -> Assistent in der MainActivity. */
+    private fun openSetup() {
+        startActivity(AppNav.setup(this))
+    }
+
+    private fun plainText(): String = controller.plainText(getString(R.string.share_nothing_recognised))
 
     private fun copyToClipboard() {
         val text = plainText()
@@ -182,7 +103,6 @@ class ShareTranscribeActivity : Activity() {
             val cm = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             cm.setPrimaryClip(ClipData.newPlainText("whisperbar", text))
         }
-        Toast.makeText(this, R.string.share_copied, Toast.LENGTH_SHORT).show()
     }
 
     private fun forward() {
@@ -194,15 +114,5 @@ class ShareTranscribeActivity : Activity() {
                 getString(R.string.share_forward),
             ),
         )
-    }
-
-    override fun onDestroy() {
-        cancelled = true
-        io.shutdownNow()
-        super.onDestroy()
-    }
-
-    companion object {
-        private const val TAG = "WhisperBarShare"
     }
 }
