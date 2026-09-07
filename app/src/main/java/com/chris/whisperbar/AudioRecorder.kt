@@ -12,7 +12,7 @@ import kotlin.math.abs
  * Nimmt Mikrofon-Audio als 16 kHz Mono PCM16 auf und liefert es als FloatArray
  * (Whisper-Format, [-1, 1]). Push-to-talk: [start] beim Druecken, [stop] beim Loslassen.
  *
- * Braucht die RECORD_AUDIO-Berechtigung (wird in der SetupActivity angefragt).
+ * Braucht die RECORD_AUDIO-Berechtigung (wird im Einrichtungs-Assistenten angefragt).
  */
 class AudioRecorder {
 
@@ -32,7 +32,7 @@ class AudioRecorder {
 
     val isRecording: Boolean get() = recording
 
-    @SuppressLint("MissingPermission") // Aufrufer stellt Berechtigung sicher (SetupActivity).
+    @SuppressLint("MissingPermission") // Aufrufer stellt Berechtigung sicher (Einrichtungs-Assistent).
     fun start(): Boolean {
         if (recording) return true
         val minBuf = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL, ENCODING)

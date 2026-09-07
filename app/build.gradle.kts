@@ -61,6 +61,8 @@ android {
 
     buildFeatures {
         compose = true
+        // BuildConfig.VERSION_NAME fuer Home-Fusszeile und Ueber-Sheet (AGP 9: Default aus).
+        buildConfig = true
     }
 
     // Lint soll den Build nicht an Warnungen scheitern lassen (Reports bleiben erhalten).

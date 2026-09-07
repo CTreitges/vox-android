@@ -22,14 +22,31 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
+        <!-- Einzige Compose-Activity (UX-Spec §0.2): Router, Home, Assistent, Einstellungen.
+             singleTask: Deep-Links aus IME/Overlay/Notification (AppNav) landen per onNewIntent. -->
         <activity
+            android:name=".ui.MainActivity"
+            android:exported="false"
+            android:launchMode="singleTask" />
+
+        <!-- Launcher-Alias unter dem alten Namen: bestehende Startbildschirm-Verknuepfungen bleiben gueltig. -->
+        <activity-alias
             android:name=".SetupActivity"
+            android:targetActivity=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity-alias>
+
+        <!-- Einstellungen-Alias: Ziel von xml/method.xml (settingsActivity) und alten Intents.
+             MainActivity erkennt den Alias am Komponentennamen und oeffnet den Einstellungen-Hub. -->
+        <activity-alias
+            android:name=".SettingsActivity"
+            android:targetActivity=".ui.MainActivity"
+            android:exported="true"
+            android:label="@string/settings_title" />
 
         <activity
             android:name=".ShareTranscribeActivity"
@@ -54,11 +71,6 @@
                 <data android:mimeType="application/ogg" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:label="@string/settings_title" />
 
         <service
             android:name=".ime.WhisperBarInputMethodService"
