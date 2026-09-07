@@ -411,10 +411,6 @@
     <string name="share_cd_copy">Text kopieren</string>
 
     <!-- Allgemein (UX-Spec §6.1) -->
-    <string name="common_close">Schließen</string>
-    <string name="common_retry">Erneut</string>
-    <string name="cd_close">Schließen</string>
-    <string name="err_unknown">Unbekannter Fehler: %1$s</string>
 
     <!-- §6.11 Schwebender Knopf (V1) und Notification (N1) -->
     <string name="float_channel">WhisperBar Diktat</string>

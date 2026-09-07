@@ -89,9 +89,9 @@ class ShareTranscribeActivity : ComponentActivity() {
         finish()
     }
 
-    /** Ausweg "Einrichtung oeffnen" — einzige Stelle mit dem Ziel; ein spaeteres Paket tauscht es (AppNav.setup). */
+    /** Ausweg "Einrichtung oeffnen" -> Assistent in der MainActivity. */
     private fun openSetup() {
-        startActivity(Intent(this, SetupActivity::class.java).putExtra(EXTRA_ROUTE, ROUTE_SETUP))
+        startActivity(AppNav.setup(this))
     }
 
     private fun plainText(): String = controller.plainText(getString(R.string.share_nothing_recognised))
@@ -114,10 +114,5 @@ class ShareTranscribeActivity : ComponentActivity() {
                 getString(R.string.share_forward),
             ),
         )
-    }
-
-    companion object {
-        const val EXTRA_ROUTE = "route"
-        const val ROUTE_SETUP = "setup"
     }
 }
