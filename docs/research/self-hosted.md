@@ -1,6 +1,6 @@
 # Vox — Provider „Eigener Server" (Recherche + Anleitung + App-Änderungsliste)
 
-Stand: 2026-09-06 · Repo: `/home/chris/vox-android` (Branch `v3-redesign`, read-only analysiert) · Ziel-Maschine für spätere Installation: Oracle-VPS aarch64 (4 Kerne, 24 GB RAM, Ubuntu 24.04, Caddy, systemd-User-Services).
+Stand: 2026-09-06 · Ziel-Maschine für spätere Installation: Oracle-VPS aarch64 (4 Kerne, 24 GB RAM, Ubuntu 24.04, Caddy, systemd-User-Services).
 
 Alle Versions-/Verhaltensaussagen stammen aus den verlinkten Quellen (abgerufen 2026-09-06). Unsicheres ist als **(unsicher)** markiert; Leistungszahlen für den VPS sind **Schätzungen** aus fremden ARM-Benchmarks, nicht gemessen.
 

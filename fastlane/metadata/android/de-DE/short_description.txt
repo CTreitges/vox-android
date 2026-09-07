@@ -1,0 +1,1 @@
+Diktieren in jede App – online per eigenem API-Key oder offline mit Whisper

@@ -1,6 +1,6 @@
 # whisper.cpp On-Device-Erkennung für Vox — Wiederherstellung technisch abgesichert
 
-Stand der Recherche: 2026-09-06 · Repo `/home/chris/vox-android` (Branch `v3-redesign`, read-only) · Alt-Stand: Tag `offline-v1`
+Stand der Recherche: 2026-09-06 · Alt-Stand: Tag `offline-v1`
 Alle Versions-/Größen-/API-Angaben stammen aus live abgefragten Quellen (GitHub-API, Raw-Dateien, Hugging-Face-API, Google-SDK-Repository-XML, developer.android.com). Unsicheres ist als **[grob]** oder **[unsicher]** markiert.
 
 ---

@@ -1,6 +1,6 @@
 # Vox-Android — Build-Konfiguration für Jetpack Compose + Material 3
 
-Stand: 2026-09-06 · Repo `/home/chris/vox-android` (Branch `v3-redesign`) · Read-only-Recherche, nichts gebaut, nichts verändert.
+Stand: 2026-09-06 · Read-only-Recherche, nichts gebaut, nichts verändert.
 Alle Versions-/Datumsangaben stammen aus den unten verlinkten Quellen (abgerufen 2026-09-06). Wo etwas nicht belegbar war, steht **[unsicher]**.
 
 ---
