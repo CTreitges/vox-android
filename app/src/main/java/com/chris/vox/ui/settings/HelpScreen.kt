@@ -71,6 +71,15 @@ fun HelpScreen(section: Int, nav: NavState) {
                     HelpLine(R.drawable.ic_touch_app, stringResource(R.string.help_s1_bubble))
                     HelpLine(R.drawable.ic_keyboard, stringResource(R.string.help_s1_keyboard))
                     HelpLine(R.drawable.ic_voicemail, stringResource(R.string.help_s1_share))
+                    // Nur anzeigen — tutorialSeen bleibt gesetzt.
+                    VoxRow(
+                        headline = stringResource(R.string.help_s1_tutorial),
+                        leading = { VoxIcon(R.drawable.ic_replay, null, Modifier.size(24.dp), MaterialTheme.colorScheme.primary) },
+                        trailing = {
+                            VoxIcon(R.drawable.ic_chevron_right, null, Modifier.size(24.dp), MaterialTheme.colorScheme.onSurfaceVariant)
+                        },
+                        onClick = { nav.push(Screen.Tutorial()) },
+                    )
                 }
             }
             item {

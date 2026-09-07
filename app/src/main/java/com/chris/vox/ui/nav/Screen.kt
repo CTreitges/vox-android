@@ -29,9 +29,17 @@ sealed class Screen(val key: String) {
     /** [section] 1..7 = initial geoeffneter Hilfe-Abschnitt. */
     data class Help(val section: Int = 1) : Screen("help")
 
+    /** Tutorial (T); [startPage] 0..3 = zuerst gezeigte Seite, [PAGE_SHARE] = Sprachnachrichten abtippen. */
+    data class Tutorial(val startPage: Int = 0) : Screen("tutorial") {
+        companion object {
+            const val PAGE_SHARE = 2
+        }
+    }
+
     fun encode(): String = when (this) {
         is Setup -> "$key:$step"
         is Help -> "$key:$section"
+        is Tutorial -> "$key:$startPage"
         else -> key
     }
 
@@ -46,6 +54,7 @@ sealed class Screen(val key: String) {
                 "button" -> ButtonKeyboard
                 "models" -> Models
                 "help" -> Help(arg ?: 1)
+                "tutorial" -> Tutorial(arg ?: 0)
                 else -> Home
             }
         }

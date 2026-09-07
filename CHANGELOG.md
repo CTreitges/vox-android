@@ -2,6 +2,12 @@
 
 Alle nennenswerten Änderungen an Vox. Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/), Versionierung nach [SemVer](https://semver.org/lang/de/).
 
+## [Unveröffentlicht]
+
+### Hinzugefügt
+
+- **Illustriertes Tutorial nach der Einrichtung** (Knopf, Tastatur, Sprachnachrichten aus WhatsApp abtippen, Ergebnis): vier Seiten, einmalig nach „Knopf starten & los" bzw. beim ersten Start nach dem Update; erneut unter Anleitung & Hilfe → „Tutorial erneut ansehen", „Mehr" beim Sprachnachrichten-Hinweis auf dem Startbildschirm springt direkt zur passenden Seite.
+
 ## [3.1.0] — 2026-09-07
 
 ### Geändert

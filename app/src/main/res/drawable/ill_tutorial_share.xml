@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tutorial-Illustration Seite 3: generischer Chat (keine Fremdmarken) mit gruener Sprachnachricht,
+     die lange gedrueckt wird, Kontextmenue "Teilen" und Teilen-Blatt mit hervorgehobener Vox-Kachel.
+     Flach und schematisch im Stil des App-Icons; nur @color/vox_*-Farben, kein Text
+     (Bildbeschreibung: tutorial_img_* in strings.xml). Erzeugt mit scratchpad/gen_tutorial_ill.py.
+     VectorRaster bewusst ignoriert: Illustration in Seitengroesse, kein Icon. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:width="320dp"
+    android:height="240dp"
+    android:viewportWidth="320"
+    android:viewportHeight="240"
+    tools:ignore="VectorRaster">
+    <path
+        android:fillColor="@color/vox_surfaceContainerHigh"
+        android:pathData="M38,14 h110 a20,20 0 0 1 20,20 v228 h-150 v-228 a20,20 0 0 1 20,-20 z" />
+    <path
+        android:fillColor="@color/vox_surfaceContainerLow"
+        android:pathData="M38,20 h110 a14,14 0 0 1 14,14 v228 h-138 v-228 a14,14 0 0 1 14,-14 z" />
+    <path
+        android:fillColor="@color/vox_outlineVariant"
+        android:pathData="M90.5,25 a2.5,2.5 0 1 0 5,0 a2.5,2.5 0 1 0 -5,0 z" />
+    <path
+        android:fillColor="@color/vox_surfaceContainer"
+        android:pathData="M24,34 h138 v24 h-138 z" />
+    <path
+        android:fillColor="@color/vox_outlineVariant"
+        android:pathData="M32,46 a8,8 0 1 0 16,0 a8,8 0 1 0 -16,0 z" />
+    <path
+        android:fillColor="@color/vox_onSurfaceVariant"
+        android:pathData="M57,43 h44 a3,3 0 0 1 3,3 v0 a3,3 0 0 1 -3,3 h-44 a3,3 0 0 1 -3,-3 v0 a3,3 0 0 1 3,-3 z" />
+    <path
+        android:fillColor="@color/vox_surfaceContainerHigh"
+        android:pathData="M40,68 h64 a8,8 0 0 1 8,8 v12 a8,8 0 0 1 -8,8 h-64 a8,8 0 0 1 -8,-8 v-12 a8,8 0 0 1 8,-8 z" />
+    <path
+        android:fillColor="@color/vox_onSurfaceVariant"
+        android:pathData="M42.5,76 h59 a2.5,2.5 0 0 1 2.5,2.5 v0 a2.5,2.5 0 0 1 -2.5,2.5 h-59 a2.5,2.5 0 0 1 -2.5,-2.5 v0 a2.5,2.5 0 0 1 2.5,-2.5 z" />
+    <path
+        android:fillColor="@color/vox_onSurfaceVariant"
+        android:pathData="M42.5,85 h39 a2.5,2.5 0 0 1 2.5,2.5 v0 a2.5,2.5 0 0 1 -2.5,2.5 h-39 a2.5,2.5 0 0 1 -2.5,-2.5 v0 a2.5,2.5 0 0 1 2.5,-2.5 z" />
+    <path
+        android:fillColor="@color/vox_successContainer"
+        android:pathData="M60,138 h86 a10,10 0 0 1 10,10 v12 a10,10 0 0 1 -10,10 h-86 a10,10 0 0 1 -10,-10 v-12 a10,10 0 0 1 10,-10 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M60,147 L71,154 L60,161 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M80,151 h0 a1.5,1.5 0 0 1 1.5,1.5 v3 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-3 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M86,148 h0 a1.5,1.5 0 0 1 1.5,1.5 v9 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-9 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M92,145 h0 a1.5,1.5 0 0 1 1.5,1.5 v15 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-15 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M98,149 h0 a1.5,1.5 0 0 1 1.5,1.5 v7 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-7 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M104,146 h0 a1.5,1.5 0 0 1 1.5,1.5 v13 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-13 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M110,150 h0 a1.5,1.5 0 0 1 1.5,1.5 v5 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-5 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M116,144 h0 a1.5,1.5 0 0 1 1.5,1.5 v17 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-17 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M122,147 h0 a1.5,1.5 0 0 1 1.5,1.5 v11 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-11 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M128,151 h0 a1.5,1.5 0 0 1 1.5,1.5 v3 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-3 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M134,148 h0 a1.5,1.5 0 0 1 1.5,1.5 v9 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-9 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M140,146 h0 a1.5,1.5 0 0 1 1.5,1.5 v13 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-13 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_success"
+        android:pathData="M146,150 h0 a1.5,1.5 0 0 1 1.5,1.5 v5 a1.5,1.5 0 0 1 -1.5,1.5 h0 a1.5,1.5 0 0 1 -1.5,-1.5 v-5 a1.5,1.5 0 0 1 1.5,-1.5 z" />
+    <path
+        android:fillColor="@color/vox_surfaceContainerHigh"
+        android:pathData="M40,182 h54 a8,8 0 0 1 8,8 v8 a8,8 0 0 1 -8,8 h-54 a8,8 0 0 1 -8,-8 v-8 a8,8 0 0 1 8,-8 z" />
+    <path
+        android:fillColor="@color/vox_onSurfaceVariant"
+        android:pathData="M42.5,191 h45 a2.5,2.5 0 0 1 2.5,2.5 v0 a2.5,2.5 0 0 1 -2.5,2.5 h-45 a2.5,2.5 0 0 1 -2.5,-2.5 v0 a2.5,2.5 0 0 1 2.5,-2.5 z" />
+    <path
+        android:fillColor="@color/vox_surfaceContainerHighest"
+        android:strokeColor="@color/vox_outlineVariant"
+        android:strokeWidth="1"
+        android:pathData="M70,104 h78 a8,8 0 0 1 8,8 v10 a8,8 0 0 1 -8,8 h-78 a8,8 0 0 1 -8,-8 v-10 a8,8 0 0 1 8,-8 z" />
+    <group
+        android:translateX="72"
+        android:translateY="110"
+        android:scaleX="0.01"
+        android:scaleY="0.01">
+        <path
+            android:fillColor="@color/vox_onSurface"
+            android:pathData="M720,880Q670,880 635,845Q600,810 600,760Q600,753 601,745.5Q602,738 604,732L322,568Q305,583 284,591.5Q263,600 240,600Q190,600 155,565Q120,530 120,480Q120,430 155,395Q190,360 240,360Q263,360 284,368.5Q305,377 322,392L604,228Q602,222 601,214.5Q600,207 600,200Q600,150 635,115Q670,80 720,80Q770,80 805,115Q840,150 840,200Q840,250 805,285Q770,320 720,320Q697,320 676,311.5Q655,303 638,288L356,452Q358,458 359,465.5Q360,473 360,480Q360,487 359,494.5Q358,502 356,508L638,672Q655,657 676,648.5Q697,640 720,640Q770,640 805,675Q840,710 840,760Q840,810 805,845Q770,880 720,880ZM720,240Q737,240 748.5,228.5Q760,217 760,200Q760,183 748.5,171.5Q737,160 720,160Q703,160 691.5,171.5Q680,183 680,200Q680,217 691.5,228.5Q703,240 720,240ZM240,520Q257,520 268.5,508.5Q280,497 280,480Q280,463 268.5,451.5Q257,440 240,440Q223,440 211.5,451.5Q200,463 200,480Q200,497 211.5,508.5Q223,520 240,520ZM720,800Q737,800 748.5,788.5Q760,777 760,760Q760,743 748.5,731.5Q737,720 720,720Q703,720 691.5,731.5Q680,743 680,760Q680,777 691.5,788.5Q703,800 720,800ZM720,200Q720,200 720,200Q720,200 720,200Q720,200 720,200Q720,200 720,200Q720,200 720,200Q720,200 720,200Q720,200 720,200Q720,200 720,200ZM240,480Q240,480 240,480Q240,480 240,480Q240,480 240,480Q240,480 240,480Q240,480 240,480Q240,480 240,480Q240,480 240,480Q240,480 240,480ZM720,760Q720,760 720,760Q720,760 720,760Q720,760 720,760Q720,760 720,760Q720,760 720,760Q720,760 720,760Q720,760 720,760Q720,760 720,760Z" />
+    </group>
+    <path
+        android:fillColor="@color/vox_onSurface"
+        android:pathData="M101.03 114.16H98.37V121.5H96.9V114.16H94.26V112.97H101.03ZM104.8 121.62Q103.45 121.62 102.61 120.76Q101.77 119.91 101.77 118.49V118.32Q101.77 117.37 102.14 116.62Q102.5 115.88 103.16 115.46Q103.83 115.04 104.64 115.04Q105.94 115.04 106.64 115.87Q107.35 116.7 107.35 118.21V118.78H103.21Q103.27 119.57 103.73 120.02Q104.19 120.48 104.89 120.48Q105.87 120.48 106.48 119.69L107.25 120.42Q106.87 120.99 106.23 121.3Q105.6 121.62 104.8 121.62ZM104.63 116.19Q104.05 116.19 103.69 116.6Q103.33 117.01 103.23 117.74H105.94V117.63Q105.89 116.92 105.56 116.55Q105.23 116.19 104.63 116.19ZM109.97 121.5H108.54V115.16H109.97ZM108.46 113.51Q108.46 113.19 108.66 112.97Q108.87 112.75 109.26 112.75Q109.64 112.75 109.86 112.97Q110.07 113.19 110.07 113.51Q110.07 113.84 109.86 114.05Q109.64 114.26 109.26 114.26Q108.87 114.26 108.66 114.05Q108.46 113.84 108.46 113.51ZM113.03 121.5H111.61V112.5H113.03ZM117.37 121.62Q116.02 121.62 115.18 120.76Q114.34 119.91 114.34 118.49V118.32Q114.34 117.37 114.7 116.62Q115.07 115.88 115.73 115.46Q116.39 115.04 117.21 115.04Q118.5 115.04 119.21 115.87Q119.92 116.7 119.92 118.21V118.78H115.77Q115.84 119.57 116.3 120.02Q116.76 120.48 117.46 120.48Q118.43 120.48 119.05 119.69L119.82 120.42Q119.44 120.99 118.8 121.3Q118.16 121.62 117.37 121.62ZM117.2 116.19Q116.62 116.19 116.26 116.6Q115.9 117.01 115.8 117.74H118.51V117.63Q118.46 116.92 118.13 116.55Q117.79 116.19 117.2 116.19ZM122.34 115.16 122.38 115.89Q123.09 115.04 124.23 115.04Q126.21 115.04 126.24 117.31V121.5H124.82V117.39Q124.82 116.79 124.56 116.5Q124.3 116.21 123.71 116.21Q122.85 116.21 122.42 116.99V121.5H121V115.16Z" />
+    <path
+        android:strokeColor="@color/vox_primary"
+        android:strokeWidth="2.5"
+        android:strokeAlpha="0.7"
+        android:pathData="M105,160 a19,19 0 1 0 38,0 a19,19 0 1 0 -38,0 z" />
+    <path
+        android:strokeColor="@color/vox_primary"
+        android:strokeWidth="2.5"
+        android:strokeAlpha="0.35"
+        android:pathData="M98,160 a26,26 0 1 0 52,0 a26,26 0 1 0 -52,0 z" />
+    <path
+        android:strokeColor="@color/vox_secondary"
+        android:strokeWidth="26"
+        android:strokeLineCap="round"
+        android:pathData="M124,160 L160,210" />
+    <path
+        android:fillColor="@color/vox_onSurface"
+        android:pathData="M111,160 a13,13 0 1 0 26,0 a13,13 0 1 0 -26,0 z" />
+    <path
+        android:strokeColor="@color/vox_primary"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M162,117 L178,117" />
+    <path
+        android:fillColor="@color/vox_primary"
+        android:pathData="M188,117 L177,110.5 L177,123.5 z" />
+    <path
+        android:fillColor="@color/vox_surfaceContainerHigh"
+        android:strokeColor="@color/vox_outlineVariant"
+        android:strokeWidth="1"
+        android:pathData="M198,44 h100 a14,14 0 0 1 14,14 v142 a14,14 0 0 1 -14,14 h-100 a14,14 0 0 1 -14,-14 v-142 a14,14 0 0 1 14,-14 z" />
+    <path
+        android:fillColor="@color/vox_outline"
+        android:pathData="M238,52 h20 a2,2 0 0 1 2,2 v0 a2,2 0 0 1 -2,2 h-20 a2,2 0 0 1 -2,-2 v0 a2,2 0 0 1 2,-2 z" />
+    <path
+        android:fillColor="@color/vox_onSurfaceVariant"
+        android:pathData="M201,66 h52 a3,3 0 0 1 3,3 v0 a3,3 0 0 1 -3,3 h-52 a3,3 0 0 1 -3,-3 v0 a3,3 0 0 1 3,-3 z" />
+    <path
+        android:fillColor="@color/vox_secondaryContainer"
+        android:pathData="M204,88 h16 a8,8 0 0 1 8,8 v16 a8,8 0 0 1 -8,8 h-16 a8,8 0 0 1 -8,-8 v-16 a8,8 0 0 1 8,-8 z" />
+    <path
+        android:strokeColor="@color/vox_onSecondaryContainer"
+        android:strokeWidth="3"
+        android:pathData="M204,104 a8,8 0 1 0 16,0 a8,8 0 1 0 -16,0 z" />
+    <path
+        android:fillColor="@color/vox_primary"
+        android:fillAlpha="0.18"
+        android:pathData="M238,81 h22 a12,12 0 0 1 12,12 v22 a12,12 0 0 1 -12,12 h-22 a12,12 0 0 1 -12,-12 v-22 a12,12 0 0 1 12,-12 z" />
+    <path
+        android:fillColor="@color/vox_primaryContainer"
+        android:strokeColor="@color/vox_primary"
+        android:strokeWidth="3"
+        android:pathData="M239,85 h20 a9,9 0 0 1 9,9 v20 a9,9 0 0 1 -9,9 h-20 a9,9 0 0 1 -9,-9 v-20 a9,9 0 0 1 9,-9 z" />
+    <group
+        android:translateX="225.24"
+        android:translateY="79.8"
+        android:scaleX="0.44"
+        android:scaleY="0.44">
+        <path
+            android:fillColor="@color/vox_onPrimaryContainer"
+            android:pathData="M54,34 a9,9 0 0 1 9,9 v12 a9,9 0 0 1 -18,0 v-12 a9,9 0 0 1 9,-9 z" />
+        <path
+            android:fillColor="@color/vox_primaryContainer"
+            android:fillAlpha="0.85"
+            android:pathData="M51,43 h6 a1,1 0 0 1 0,2 h-6 a1,1 0 0 1 0,-2 z M51,48 h6 a1,1 0 0 1 0,2 h-6 a1,1 0 0 1 0,-2 z M51,53 h6 a1,1 0 0 1 0,2 h-6 a1,1 0 0 1 0,-2 z" />
+        <path
+            android:strokeColor="@color/vox_onPrimaryContainer"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M39,54 a15,15 0 0 0 30,0" />
+        <path
+            android:strokeColor="@color/vox_onPrimaryContainer"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M54,69 v7 M46,76 h16" />
+        <path
+            android:strokeColor="@color/vox_primary"
+            android:strokeWidth="3.5"
+            android:strokeLineCap="round"
+            android:pathData="M74.8,40.3 a23,23 0 0 1 0,19.4 M33.2,40.3 a23,23 0 0 0 0,19.4" />
+        <path
+            android:strokeColor="@color/vox_primary"
+            android:strokeWidth="3.5"
+            android:strokeAlpha="0.6"
+            android:strokeLineCap="round"
+            android:pathData="M81.2,37.3 a30,30 0 0 1 0,25.4 M26.8,37.3 a30,30 0 0 0 0,25.4" />
+    </group>
+    <path
+        android:fillColor="@color/vox_tertiaryContainer"
+        android:pathData="M278,88 h16 a8,8 0 0 1 8,8 v16 a8,8 0 0 1 -8,8 h-16 a8,8 0 0 1 -8,-8 v-16 a8,8 0 0 1 8,-8 z" />
+    <path
+        android:fillColor="@color/vox_onTertiaryContainer"
+        android:pathData="M286,96 L295,112 L277,112 z" />
+    <path
+        android:fillColor="@color/vox_onSurfaceVariant"
+        android:pathData="M202,128 h20 a2,2 0 0 1 2,2 v0 a2,2 0 0 1 -2,2 h-20 a2,2 0 0 1 -2,-2 v0 a2,2 0 0 1 2,-2 z" />
+    <path
+        android:fillColor="@color/vox_primary"
+        android:pathData="M238,128 h22 a2,2 0 0 1 2,2 v0 a2,2 0 0 1 -2,2 h-22 a2,2 0 0 1 -2,-2 v0 a2,2 0 0 1 2,-2 z" />
+    <path
+        android:fillColor="@color/vox_onSurfaceVariant"
+        android:pathData="M276,128 h20 a2,2 0 0 1 2,2 v0 a2,2 0 0 1 -2,2 h-20 a2,2 0 0 1 -2,-2 v0 a2,2 0 0 1 2,-2 z" />
+    <path
+        android:fillColor="@color/vox_surfaceContainerHighest"
+        android:pathData="M204,150 h16 a8,8 0 0 1 8,8 v16 a8,8 0 0 1 -8,8 h-16 a8,8 0 0 1 -8,-8 v-16 a8,8 0 0 1 8,-8 z" />
+    <path
+        android:fillColor="@color/vox_outlineVariant"
+        android:pathData="M202,190 h20 a2,2 0 0 1 2,2 v0 a2,2 0 0 1 -2,2 h-20 a2,2 0 0 1 -2,-2 v0 a2,2 0 0 1 2,-2 z" />
+    <path
+        android:fillColor="@color/vox_surfaceContainerHighest"
+        android:pathData="M241,150 h16 a8,8 0 0 1 8,8 v16 a8,8 0 0 1 -8,8 h-16 a8,8 0 0 1 -8,-8 v-16 a8,8 0 0 1 8,-8 z" />
+    <path
+        android:fillColor="@color/vox_outlineVariant"
+        android:pathData="M239,190 h20 a2,2 0 0 1 2,2 v0 a2,2 0 0 1 -2,2 h-20 a2,2 0 0 1 -2,-2 v0 a2,2 0 0 1 2,-2 z" />
+    <path
+        android:fillColor="@color/vox_surfaceContainerHighest"
+        android:pathData="M278,150 h16 a8,8 0 0 1 8,8 v16 a8,8 0 0 1 -8,8 h-16 a8,8 0 0 1 -8,-8 v-16 a8,8 0 0 1 8,-8 z" />
+    <path
+        android:fillColor="@color/vox_outlineVariant"
+        android:pathData="M276,190 h20 a2,2 0 0 1 2,2 v0 a2,2 0 0 1 -2,2 h-20 a2,2 0 0 1 -2,-2 v0 a2,2 0 0 1 2,-2 z" />
+</vector>

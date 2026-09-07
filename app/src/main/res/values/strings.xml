@@ -178,6 +178,24 @@
     <string name="a11y_label">Vox Text-Einfügen</string>
     <string name="a11y_description">Fügt diktierten Text ins gerade fokussierte Feld ein, damit du beim Diktieren nicht die Tastatur wechseln musst. Es wird nichts mitgelesen oder gespeichert.</string>
 
+    <!-- Tutorial (T): einmal nach der Einrichtung, sonst Home „Mehr“ (Seite 3) und Hilfe „Tutorial erneut ansehen“ -->
+    <string name="tutorial_skip">Überspringen</string>
+    <string name="tutorial_next">Weiter</string>
+    <string name="tutorial_start">Los geht\'s</string>
+    <string name="tutorial_cd_page">Seite %1$d von %2$d</string>
+    <string name="tutorial_p1_title">Diktieren mit dem Knopf</string>
+    <string name="tutorial_p1_body">Tippe den schwebenden Knopf an: Er wird rot und zählt die Aufnahme mit. Nochmal antippen — der Text landet im gerade aktiven Textfeld. Zum Verwerfen ziehst du den Knopf auf das ✕. Wird er rot mit ↻, ist etwas schiefgegangen: Antippen versucht es erneut.</string>
+    <string name="tutorial_p2_title">Diktier-Tastatur</string>
+    <string name="tutorial_p2_body">Manche Apps zeigen den Knopf nicht — dann hilft die Vox-Tastatur. Wechsle über das Tastatur-Symbol zu Vox, halte das Mikrofon gedrückt und sprich. Beim Loslassen wird der Text eingefügt.</string>
+    <string name="tutorial_p3_title">Sprachnachrichten abtippen</string>
+    <string name="tutorial_p3_body">Halte in WhatsApp — genauso in Telegram oder Signal — die Sprachnachricht lange gedrückt, tippe auf „Teilen“ und wähle Vox. Kurz darauf steht der Text da. Mehrere Nachrichten auf einmal gehen auch.</string>
+    <string name="tutorial_p4_title">Der Text ist da</string>
+    <string name="tutorial_p4_body">Der Text erscheint in Absätzen. Der Schalter „Füllwörter ausblenden“ nimmt „ähm“ und „äh“ heraus — ausgeschaltet liest du alles wortgetreu. Dann Kopieren oder Teilen. Alles hier findest du jederzeit unter Anleitung &amp; Hilfe.</string>
+    <string name="tutorial_img_button">Handy mit Textfeld und schwebendem Mikro-Knopf, der rot pulsiert; ein Pfeil zeigt vom Knopf ins Textfeld.</string>
+    <string name="tutorial_img_keyboard">Handy mit dunkler Diktier-Tastatur; ein Finger hält die große Mikrofon-Taste gedrückt, darüber Pegelbalken.</string>
+    <string name="tutorial_img_share">Chat mit einer Sprachnachricht, die lange gedrückt wird; darüber der Menüpunkt „Teilen“ und daneben ein Teilen-Blatt, in dem die Vox-Kachel hervorgehoben ist.</string>
+    <string name="tutorial_img_result">Ergebniskarte von Vox mit drei Textabsätzen, dem eingeschalteten Schalter „Füllwörter ausblenden“ und den Knöpfen Kopieren und Teilen.</string>
+
     <!-- §6.4 Einstellungen-Hub (E), Über (E6) -->
     <string name="settings_title">Einstellungen</string>
     <string name="settings_group_recognition">Erkennung</string>
@@ -344,6 +362,7 @@
     <string name="help_s1_bubble">Schwebender Knopf: antippen = Aufnahme, nochmal = fertig &amp; einfügen, auf ✕ ziehen = verwerfen, rot = Fehler, antippen = erneut.</string>
     <string name="help_s1_keyboard">Diktier-Tastatur: Mikrofon gedrückt halten, sprechen, loslassen.</string>
     <string name="help_s1_share">Sprachnachrichten: in WhatsApp lange drücken → Teilen → Vox. Der Text erscheint in Absätzen, du kannst ihn kopieren oder weitergeben.</string>
+    <string name="help_s1_tutorial">Tutorial erneut ansehen</string>
     <string name="help_s2_title">Einrichtung Schritt für Schritt</string>
     <string name="help_s3_title">API-Key bekommen</string>
     <string name="help_s3_intro">Ein API-Key ist ein persönlicher Zugangsschlüssel. Du bezahlst nur, was du nutzt — ein Diktat kostet meist unter einem Cent.</string>

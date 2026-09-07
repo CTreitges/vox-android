@@ -131,7 +131,8 @@ fun SetupScreen(step: Int, nav: NavState) {
                         onGoToStep = go,
                         onFinish = {
                             if (!prefs.overlaySkipped && env.status.canDrawOverlays) FloatingMicService.start(ctx)
-                            nav.replaceAll(Screen.Home)
+                            // Nach der Einrichtung einmal das Tutorial; Home liegt darunter, Beenden fuehrt dorthin.
+                            if (prefs.tutorialSeen) nav.replaceAll(Screen.Home) else nav.replaceAll(Screen.Home, Screen.Tutorial())
                         },
                     )
                     else -> {

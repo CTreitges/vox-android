@@ -28,6 +28,7 @@ import com.chris.vox.ui.settings.TextSettingsScreen
 import com.chris.vox.ui.setup.SetupScreen
 import com.chris.vox.ui.state.AppEnv
 import com.chris.vox.ui.state.LocalAppEnv
+import com.chris.vox.ui.tutorial.TutorialScreen
 
 /**
  * Wurzel der Compose-UI: Router (§1.2), Back-Stack und Screen-Wechsel (Fade-through, §5.4).
@@ -36,7 +37,7 @@ import com.chris.vox.ui.state.LocalAppEnv
 @Composable
 fun VoxApp(env: AppEnv, route: RouteRequest? = null, onRouteConsumed: () -> Unit = {}) {
     CompositionLocalProvider(LocalAppEnv provides env) {
-        val nav = rememberNavState { listOf(startScreen(SetupFacts.from(env.prefs, env.status))) }
+        val nav = rememberNavState { startStack(SetupFacts.from(env.prefs, env.status), env.prefs.tutorialSeen) }
 
         LaunchedEffect(route) {
             if (route != null) {
@@ -68,6 +69,7 @@ fun VoxApp(env: AppEnv, route: RouteRequest? = null, onRouteConsumed: () -> Unit
                 Screen.ButtonKeyboard -> ButtonKeyboardScreen(nav)
                 Screen.Models -> ModelsScreen(nav)
                 is Screen.Help -> HelpScreen(section = (nav.current as? Screen.Help)?.section ?: screen.section, nav = nav)
+                is Screen.Tutorial -> TutorialScreen(startPage = screen.startPage, onFinish = { nav.replaceAll(Screen.Home) })
             }
         }
     }
@@ -78,6 +80,15 @@ fun startScreen(facts: SetupFacts): Screen = when (val start = SetupRouter.start
     Start.Home -> Screen.Home
     Start.Welcome -> Screen.Setup(Screen.Setup.WELCOME)
     is Start.Step -> Screen.Setup(start.step)
+}
+
+/**
+ * Back-Stack beim Start: Bestandsnutzer, die bereits eingerichtet sind, sehen das Tutorial einmal
+ * (Home darunter, Beenden fuehrt dorthin) — nie, solange die Einrichtung offen ist (dort zeigt W9 es).
+ */
+fun startStack(facts: SetupFacts, tutorialSeen: Boolean): List<Screen> {
+    val start = startScreen(facts)
+    return if (start == Screen.Home && !tutorialSeen) listOf(Screen.Home, Screen.Tutorial()) else listOf(start)
 }
 
 /** Deep-Link anwenden: `home` (Notification), `settings` (IME-Zahnrad), `setup[+step]` (IME/Overlay/Share). */

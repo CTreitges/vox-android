@@ -32,7 +32,9 @@ class PrefsStateTest {
         state.refineMode = RefineMode.BEAUTIFY
         state.customFillers = setOf("Sozusagen", "halt ")
         state.sttProviderId = "groq"
+        state.tutorialSeen = true
         val fresh = Prefs(ctx)
+        assertTrue(fresh.tutorialSeen)
         assertEquals(Engine.OFFLINE, fresh.engine)
         assertEquals(RefineMode.BEAUTIFY, fresh.refineMode)
         assertEquals(setOf("sozusagen", "halt"), fresh.customFillers)

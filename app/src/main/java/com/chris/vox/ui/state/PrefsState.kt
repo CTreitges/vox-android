@@ -47,6 +47,7 @@ class PrefsState(val prefs: Prefs) {
     var a11ySkipped: Boolean by pref(prefs.a11ySkipped) { prefs.a11ySkipped = it }
     var notifSkipped: Boolean by pref(prefs.notifSkipped) { prefs.notifSkipped = it }
     var keyboardSkipped: Boolean by pref(prefs.keyboardSkipped) { prefs.keyboardSkipped = it }
+    var tutorialSeen: Boolean by pref(prefs.tutorialSeen) { prefs.tutorialSeen = it }
 
     // Offline
     var offlineModel: String by pref(prefs.offlineModel) { prefs.offlineModel = it }

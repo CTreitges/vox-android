@@ -40,6 +40,7 @@ import com.chris.vox.whisper.ModelStore
 import java.io.RandomAccessFile
 import com.chris.vox.ui.settings.SettingsHubScreen
 import com.chris.vox.ui.settings.TextSettingsScreen
+import com.chris.vox.ui.setup.SetupScreen
 import com.chris.vox.ui.state.AppEnv
 import com.chris.vox.ui.state.LocalAppEnv
 import com.chris.vox.ui.state.PrefsState
@@ -109,6 +110,7 @@ class MainFlowTest {
     @Test fun routerZeigtHomeMitHeroWennEingerichtet() {
         prefs.engine = Engine.ONLINE
         prefs.apiKey = "sk-test"
+        prefs.tutorialSeen = true // eingerichtet + Tutorial gesehen -> direkt Home
         app(env(readyStatus))
         compose.onNodeWithText("Mikro-Knopf starten").assertIsDisplayed().assertIsEnabled()
         compose.onNodeWithText("Online · OpenAI · GPT Transcribe (empfohlen)").assertIsDisplayed()
@@ -123,6 +125,67 @@ class MainFlowTest {
         compose.onNodeWithText("Mikro-Knopf starten").assertIsNotEnabled()
         compose.onNodeWithText("Mikrofon fehlt — beheben").assertIsDisplayed()
         compose.onNodeWithText("Pflicht-Berechtigung fehlt").assertExists()
+    }
+
+    // --- Tutorial (T) ------------------------------------------------------------
+
+    @Test fun routerZeigtTutorialEinmalWennEingerichtet() {
+        // Bestandsnutzer nach dem Update: Home liegt darunter, Ueberspringen fuehrt dorthin.
+        prefs.engine = Engine.ONLINE
+        prefs.apiKey = "sk-test"
+        app(env(readyStatus))
+        compose.onNodeWithText("Diktieren mit dem Knopf").assertIsDisplayed()
+        compose.onNodeWithText("Mikro-Knopf starten").assertDoesNotExist()
+        compose.onNodeWithText("Überspringen").performClick()
+        compose.waitForIdle()
+        assertTrue(Prefs(ctx).tutorialSeen)
+        compose.onNodeWithText("Mikro-Knopf starten").assertIsDisplayed()
+    }
+
+    @Test fun routerZeigtKeinTutorialSolangeEinrichtungOffen() {
+        prefs.welcomeSeen = true
+        prefs.engine = Engine.ONLINE // Key fehlt -> Schritt 2a
+        app(env(readyStatus))
+        compose.onNodeWithText("Zugang zum Dienst").assertIsDisplayed()
+        compose.onNodeWithText("Diktieren mit dem Knopf").assertDoesNotExist()
+    }
+
+    @Test fun fertigSeiteFuehrtErstInsTutorial() {
+        prefs.engine = Engine.ONLINE
+        prefs.apiKey = "sk-test"
+        val nav = NavState(listOf(Screen.Setup(Screen.Setup.DONE)))
+        val status = readyStatus.copy(canDrawOverlays = false) // kein Service-Start im Test
+        compose.setContent {
+            VoxTheme { CompositionLocalProvider(LocalAppEnv provides env(status)) { SetupScreen(Screen.Setup.DONE, nav) } }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Knopf starten & los").performClick()
+        compose.waitForIdle()
+        assertEquals(listOf(Screen.Home, Screen.Tutorial()), nav.snapshot())
+    }
+
+    @Test fun hilfeZeileOeffnetTutorialOhneFlagZuruecksetzen() {
+        prefs.engine = Engine.ONLINE
+        prefs.apiKey = "sk-test"
+        prefs.tutorialSeen = true
+        app(env(readyStatus))
+        compose.onNodeWithContentDescription("Anleitung und Hilfe").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Tutorial erneut ansehen").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Diktieren mit dem Knopf").assertIsDisplayed()
+        assertTrue(Prefs(ctx).tutorialSeen)
+    }
+
+    @Test fun homeMehrOeffnetTutorialSeiteSprachnachrichten() {
+        prefs.engine = Engine.ONLINE
+        prefs.apiKey = "sk-test"
+        prefs.tutorialSeen = true
+        app(env(readyStatus))
+        compose.onNodeWithText("Mehr").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Sprachnachrichten abtippen").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Seite 3 von 4").assertIsDisplayed()
     }
 
     // --- Assistent ---------------------------------------------------------------

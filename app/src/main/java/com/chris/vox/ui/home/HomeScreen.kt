@@ -122,7 +122,7 @@ fun HomeScreen(nav: NavState) {
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f),
                     )
-                    TextButton(onClick = { nav.push(Screen.Help(1)) }) { Text(stringResource(R.string.common_more)) }
+                    TextButton(onClick = { nav.push(Screen.Tutorial(Screen.Tutorial.PAGE_SHARE)) }) { Text(stringResource(R.string.common_more)) }
                 }
             }
 

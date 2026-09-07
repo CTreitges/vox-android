@@ -215,6 +215,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_KEYBOARD_SKIPPED, false)
         set(v) = sp.edit().putBoolean(KEY_KEYBOARD_SKIPPED, v).apply()
 
+    /** Das Tutorial nach der Einrichtung wurde einmal gezeigt (oder uebersprungen). */
+    var tutorialSeen: Boolean
+        get() = sp.getBoolean(KEY_TUTORIAL_SEEN, false)
+        set(v) = sp.edit().putBoolean(KEY_TUTORIAL_SEEN, v).apply()
+
     // --- Offline-Erkennung (whisper.cpp, WP3) --------------------------------
 
     /** ModelCatalog-ID (WP3 definiert den Katalog: tiny/base/small/large-v3-turbo). */
@@ -291,6 +296,7 @@ class Prefs(context: Context) {
         private const val KEY_A11Y_SKIPPED = "setup_skip_a11y"
         private const val KEY_NOTIF_SKIPPED = "setup_skip_notif"
         private const val KEY_KEYBOARD_SKIPPED = "setup_skip_keyboard"
+        private const val KEY_TUTORIAL_SEEN = "tutorial_seen"
         private const val KEY_OFFLINE_MODEL = "offline_model"
         private const val KEY_OFFLINE_ACCURATE = "offline_accurate"
         private const val KEY_SHARE_HIDE_FILLERS = "share_hide_fillers"

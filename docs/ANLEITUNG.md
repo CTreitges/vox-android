@@ -166,6 +166,8 @@ Die Abschlussseite fasst unter **Deine Einrichtung** alles zusammen (Erkennung, 
 
 **Knopf starten & los** startet den schwebenden Mikro-Knopf und bringt dich zum Startbildschirm (bei „Nur Tastatur" heißt der Button **Zum Start**).
 
+Direkt danach zeigt Vox einmalig ein kurzes, bebildertes **Tutorial** (vier Seiten: Diktieren mit dem Knopf · Diktier-Tastatur · Sprachnachrichten abtippen · Der Text ist da); **Überspringen** ist jederzeit möglich. Erneut aufrufbar unter **Anleitung & Hilfe → Tutorial erneut ansehen**; **Mehr** beim Hinweis „Sprachnachrichten abtippen" auf dem Startbildschirm springt direkt zur Seite über Sprachnachrichten.
+
 ### Der Startbildschirm
 
 Danach zeigt Vox beim Öffnen den Startbildschirm:
