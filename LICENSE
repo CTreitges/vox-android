@@ -19,12 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Abhängigkeiten und Drittkomponenten:
-- whisper.cpp (MIT) — https://github.com/ggml-org/whisper.cpp — als Git-Submodul, statisch in libvox.so gelinkt
-- Whisper-Modelle im ggml-Format (MIT, OpenAI/ggml) — werden NICHT mitgeliefert, sondern auf Wunsch des Nutzers
-  zur Laufzeit von https://huggingface.co/ggerganov/whisper.cpp geladen
-- Jetpack Compose / AndroidX (Apache License 2.0) — https://developer.android.com/jetpack
-- Material Symbols (Apache License 2.0) — https://fonts.google.com/icons
