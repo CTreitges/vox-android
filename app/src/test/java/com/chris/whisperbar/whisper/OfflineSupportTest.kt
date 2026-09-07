@@ -47,6 +47,16 @@ class OfflineSupportTest {
         assertEquals(2, OfflineSupport.performanceCoreCount(listOf(1_700_000L, 1_700_000L, 1_700_000L, 1_700_000L, 1_700_000L, 1_700_000L, 2_200_000L, 2_200_000L)))
     }
 
+    @Test fun geraetBrauchtDreiGbFuerOffline() {
+        // Review NAT-1: UX-Spec §2 Schritt 1 — RAM < 3 GB -> Offline nicht anbieten (gleiche 10-%-Toleranz).
+        val gib = 1024L * 1024 * 1024
+        assertFalse(OfflineSupport.deviceFits(2 * gib))
+        assertFalse(OfflineSupport.deviceFits(26 * gib / 10))
+        assertTrue("2,8 GiB gemeldet auf einem 3-GB-Geraet", OfflineSupport.deviceFits(28 * gib / 10))
+        assertTrue(OfflineSupport.deviceFits(3 * gib))
+        assertTrue(OfflineSupport.deviceFits(8 * gib))
+    }
+
     @Test fun ramToleranzFuerLarge() {
         val large = ModelCatalog.LARGE_V3_TURBO
         val gib = 1024L * 1024 * 1024

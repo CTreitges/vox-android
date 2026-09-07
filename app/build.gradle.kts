@@ -65,9 +65,10 @@ android {
         buildConfig = true
     }
 
-    // Lint soll den Build nicht an Warnungen scheitern lassen (Reports bleiben erhalten).
+    // Lint-ERRORS brechen den Build (CI-Schritt "Unit-Tests + Lint" ist sonst nur scheinbar gruen);
+    // Warnungen scheitern nie (Default), die Reports bleiben erhalten.
     lint {
-        abortOnError = false
+        abortOnError = true
     }
 
     signingConfigs {

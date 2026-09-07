@@ -40,6 +40,7 @@ data class SystemStatus(
             val selected = Settings.Secure.getString(app.contentResolver, Settings.Secure.DEFAULT_INPUT_METHOD)
             val notifNeeded = Build.VERSION.SDK_INT >= 33
             val store = ModelStore(app)
+            val totalRam = OfflineSupport.totalRamBytes(app)
             return SystemStatus(
                 micGranted = granted(app, Manifest.permission.RECORD_AUDIO),
                 canDrawOverlays = Settings.canDrawOverlays(app),
@@ -51,8 +52,8 @@ data class SystemStatus(
                 bubbleRunning = FloatingMicService.isRunning,
                 installedModels = store.installed().map { it.id }.toSet(),
                 modelsUsedBytes = store.usedBytes(),
-                offlineSupported = OfflineSupport.isSupported,
-                totalRamBytes = OfflineSupport.totalRamBytes(app),
+                offlineSupported = OfflineSupport.isSupported && OfflineSupport.deviceFits(totalRam),
+                totalRamBytes = totalRam,
             )
         }
 

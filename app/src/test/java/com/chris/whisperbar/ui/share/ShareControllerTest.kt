@@ -128,6 +128,27 @@ class ShareControllerTest {
         assertEquals(3, calls) // Datei 1 wurde nicht noch einmal erkannt
     }
 
+    @Test fun retryWaehrendLaufendemLaufWirdIgnoriert() {
+        // Review KOR-1: "Erneut" fuer Datei 0, waehrend Datei 1 noch laeuft, darf den Lauf nicht
+        // ersetzen — sonst wird das Ergebnis von Datei 1 verworfen und sie verschwindet aus der Liste.
+        var calls = 0
+        lateinit var c: ShareController
+        c = controller(listOf(uriA, uriB), ShareTranscriber { _, uri, _, _ ->
+            calls++
+            if (uri == uriA) throw UnsupportedAudioException("Kaputt")
+            assertEquals(SharePhase.LOADING, c.state.phase)
+            c.retryFile(0) // Nutzer tippt "Erneut" bei Datei 0, Datei 1 laeuft gerade
+            c.retryAll()
+            transcript("b.ogg")
+        })
+        c.start()
+        assertEquals(2, calls) // kein zweiter Lauf gestartet
+        assertEquals(SharePhase.DONE, c.state.phase)
+        assertEquals("Kaputt", c.state.files[0].error)
+        assertEquals("b.ogg", c.state.files[1].result?.source)
+        assertTrue(c.state.hasErrors) // "Alles erneut" bleibt moeglich
+    }
+
     @Test fun alleFehlgeschlagenDannAllesErneut() {
         var fail = true
         val c = controller(listOf(uriA, uriB), ShareTranscriber { _, uri, _, _ ->

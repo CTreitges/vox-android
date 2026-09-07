@@ -37,11 +37,13 @@ internal class WhisperContext private constructor() {
     fun transcribe(samples: FloatArray, language: String, initialPrompt: String, beamSize: Int, threads: Int): TranscriptResult {
         if (samples.isEmpty()) return TranscriptResult("")
         val audio = padToMinimum(samples)
-        abortRequested = false
         return onWorker {
             val ctx = ptr
             check(ctx != 0L) { "WhisperContext bereits freigegeben" }
-            if (abortRequested) return@onWorker TranscriptResult("")
+            // Erst hier zuruecksetzen, nicht beim Einreihen: ein [abort] gilt nur dem gerade laufenden
+            // Job. Sonst verschluckt der Abbruch der Share-Ansicht ein gleichzeitig eingereihtes Diktat
+            // (liefert still ""), oder ein eingereihter Job hebt den Abbruch des laufenden wieder auf.
+            abortRequested = false
             val rc = WhisperLib.fullTranscribe(ctx, threads, language, initialPrompt.ifBlank { null }, beamSize, true, audio)
             if (rc != 0) {
                 if (abortRequested) return@onWorker TranscriptResult("")
@@ -55,7 +57,7 @@ internal class WhisperContext private constructor() {
         }
     }
 
-    /** Laufende Erkennung abbrechen: whisper_full liefert dann einen Fehlercode, [transcribe] "". */
+    /** Die GERADE LAUFENDE Erkennung abbrechen: whisper_full liefert dann einen Fehlercode, [transcribe] "". Eingereihte Jobs laufen danach normal. */
     fun abort() {
         abortRequested = true
         WhisperLib.requestAbort()

@@ -96,7 +96,8 @@ fun LlmAccessSection(snack: SnackController) {
                         placeholder = { Text("http://server:11434/v1") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-                        isError = problem?.severity == ServerUrlCheck.Severity.ERROR,
+                        // Leer = Pflichtfeld offen: ohne URL ginge die Anfrage an "/chat/completions".
+                        isError = prefs.llmUrl.isBlank() || problem?.severity == ServerUrlCheck.Severity.ERROR,
                         supportingText = {
                             Text(if (problem != null) urlProblemText(problem) else stringResource(R.string.rec_base_url_hint))
                         },

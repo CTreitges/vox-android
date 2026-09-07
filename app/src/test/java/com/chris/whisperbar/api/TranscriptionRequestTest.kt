@@ -65,6 +65,13 @@ class TranscriptionRequestTest {
         )
     }
 
+    @Test fun eigenerServerOhneModellSendetKeinLeeresModelFeld() {
+        // Review API-7: custom hat keinen Modell-Default; model="" quittieren speaches/LocalAI mit 422.
+        val f = TranscriptionRequest.fields(stt("custom", "", "http://s:8000/v1"), "de", "")
+        assertEquals(listOf("response_format" to "json", "language" to "de"), f)
+        assertFalse(names(TranscriptionRequest.fields(stt("custom", "   ", "http://s:8000/v1"), "auto", "")).contains("model"))
+    }
+
     @Test fun endpunktAusBaseUrlOderOverride() {
         assertEquals(
             "https://api.openai.com/v1/audio/transcriptions",

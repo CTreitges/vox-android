@@ -331,12 +331,12 @@ class FloatingMicService : Service() {
         if (state != BubbleState.RECORDING) return
         applyState(BubbleState.SENDING)
         renderer?.haptic(BubbleMotion.Haptic.CONTEXT_CLICK)
-        io.submit {
+        runIo {
             val samples = recorder.stop()
             // Sehr kurze Aufnahmen (< 0,3 s) verwerfen — meist versehentliche Taps.
             if (samples.size < AudioRecorder.SAMPLE_RATE * 3 / 10) {
                 main.post { applyState(BubbleState.IDLE) }
-                return@submit
+                return@runIo
             }
             send(samples)
         }
@@ -350,7 +350,27 @@ class FloatingMicService : Service() {
         }
         applyState(BubbleState.SENDING)
         renderer?.haptic(BubbleMotion.Haptic.CONTEXT_CLICK)
-        io.submit { send(samples) }
+        runIo { send(samples) }
+    }
+
+    /**
+     * Hintergrundarbeit, die den Knopf garantiert wieder aus SENDING holt: ein Throwable, das
+     * kein Exception ist (OutOfMemoryError bei sehr langen Diktaten), versickert sonst im Future
+     * von submit(), und der Knopf reagiert bis zum Neustart nicht mehr.
+     */
+    private fun runIo(block: () -> Unit) {
+        io.execute {
+            try {
+                block()
+            } catch (e: Throwable) {
+                Log.e(TAG, "Diktat abgebrochen", e)
+                pendingSamples = null
+                main.post {
+                    toast(getString(R.string.kb_error))
+                    applyState(BubbleState.IDLE)
+                }
+            }
+        }
     }
 
     /** Verwirft eine laufende Aufnahme oder das gepufferte Audio. */
@@ -364,7 +384,8 @@ class FloatingMicService : Service() {
     /** Laeuft auf dem io-Thread. */
     private fun send(samples: FloatArray) {
         try {
-            val text = TranscriptionEngine.transcribe(applicationContext, samples)
+            var refineSkipped: String? = null
+            val text = TranscriptionEngine.transcribe(applicationContext, samples) { refineSkipped = it }
             val out = if (prefs.trailingSpace && text.isNotEmpty()) "$text " else text
             pendingSamples = null
             main.post {
@@ -375,6 +396,7 @@ class FloatingMicService : Service() {
                 }
                 applyState(BubbleState.IDLE, copied = copied)
                 renderer?.flashSuccess()
+                refineSkipped?.let { toast(getString(R.string.refine_skipped, it)) }
             }
         } catch (e: ApiNotConfiguredException) {
             pendingSamples = null

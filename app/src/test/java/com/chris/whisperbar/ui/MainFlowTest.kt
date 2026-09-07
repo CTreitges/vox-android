@@ -3,7 +3,15 @@ package com.chris.whisperbar.ui
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelectable
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
@@ -23,6 +31,12 @@ import com.chris.whisperbar.ui.nav.Screen
 import com.chris.whisperbar.ui.nav.SystemStatus
 import com.chris.whisperbar.ui.settings.HelpScreen
 import com.chris.whisperbar.ui.settings.ModelsScreen
+import com.chris.whisperbar.ui.settings.RecognitionScreen
+import com.chris.whisperbar.whisper.DownloadState
+import com.chris.whisperbar.whisper.ModelCatalog
+import com.chris.whisperbar.whisper.ModelDownloads
+import com.chris.whisperbar.whisper.ModelStore
+import java.io.RandomAccessFile
 import com.chris.whisperbar.ui.settings.SettingsHubScreen
 import com.chris.whisperbar.ui.settings.TextSettingsScreen
 import com.chris.whisperbar.ui.state.AppEnv
@@ -186,6 +200,64 @@ class MainFlowTest {
         compose.onNodeWithContentDescription("Large v3 Turbo herunterladen").assertIsNotEnabled()
         compose.onNodeWithContentDescription("Small herunterladen").assertIsEnabled()
         compose.onNodeWithText("Noch kein Modell geladen").assertExists()
+    }
+
+    @Test fun modellZeileIstEinAuswaehlbaresElementMitNamen() {
+        // Review SPEC-3: TalkBack liest "Base, Optionsfeld, …" statt viermal nur "Optionsfeld".
+        val store = ModelStore(ctx)
+        store.ensureDir()
+        RandomAccessFile(store.file(ModelCatalog.BASE), "rw").use { it.setLength(ModelCatalog.BASE.bytes) }
+        try {
+            screen(env()) { ModelsScreen(it) }
+            compose.onNode(isSelectable() and hasText("Small")).assertIsNotEnabled().assertIsSelected() // Default, nicht installiert
+            compose.onNode(isSelectable() and hasText("Base")).assertIsEnabled().assertIsNotSelected().performClick()
+            compose.waitForIdle()
+            assertEquals("base", Prefs(ctx).offlineModel)
+            compose.onNode(isSelectable() and hasText("Base")).assertIsSelected()
+            // Loeschen bleibt ein eigener, beschrifteter Knoten ausserhalb der Radio-Zeile.
+            compose.onNodeWithContentDescription("Base löschen").assertIsEnabled()
+        } finally {
+            store.delete(ModelCatalog.BASE)
+        }
+    }
+
+    @Test fun erneutIstWaehrendAnderemDownloadGesperrt() {
+        // Review KOR-6: der Dienst ignoriert einen zweiten Start still — der Knopf darf ihn gar nicht anbieten.
+        ModelDownloads.update("tiny", DownloadState.Failed("Netzwerkfehler beim Laden", retryable = true))
+        try {
+            screen(env()) { ModelsScreen(it) }
+            compose.onNodeWithText("Erneut").assertIsEnabled()
+            ModelDownloads.update("base", DownloadState.Running(1_000, 60_000_000, 500))
+            compose.waitForIdle()
+            compose.onNodeWithText("Erneut").assertIsNotEnabled()
+        } finally {
+            ModelDownloads.clear("tiny")
+            ModelDownloads.clear("base")
+        }
+    }
+
+    @Test fun kontextFeldSagtBeiMistralDassNichtsMitgeschicktWird() {
+        // Review API-2: kein context_bias umgesetzt — kein Wortlisten-Versprechen in der Oberflaeche.
+        prefs.engine = Engine.ONLINE
+        prefs.sttProviderId = "mistral"
+        prefs.apiKey = "k"
+        screen(env()) { RecognitionScreen(it) }
+        compose.onNodeWithText("Dieser Anbieter nimmt keinen Kontext entgegen — das Feld wirkt nur bei anderen Anbietern und offline.")
+            .assertExists()
+        compose.onNodeWithText("Kontext-Wörter (kommagetrennt)").assertDoesNotExist()
+    }
+
+    @Test fun eigenerServerMarkiertLeeresModellAlsFehler() {
+        // Review API-7: kein Modell-Default beim eigenen Server -> Pflichtfeld.
+        prefs.engine = Engine.ONLINE
+        prefs.sttProviderId = "custom"
+        prefs.apiBaseUrl = "http://192.168.1.5:8000/v1"
+        screen(env()) { RecognitionScreen(it) }
+        val modelField = compose.onNode(hasSetTextAction() and hasText("Modell"))
+        modelField.assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Error))
+        modelField.performTextInput("whisper-1")
+        compose.waitForIdle()
+        compose.onNode(hasSetTextAction() and hasText("Modell")).assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.Error))
     }
 
     // --- E5 Hilfe, Hub -------------------------------------------------------------

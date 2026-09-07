@@ -379,7 +379,7 @@ Immer aktiv, lokal, kostenlos:
 Unter Einstellungen → **Erkennung** → Karte **Sprache & Kontext**:
 
 - **Sprache**: Automatisch erkennen · Deutsch (Voreinstellung) · Englisch · Spanisch · Französisch · Italienisch. Eine feste Sprache ist schneller und genauer als „Automatisch erkennen" — vor allem bei kurzen Diktaten; sie bestimmt auch, welche Füllwort-Liste gilt. Bei „Automatisch erkennen" nimmt WhisperBar die vom Modell erkannte Sprache für die Nachbearbeitung.
-- **Kontext: Namen, Fachbegriffe, Schreibweisen** — ein Freitextfeld, das als Prompt mitgeschickt wird und der Erkennung bei Eigennamen und Fachwörtern hilft. Kostet nichts extra. Beispiel: „Christof Treitges, WhisperBar, Lieferschein-Processor, SvelteKit". Der Kontext wirkt online **und** offline (dort als Start-Prompt des Modells). Mistral und OpenRouter unterstützen das Prompt-Feld nicht — dort wird der Kontext nicht mitgeschickt.
+- **Kontext: Namen, Fachbegriffe, Schreibweisen** — ein Freitextfeld, das als Prompt mitgeschickt wird und der Erkennung bei Eigennamen und Fachwörtern hilft. Kostet nichts extra. Beispiel: „Christof Treitges, WhisperBar, Lieferschein-Processor, SvelteKit". Der Kontext wirkt online **und** offline (dort als Start-Prompt des Modells). Mistral und OpenRouter unterstützen das Prompt-Feld nicht — dort wird der Kontext nicht mitgeschickt; das Feld zeigt dann den Hinweis „Dieser Anbieter nimmt keinen Kontext entgegen …" und wirkt weiter bei anderen Anbietern und offline.
 
 ---
 
@@ -418,9 +418,9 @@ Die Modelle sind quantisierte Versionen (q5) der OpenAI-Whisper-Modelle aus dem 
 
 Unter Erkennung → Offline-Modell steht das aktive Modell mit **Ändern**. Hinweis dort: „Erste Nutzung lädt das Modell in den Speicher (2–5 s)." Danach bleibt es geladen; erst wenn du die WhisperBar-Oberfläche öffnest und wieder verlässt oder der Arbeitsspeicher knapp wird, gibt WhisperBar das Modell frei, und das nächste Diktat lädt es erneut.
 
-### 9.4 Genauigkeit: „Genau" oder „Schnell"
+### 9.4 Genauigkeit
 
-Standardmäßig arbeitet die Offline-Erkennung im Modus **Genau** (Beam-Search mit fünf Kandidaten — derselbe Modus wie die whisper.cpp-Kommandozeile; weniger Abbrüche und Halluzinationen). Der Modus **Schnell** (Greedy) rechnet den Decoder-Teil deutlich schneller, ist aber etwas ungenauer. Für Small ist der Unterschied in der Laufzeit klein, weil der Encoder dominiert; bei Large v3 Turbo lohnt sich „Schnell" eher. Die Umschaltung gehört zu den Offline-Einstellungen (Einstellungen → Erkennung, Bereich Offline-Modell).
+Die Offline-Erkennung arbeitet fest mit Beam-Search (fünf Kandidaten — derselbe Modus wie die whisper.cpp-Kommandozeile; weniger Abbrüche und Halluzinationen als Greedy). Einen Umschalter auf den schnelleren, etwas ungenaueren Greedy-Modus gibt es in 3.0.0 nicht; für Small ist der Laufzeit-Unterschied ohnehin klein, weil der Encoder dominiert. Wer Tempo braucht, wählt ein kleineres Modell (Base).
 
 ### 9.5 Wie lange dauert es?
 
@@ -550,7 +550,7 @@ Bei Fehler: `docker logs speaches` bzw. `journalctl -u ollama`.
 | Base-URL | `http://SERVER:8000/v1` (LAN/Tailscale) oder `https://whisper.example.de/v1` (Caddy). „Muss auf /v1 enden. http:// nur im eigenen Netz (LAN/VPN)." |
 | API-Key (optional) | leer, oder der in `API_KEY`/Caddy gesetzte Token |
 | Modell | `Systran/faster-whisper-medium` (speaches) · `whisper-1` (LocalAI/hwdsl2) · beliebig (whisper.cpp) — per **Eigenes Modell …** eintragen |
-| Zeitüberschreitung | Voreinstellung 600 s (einstellbar 30–1800 s) — CPU-Server brauchen bei langen Aufnahmen Minuten |
+| Zeitüberschreitung | fest 600 s beim Eigenen Server (Cloud-Anbieter 90 s) — CPU-Server brauchen bei langen Aufnahmen Minuten; nicht einstellbar |
 
 Dann **Zugang prüfen**.
 
@@ -572,7 +572,7 @@ WhisperBar hat keinen eigenen Server, kein Konto, keine Telemetrie. Was mit dein
 
 **Bedienungshilfe:** Die Bedienungshilfe „WhisperBar Text-Einfügen" liest nichts mit und speichert nichts; sie fügt nur den diktierten Text in das fokussierte Feld ein. Android zeigt beim Aktivieren die übliche Warnung für Bedienungshilfen („kann Bildschirminhalte lesen") — WhisperBar nutzt davon ausschließlich das Einfügen.
 
-**Auf dem Gerät gespeichert:** Deine Einstellungen inklusive API-Key (im privaten App-Speicher, für andere Apps unzugänglich), die heruntergeladenen Modelle und die Position des Knopfs. Keine Aufnahmen, keine Texte, keine Verläufe. Ein fehlgeschlagenes Diktat bleibt nur so lange im Arbeitsspeicher gepuffert, bis du es erneut sendest oder verwirfst. Hinweis: WhisperBar erlaubt das Android-System-Backup; je nach Gerätekonfiguration können die Einstellungen (inklusive Key) im Geräte-Backup deines Google-Kontos landen.
+**Auf dem Gerät gespeichert:** Deine Einstellungen inklusive API-Key (im privaten App-Speicher, für andere Apps unzugänglich), die heruntergeladenen Modelle und die Position des Knopfs. Keine Aufnahmen, keine Texte, keine Verläufe. Ein fehlgeschlagenes Diktat bleibt nur so lange im Arbeitsspeicher gepuffert, bis du es erneut sendest oder verwirfst. WhisperBar ist vom Android-System-Backup ausgenommen (`allowBackup=false`): die Einstellungen inklusive Key landen weder im Google-Backup noch im Geräte-zu-Gerät-Transfer — nach einem Gerätewechsel richtest du den Zugang neu ein.
 
 **Berechtigungen:** Mikrofon (Aufnahme), Internet (Online-Dienst und Modell-Download), Über anderen Apps anzeigen (Knopf), Benachrichtigungen (Beenden-Aktion und Download-Fortschritt), Netzwerkstatus (Nachfrage vor Downloads über mobile Daten), Vordergrund-Dienste (Knopf und Modell-Download).
 
@@ -603,14 +603,14 @@ Nur beim Eigenen Server: Base-URL ohne `/v1` eingetragen, oder whisper-server l�
 **„Unverschlüsseltes http:// ist zu dieser Adresse nicht erlaubt — https:// oder lokale Adresse nutzen".**
 `http://` geht nur zu privaten Adressen (siehe [Kapitel 10](#10-eigener-server)). Für einen Server im Internet `https://` (Caddy, Tailscale Serve) verwenden oder per VPN eine private Adresse nutzen.
 
-**„Zeitüberschreitung — Server zu langsam? Timeout in den Einstellungen erhöhen".**
-Beim Eigenen Server: die Zeitüberschreitung (Voreinstellung 600 s) erhöhen, ein kleineres Modell auf dem Server verwenden oder mehr Threads geben. Bei Cloud-Anbietern deutet der Fehler auf eine schlechte Verbindung — WhisperBar puffert das Diktat, Tippen sendet erneut.
+**„Zeitüberschreitung — Server zu langsam oder Verbindung schlecht".**
+Beim Eigenen Server (Limit 600 s): ein kleineres Modell auf dem Server verwenden, mehr Threads geben oder kürzer diktieren. Bei Cloud-Anbietern deutet der Fehler auf eine schlechte Verbindung — WhisperBar puffert das Diktat, Tippen sendet erneut.
 
 **„Server nicht erreichbar — läuft er, stimmt der Port, gleiches WLAN/VPN?" / „Server nicht gefunden — Hostname/IP prüfen".**
 Nur beim Eigenen Server: Läuft der Container? Stimmt der Port (speaches 8000, whisper-server 8080, Ollama 11434)? Sind Handy und Server im selben Netz bzw. Tailnet? Test mit `curl` von einem Rechner aus (Kapitel 10, Schritt 4).
 
 **Offline ist zu langsam.**
-Ein kleineres Modell wählen (Base oder Small), den Modus „Schnell" probieren oder auf den Online-Dienst wechseln. Auch andere gleichzeitig laufende Apps bremsen — die Erkennung nutzt alle Performance-Kerne.
+Ein kleineres Modell wählen (Base oder Small) oder auf den Online-Dienst wechseln. Auch andere gleichzeitig laufende Apps bremsen — die Erkennung nutzt alle Performance-Kerne.
 
 **„Datei beschädigt — erneut laden" / „Offline-Modell konnte nicht geladen werden".**
 Modell unter Offline-Modelle löschen und neu laden. Tritt der Fehler direkt nach dem Download auf, war die Übertragung fehlerhaft; WhisperBar lädt das Modell beim nächsten Versuch neu.

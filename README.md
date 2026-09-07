@@ -53,7 +53,7 @@ Grundsätze: reine Logik in Android-freien Kotlin-Objekten (JVM-testbar), Compos
 | Text einfügen | `a11y/` — `TextInserterAccessibilityService`, `TextInsertion` (Cursor/Auswahl, leeres Feld) |
 | Pipeline & Audio | `TranscriptionEngine` (trimSilence → Backend → Refine → Polish; `SharedAudioTranscriber` für geteilte Audios), `TranscriptionBackend` (`OnlineBackend`), `AudioRecorder`, `AudioUtils`, `WavEncoder`, `AudioDecoder` (MediaCodec → 16 kHz Mono), `AudioConvert`, `AudioChunks` (5-Minuten-Stücke an Sprechpausen), `Formats` |
 | Textveredelung | `TextPolisher` + `PolishPlan` (Füllwörter eingebaut/eigene/abgewählte, Groß-Schreibung, Whitespace), `Paragrapher` (Absatz-Heuristik) |
-| Daten & Start | `Prefs` (SharedPreferences, Migration v2 → v3), `SetupState` („eingerichtet?"), `AppNav` (Deep-Link-Intents route/step), `WhisperBarApp` (Application: Engine-Init, `onTrimMemory`), `ShareTranscribeActivity` (Teilen-Ziel) |
+| Daten & Start | `Prefs` (SharedPreferences, Migration v2 → v3), `SetupState` (Zugang vollständig?; „eingerichtet?" entscheidet `ui/nav/SetupRouter`), `AppNav` (Deep-Link-Intents route/step), `WhisperBarApp` (Application: Engine-Init, `onTrimMemory`), `ShareTranscribeActivity` (Teilen-Ziel) |
 
 Weitere Unterlagen: [docs/design/ux-spec-v3.md](docs/design/ux-spec-v3.md) (verbindliche UX-Spezifikation der v3-Oberfläche) und [docs/research/](docs/research/README.md) (Recherche-Reports zu Compose-Stack, Anbietern, whisper.cpp und Self-Hosting).
 
@@ -110,7 +110,7 @@ Ein persistenter PKCS12-Keystore liegt als GitHub-Secrets `WB_KEYSTORE_B64` (Bas
 
 ## Tests
 
-Alle Tests laufen ohne Gerät und ohne Emulator (`./gradlew testDebugUnitTest`): reine JVM-Tests für die Logik, Robolectric (SDK 35) für alles, was Android-Ressourcen, `org.json`, SharedPreferences oder Layout-Inflation braucht. HTTP-Pfade werden gegen einen lokalen JDK-`HttpServer` getestet. Stand 3.0.0: 44 Testklassen in 41 Dateien, 306 `@Test`-Methoden.
+Alle Tests laufen ohne Gerät und ohne Emulator (`./gradlew testDebugUnitTest`): reine JVM-Tests für die Logik, Robolectric (SDK 35) für alles, was Android-Ressourcen, `org.json`, SharedPreferences oder Layout-Inflation braucht. HTTP-Pfade werden gegen einen lokalen JDK-`HttpServer` getestet. Stand 3.0.0: 58 Testklassen in 55 Dateien, 403 `@Test`-Methoden.
 
 | Testklasse | Deckt ab |
 |---|---|
@@ -119,11 +119,12 @@ Alle Tests laufen ohne Gerät und ohne Emulator (`./gradlew testDebugUnitTest`):
 | `AudioConvertTest` | Downmix, Resampling, RMS-Profil geteilter Audios |
 | `AudioUtilsTest` | Stille-Trimmen |
 | `FormatsTest` | Dauer-Formatierung (Timer, Überschriften) |
+| `ManifestBackupTest` | `allowBackup=false` + Backup-/Extraktionsregeln schließen die Prefs-Datei (API-Keys) aus |
 | `NetworkSecurityConfigTest` | Jeder Cloud-Anbieter des Katalogs ist in der https-Pflicht-Liste; Klartext nur global |
 | `ParagrapherTest` | Absatz-Heuristik: Satzgrenzen, Diskursmarker, Abkürzungen, Wortlaut bleibt |
 | `PolishPlanTest` | Welche Nachbearbeitung greift: Wortliste vs. KI-Entscheidung, verbatim/cleaned |
 | `PrefsTest` | Migration v2 → v3 (einmalig), neue Schlüssel, Timeout-Grenzen, StringSets, Flags |
-| `SetupStateTest` | „Ist die App eingerichtet?" (Engine, Zugang, Modell, Mikrofon) |
+| `SetupStateTest` | Transkriptions-Zugang vollständig (URL, Key je nach Anbieter) |
 | `TextPolisherTest` | Füllwörter (eingebaut, eigene, abgewählte, mehrwortig), Groß-Schreibung, Whitespace, Zeilenumbrüche |
 | `TranscriptionEngineTest` | Backend-Wahl und kompletter Diktat-Pfad gegen einen lokalen „eigenen Server": Multipart-Felder, kein Header ohne Key, Ollama-Body, Politur, Offline-Konfiguration |
 | `WavEncoderTest`, `WavHeaderTest`, `WavSamplesTest` | WAV-Header und PCM-Kodierung, getrennter Kopf fürs Streaming, Rückweg PCM → Float |

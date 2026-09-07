@@ -169,7 +169,7 @@ class WhisperBarInputMethodService : InputMethodService() {
         applyState(BubbleState.SENDING)
         showStatus(Status.TRANSCRIBING)
         haptic(BubbleMotion.Haptic.CONTEXT_CLICK)
-        io.submit {
+        runIo {
             // ... aber stop() (join + PCM->Float) und die Anfrage bewusst auf dem
             // io-Thread, NIE auf dem UI-Thread (sonst Freeze/ANR beim Loslassen).
             val samples = recorder.stop()
@@ -179,9 +179,29 @@ class WhisperBarInputMethodService : InputMethodService() {
                     applyState(BubbleState.IDLE)
                     showIdleStatus()
                 }
-                return@submit
+                return@runIo
             }
             send(samples)
+        }
+    }
+
+    /**
+     * Hintergrundarbeit, die die Taste garantiert wieder aus SENDING holt: ein Throwable, das
+     * kein Exception ist (OutOfMemoryError bei sehr langen Diktaten), versickert sonst im Future
+     * von submit(), und die Tastatur diktiert bis zum Prozessende nicht mehr.
+     */
+    private fun runIo(block: () -> Unit) {
+        io.execute {
+            try {
+                block()
+            } catch (e: Throwable) {
+                Log.e(TAG, "Diktat abgebrochen", e)
+                pendingSamples = null
+                main.post {
+                    applyState(BubbleState.IDLE)
+                    showStatus(Status.ERROR)
+                }
+            }
         }
     }
 
@@ -191,19 +211,22 @@ class WhisperBarInputMethodService : InputMethodService() {
         applyState(BubbleState.SENDING)
         showStatus(Status.TRANSCRIBING)
         haptic(BubbleMotion.Haptic.CONTEXT_CLICK)
-        io.submit { send(samples) }
+        runIo { send(samples) }
     }
 
     /** Laeuft auf dem io-Thread. */
     private fun send(samples: FloatArray) {
         try {
-            val text = TranscriptionEngine.transcribe(applicationContext, samples)
+            var refineSkipped: String? = null
+            val text = TranscriptionEngine.transcribe(applicationContext, samples) { refineSkipped = it }
             pendingSamples = null
             main.post {
                 commitDictation(text)
                 applyState(BubbleState.IDLE)
                 rings?.flashSuccess()
                 showIdleStatus()
+                // Text ist eingefuegt, nur die Veredelung fiel aus — Hinweis statt Fehlerzustand.
+                refineSkipped?.let { showStatus(Status.ERROR, getString(R.string.refine_skipped, it)) }
             }
         } catch (e: ApiNotConfiguredException) {
             pendingSamples = null

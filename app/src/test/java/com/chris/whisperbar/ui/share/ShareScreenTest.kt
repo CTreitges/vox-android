@@ -3,6 +3,7 @@ package com.chris.whisperbar.ui.share
 import android.content.Context
 import android.net.Uri
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -172,6 +173,19 @@ class ShareScreenTest {
         compose.onNodeWithText("Erneut").performScrollTo().performClick()
         assertEquals(1, retried)
         compose.onNodeWithContentDescription("Alles erneut").assertIsDisplayed()
+    }
+
+    @Test fun erneutIstGesperrtSolangeEineAndereDateiLaeuft() {
+        // Review KOR-1: waehrend LADEN gibt es keinen Einzel-Retry (er wuerde den Lauf ersetzen).
+        show(
+            ShareUiState(
+                phase = SharePhase.LOADING,
+                files = listOf(ShareFile("a.ogg", error = "Netz weg"), ShareFile("b.ogg")),
+                progress = ShareProgress(1, 2, 0, 1, "Wird übertragen …"),
+            ),
+        )
+        compose.onNodeWithText("Fehlgeschlagen: Netz weg").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Erneut").assertIsNotEnabled()
     }
 
     @Test fun keinZugangZeigtEinrichtungOeffnen() {

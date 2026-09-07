@@ -2,6 +2,7 @@ package com.chris.whisperbar
 
 import android.content.Context
 import android.provider.OpenableColumns
+import android.util.Log
 import com.chris.whisperbar.api.ApiNotConfiguredException
 import com.chris.whisperbar.api.TextRefiner
 import com.chris.whisperbar.api.WavUpload
@@ -58,12 +59,15 @@ object TranscriptionEngine {
         if (configured == "auto" && !detected.isNullOrBlank()) detected else configured
 
     /**
+     * @param onRefineSkipped wird gerufen, wenn die Textverbesserung (Schritt 3) scheitert —
+     *   der erkannte Text kommt dann unveraendert durch die Nachbearbeitung; die Meldung
+     *   (z. B. "API-Fehler 401 …") kann der Aufrufer als Hinweis zeigen.
      * @throws ApiNotConfiguredException wenn keine Engine gewaehlt oder der Zugang unvollstaendig ist.
      * @throws OfflineNotAvailableException wenn offline gewaehlt ist, aber kein Modell da.
-     * @throws com.chris.whisperbar.api.ApiNetworkException bei Netzproblemen.
-     * @throws com.chris.whisperbar.api.ApiHttpException bei Fehlerstatus der API.
+     * @throws com.chris.whisperbar.api.ApiNetworkException bei Netzproblemen (Erkennung).
+     * @throws com.chris.whisperbar.api.ApiHttpException bei Fehlerstatus der API (Erkennung).
      */
-    fun transcribe(context: Context, samples: FloatArray): String {
+    fun transcribe(context: Context, samples: FloatArray, onRefineSkipped: (String) -> Unit = {}): String {
         val app = context.applicationContext
         val prefs = Prefs(app)
         requireConfigured(app, prefs)
@@ -76,7 +80,7 @@ object TranscriptionEngine {
         val language = effectiveLanguage(prefs.language, result.detectedLanguage)
         val mode = prefs.refineMode
         val refined = if (mode != RefineMode.OFF) {
-            TextRefiner(prefs.llmAccess()).refine(raw, language, mode, prefs.smartFillers)
+            refineOrRaw(raw, language, mode, prefs, onRefineSkipped)
         } else {
             raw
         }
@@ -92,6 +96,22 @@ object TranscriptionEngine {
         )
         return TextPolisher.polish(refined, options)
     }
+
+    /**
+     * Die Veredelung darf ein bereits erkanntes (und ggf. bezahltes) Diktat nie verschlucken:
+     * scheitert das Sprachmodell (falsches Modell, 401/429, eigener Server aus, Base-URL leer,
+     * unbrauchbare Antwort), kommt der Rohtext durch — nur mit Hinweis statt Fehler.
+     */
+    private fun refineOrRaw(raw: String, language: String, mode: RefineMode, prefs: Prefs, onSkipped: (String) -> Unit): String =
+        try {
+            TextRefiner(prefs.llmAccess()).refine(raw, language, mode, prefs.smartFillers)
+        } catch (e: Exception) {
+            Log.w(TAG, "Textverbesserung uebersprungen: ${e.message}", e)
+            onSkipped(e.message ?: e.javaClass.simpleName)
+            raw
+        }
+
+    private const val TAG = "TranscriptionEngine"
 }
 
 /**

@@ -15,8 +15,8 @@ Komplett neue Oberfläche, Offline-Erkennung zurück, Anbieter-Katalog, Textverb
 - **„Zugang prüfen"** für Erkennung und Textverbesserung; „Wo bekomme ich einen Key?" mit Schritten je Anbieter; „Eigenes Modell …" als freie Modell-ID.
 - **Textverbesserung in Stufen:** Aus · Glätten · Verschönern · Zusammenfassen; `<think>`-Blöcke von Reasoning-Modellen werden entfernt; `temperature` nur bei Modellen, die es unterstützen, sonst `reasoning_effort`/`max_completion_tokens`.
 - **Füllwörter bearbeiten:** eingebaute Wörter je Sprache abwählbar, eigene Wörter (auch mehrwortig) hinzufügbar, „Standard wiederherstellen".
-- **Offline-Erkennung** mit whisper.cpp v1.9.3: Modelle Tiny (32 MB), Base (60 MB), Small (190 MB, empfohlen), Large v3 Turbo (574 MB, ab 6 GB RAM) werden bei Bedarf von huggingface.co geladen — Download-Dienst mit Benachrichtigung und Abbrechen, Fortsetzen nach Abbruch (Range-Resume), automatische Wiederholung, SHA-256- und Größenprüfung, Nachfrage über mobile Daten, Löschen mit Bestätigung. Kein Modell im APK. Beam-Search („Genau") oder Greedy („Schnell"), Kontext-Prompt als `initial_prompt`, Unterdrückung von Nicht-Sprach-Tokens, Abbruch, erkannte Sprache bei „Automatisch erkennen", Freigabe des Modells bei Speicherdruck. Laufzeit-Guard: nur arm64 mit FP16 + DotProd.
-- **Eigener Server:** Key optional (ohne Key kein Authorization-Header), `http://` zu privaten Adressen (LAN, Tailscale, `.local` …) mit Warnung bei öffentlichen, Read-Timeout 600 s (30–1800 s einstellbar), `reasoning_effort: none` für Ollama/Qwen3, lesbare Netz- und Statusfehler („Server nicht erreichbar — …", „Base-URL muss auf /v1 enden", Cleartext-Hinweis).
+- **Offline-Erkennung** mit whisper.cpp v1.9.3: Modelle Tiny (32 MB), Base (60 MB), Small (190 MB, empfohlen), Large v3 Turbo (574 MB, ab 6 GB RAM) werden bei Bedarf von huggingface.co geladen — Download-Dienst mit Benachrichtigung und Abbrechen, Fortsetzen nach Abbruch (Range-Resume), automatische Wiederholung, SHA-256- und Größenprüfung, Nachfrage über mobile Daten, Löschen mit Bestätigung. Kein Modell im APK. Beam-Search (fünf Kandidaten), Kontext-Prompt als `initial_prompt`, Unterdrückung von Nicht-Sprach-Tokens, Abbruch, erkannte Sprache bei „Automatisch erkennen", Freigabe des Modells bei Speicherdruck. Laufzeit-Guard: nur arm64 mit FP16 + DotProd.
+- **Eigener Server:** Key optional (ohne Key kein Authorization-Header), `http://` zu privaten Adressen (LAN, Tailscale, `.local` …) mit Warnung bei öffentlichen, Read-Timeout 600 s, `reasoning_effort: none` für Ollama/Qwen3, lesbare Netz- und Statusfehler („Server nicht erreichbar — …", „Base-URL muss auf /v1 enden", Cleartext-Hinweis).
 - **Transkription geteilter Sprachnachrichten:** Absätze (Heuristik `Paragrapher`), Schalter „Füllwörter ausblenden" (Standard an, ausgeschaltet wortgetreu), Erneut je Datei und „Alles erneut", „Einrichtung öffnen" bei fehlendem Zugang, Anzeige des aktiven Backends.
 - **Schwebender Knopf** neu: 68 dp, vier Zustände mit Füllung/Ring/Icon/Label, Timer „● m:ss", Puls-Ring, rotierender Sende-Bogen, Erfolgsring, Shake bei Fehler, Haptik, Reduce-Motion; Abbrechen-Ziel 72 dp mit Magnet-Radius, Scrim und „Loslassen zum Verwerfen"; Hinweis „Kopiert — einfügen" beim Zwischenablage-Fallback.
 - **Diktat-Tastatur** neu: Statuszeile mit tippbaren Warnhinweisen (führen in die Einrichtung), 21-Balken-Pegelband, Mikro-Taste mit denselben vier Zuständen, Tastenreihe mit Material-Symbolen und contentDescriptions, Zahnrad → Einstellungen.
@@ -32,6 +32,15 @@ Komplett neue Oberfläche, Offline-Erkennung zurück, Anbieter-Katalog, Textverb
 - Für `gpt-transcribe` wird die Sprache als `languages[]` statt `language` gesendet; Mistral und OpenRouter bekommen kein `prompt`-Feld, Mistral zusätzlich kein `response_format` (Anbieter-Flags im Katalog).
 - Geteilte Sprachnachrichten erscheinen standardmäßig ohne Füllwörter; der wortgetreue Text ist per Schalter weiterhin verfügbar. Text mit Absätzen aus der KI behält seine Zeilenumbrüche.
 - Netz- und HTTP-Fehler zeigen verständliche Meldungen statt roher Exception-Texte.
+- Scheitert die Textverbesserung (falsches Modell, 401/429, eigener Server aus, Base-URL leer), kommt der erkannte Text unverändert an — mit Hinweis „Textverbesserung übersprungen: …" statt verlorenem Diktat.
+- `android:allowBackup="false"`: Einstellungen inklusive API-Keys bleiben auf dem Gerät (kein Google-Auto-Backup, kein Geräte-zu-Gerät-Transfer).
+- v2-Einstellungen mit eigener Base-URL werden beim Update dem passenden Anbieter bzw. „Eigener Server" zugeordnet (vorher: Label OpenAI mit https-Pflicht, Assistent blieb offen).
+- Offline wird nur auf Geräten mit mindestens 3 GB RAM angeboten (UX-Spec §2, Schritt 1).
+- Share-Ansicht: „Erneut" je Datei ist gesperrt, solange noch eine andere Datei läuft (sonst ging deren Ergebnis verloren).
+- Deep-Links (`route`/`step`) werden nur beim echten Start angewendet — nach Rotation/Prozess-Tod bleibt der wiederhergestellte Back-Stack erhalten.
+- Modell-Zeilen sind für TalkBack ein Element („Small, Optionsfeld, ausgewählt"); „Erneut" nach Fehlschlag ist während eines anderen Downloads gesperrt.
+- Download-Abbruch bei hängender Verbindung endet als Abbruch (Teildatei verworfen) statt als „Netzwerkfehler".
+- Lint-Fehler brechen den Build (`abortOnError = true`); Kontext-Feld bei Mistral/OpenRouter sagt ehrlich, dass der Anbieter keinen Kontext entgegennimmt.
 - Alle Farben in einer Wahrheit (`res/values/colors.xml`, Präfix `wb_`), Overlay/IME/Benachrichtigung/Themes lesen dieselben Tokens; Emoji-Glyphen auf Tasten durch Vektor-Icons ersetzt.
 - Ein Komma direkt vor dem Satzende, das durch das Entfernen eines Füllworts übrig bliebe, wird mit entfernt.
 
@@ -50,7 +59,7 @@ Komplett neue Oberfläche, Offline-Erkennung zurück, Anbieter-Katalog, Textverb
 - Network-Security-Config: Klartext nur für eigene Server, alle Cloud-Domains des Katalogs strikt https (Test hält beides synchron).
 - Neue Foreground-Service-Typen/Permissions: `dataSync` (Modell-Download), `FOREGROUND_SERVICE_DATA_SYNC`, `ACCESS_NETWORK_STATE`; `Application`-Klasse `WhisperBarApp`.
 - CI: Submodule, NDK/CMake/Build-Tools 36/Platform 37, `.cxx`-Cache, JNI-Symbol-Abgleich (`tools/check_jni_symbols.py`), Prüfung des Release-APKs (`.so` vorhanden, kein Modell, nur arm64, 16-KB-Alignment).
-- Tests: Robolectric 4.16.1 (SDK 35, `sqliteMode=LEGACY`, `conscryptMode=OFF` für aarch64-Hosts), androidx.test core 1.7.0 / ext-junit 1.3.0, Compose `ui-test-junit4`; Stand 3.0.0: 44 Testklassen, 306 `@Test`-Methoden (JVM + Robolectric, HTTP gegen lokalen `HttpServer`).
+- Tests: Robolectric 4.16.1 (SDK 35, `sqliteMode=LEGACY`, `conscryptMode=OFF` für aarch64-Hosts), androidx.test core 1.7.0 / ext-junit 1.3.0, Compose `ui-test-junit4`; Stand 3.0.0: 58 Testklassen in 55 Dateien, 403 `@Test`-Methoden (JVM + Robolectric, HTTP gegen lokalen `HttpServer`).
 
 ### Bekannte Punkte
 

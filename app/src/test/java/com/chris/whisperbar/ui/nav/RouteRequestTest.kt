@@ -3,6 +3,7 @@ package com.chris.whisperbar.ui.nav
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
 import com.chris.whisperbar.AppNav
 import org.junit.Assert.assertEquals
@@ -29,6 +30,14 @@ class RouteRequestTest {
         assertEquals(RouteRequest("settings"), RouteRequest.from(AppNav.settings(ctx)))
         assertEquals(RouteRequest("setup", 3), RouteRequest.from(AppNav.setup(ctx, 3)))
         assertEquals(RouteRequest("setup"), RouteRequest.from(AppNav.setup(ctx)))
+    }
+
+    @Test fun deepLinkNurBeimErststartNichtNachRecreate() {
+        // Review SPEC-1: nach Rotation/Prozess-Tod liefert getIntent() denselben Deep-Link — der
+        // wiederhergestellte Back-Stack darf nicht durch replaceAll() ueberschrieben werden.
+        assertEquals(RouteRequest("settings"), RouteRequest.initial(AppNav.settings(ctx), null))
+        assertNull(RouteRequest.initial(AppNav.settings(ctx), Bundle()))
+        assertNull(RouteRequest.initial(Intent(Intent.ACTION_MAIN), null))
     }
 
     @Test fun ungueltigerSchrittWirdIgnoriert() {

@@ -56,7 +56,10 @@ class Prefs(context: Context) {
     /**
      * v2 -> v3, laeuft genau einmal (prefs_version) und ist idempotent:
      *  - der Schalter "KI glaetten" (llm_polish) wird zum Modus refine_mode
-     *  - Bestandsnutzer (API-Key da, keine Engine gewaehlt) bleiben online
+     *  - v2 hatte eine freie api_url ohne Anbieter: passt sie zu einem Katalog-Preset, wird
+     *    dieser Anbieter gesetzt, sonst "Eigener Server" (sonst bliebe ein LAN-Server unter
+     *    dem Label OpenAI mit https-Pflicht haengen — der Assistent kaeme nie zu "fertig")
+     *  - Bestandsnutzer (API-Key da bzw. eigener Server, keine Engine gewaehlt) bleiben online
      */
     private fun migrate() {
         if (sp.getInt(KEY_PREFS_VERSION, 0) >= PREFS_VERSION) return
@@ -64,10 +67,24 @@ class Prefs(context: Context) {
         if (!sp.contains(KEY_REFINE_MODE) && sp.getBoolean(KEY_LLM_POLISH_LEGACY, false)) {
             e.putString(KEY_REFINE_MODE, RefineMode.POLISH.key)
         }
-        if (sp.getString(KEY_ENGINE, "").isNullOrBlank() && !sp.getString(KEY_API_KEY, "").isNullOrBlank()) {
+        val legacyUrl = sp.getString(KEY_API_URL, "").orEmpty().trim()
+        var provider = ProviderCatalog.openai
+        if (!sp.contains(KEY_STT_PROVIDER) && legacyUrl.isNotEmpty()) {
+            provider = providerForLegacyUrl(legacyUrl)
+            if (provider.id != ProviderCatalog.OPENAI_ID) e.putString(KEY_STT_PROVIDER, provider.id)
+        }
+        val hasKey = !sp.getString(KEY_API_KEY, "").isNullOrBlank()
+        if (sp.getString(KEY_ENGINE, "").isNullOrBlank() && (hasKey || !provider.needsKey)) {
             e.putString(KEY_ENGINE, Engine.ONLINE.key)
         }
         e.putInt(KEY_PREFS_VERSION, PREFS_VERSION).apply()
+    }
+
+    /** Katalog-Anbieter mit genau dieser Base-URL, sonst der eigene Server. */
+    private fun providerForLegacyUrl(url: String): Provider {
+        val wanted = url.trimEnd('/')
+        return ProviderCatalog.sttProviders.firstOrNull { !it.isCustom && it.baseUrl.trimEnd('/') == wanted }
+            ?: ProviderCatalog.custom
     }
 
     /** Erkennungssprache: "auto" oder ISO-Code ("de", "en", "es", "fr", "it"). Default: Deutsch. */

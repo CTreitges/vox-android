@@ -62,9 +62,18 @@ object OfflineSupport {
         return info.totalMem
     }
 
+    /**
+     * Unter 3 GB Geraetespeicher wird Offline gar nicht angeboten (UX-Spec §2 Schritt 1): small
+     * (~430 MB) laeuft im IME-Prozess neben der Ziel-App — auf 2-GB-Geraeten schiesst der LMK ihn ab.
+     */
+    const val MIN_DEVICE_RAM_BYTES = 3L shl 30
+
     /** 10 % Toleranz: ein "6-GB-Geraet" meldet als totalMem meist nur ~5,6 GiB (Kernel-Reserven). */
     fun fitsDevice(totalRamBytes: Long, model: WhisperModel): Boolean =
         totalRamBytes >= model.minDeviceRamBytes / 10 * 9
+
+    /** Geraet hat genug RAM fuer Offline ueberhaupt (gleiche 10-%-Toleranz wie [fitsDevice]). */
+    fun deviceFits(totalRamBytes: Long): Boolean = totalRamBytes >= MIN_DEVICE_RAM_BYTES / 10 * 9
 
     fun fitsDevice(context: Context, model: WhisperModel): Boolean = fitsDevice(totalRamBytes(context), model)
 

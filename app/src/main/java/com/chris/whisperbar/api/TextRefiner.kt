@@ -15,11 +15,16 @@ class TextRefiner(private val access: ApiAccess) {
 
     /**
      * Liefert den bearbeiteten Text. Bei leerer Eingabe, [RefineMode.OFF] oder leerer
-     * Antwort wird der Originaltext zurueckgegeben — die Veredelung darf ein Diktat
-     * niemals verschlucken.
+     * Antwort wird der Originaltext zurueckgegeben. Fehler des Sprachmodells (HTTP, Netz)
+     * werden geworfen — [com.chris.whisperbar.TranscriptionEngine] faengt sie und faellt
+     * auf den Rohtext zurueck: die Veredelung darf ein Diktat niemals verschlucken.
+     *
+     * @throws ApiNotConfiguredException wenn die Base-URL leer ist (eigener Server ohne URL) —
+     *   sonst ginge die Anfrage an "/chat/completions" ohne Host.
      */
     fun refine(raw: String, language: String, mode: RefineMode, smartFillers: Boolean): String {
         if (raw.isBlank() || mode == RefineMode.OFF) return raw
+        if (access.baseUrl.isBlank()) throw ApiNotConfiguredException()
 
         val payload = ChatPayload.build(
             access = access,

@@ -70,11 +70,15 @@ class ShareController(
     /** Alle Dateien erkennen (Start, Rueckkehr aus der Einrichtung). */
     fun start() = transcribe(uris.indices.toList())
 
-    /** Nur diese Datei erneut — die anderen Ergebnisse bleiben. */
-    fun retryFile(index: Int) = transcribe(listOf(index))
+    /** Nur diese Datei erneut — die anderen Ergebnisse bleiben. Waehrend eines Laufs wirkungslos. */
+    fun retryFile(index: Int) {
+        if (state.phase == SharePhase.LOADING) return
+        transcribe(listOf(index))
+    }
 
-    /** Alle fehlgeschlagenen Dateien erneut (FEHLER GESAMT: alle). */
+    /** Alle fehlgeschlagenen Dateien erneut (FEHLER GESAMT: alle). Waehrend eines Laufs wirkungslos. */
     fun retryAll() {
+        if (state.phase == SharePhase.LOADING) return
         val failed = state.files.indices.filter { state.files[it].error != null }
         transcribe(failed.ifEmpty { uris.indices.toList() })
     }
@@ -101,6 +105,10 @@ class ShareController(
         (executor as? ExecutorService)?.shutdownNow()
     }
 
+    /**
+     * Startet einen neuen Lauf und ersetzt damit einen eventuell laufenden (dessen Meldungen werden
+     * verworfen) — deshalb schuetzen [retryFile]/[retryAll] gegen Aufrufe waehrend LOADING.
+     */
     private fun transcribe(indices: List<Int>) {
         if (indices.isEmpty()) return
         cancelled = false

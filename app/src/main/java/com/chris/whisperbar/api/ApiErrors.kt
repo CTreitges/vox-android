@@ -2,6 +2,7 @@ package com.chris.whisperbar.api
 
 import java.io.IOException
 import java.net.ConnectException
+import java.net.MalformedURLException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLException
@@ -20,6 +21,9 @@ class ApiHttpException(val code: Int, val detail: String) :
     companion object {
         fun hint(code: Int, detail: String): String? = when {
             code == 401 || code == 403 -> "Server verlangt einen (anderen) API-Key"
+            // OpenAI & Co. antworten auf unbekannte Modell-IDs ebenfalls mit 404 — dann ist die
+            // Base-URL (Preset, nicht editierbar) nicht das Problem.
+            code == 404 && detail.contains("model", ignoreCase = true) -> "Modell-ID prüfen"
             code == 404 -> "Endpunkt nicht gefunden — Base-URL muss auf /v1 enden"
             code == 400 && detail.contains("failed to read audio data", ignoreCase = true) ->
                 "Server konnte das WAV nicht lesen"
@@ -40,15 +44,18 @@ class ApiHttpException(val code: Int, val detail: String) :
 class ApiNetworkException(cause: IOException) :
     RuntimeException(describe(cause), cause) {
 
+    /** Eine kaputte/fehlende Base-URL bleibt beim zehnten Versuch genauso kaputt. */
+    val retryable: Boolean = cause !is MalformedURLException
+
     companion object {
         fun describe(e: IOException): String = when {
+            e is MalformedURLException -> "Base-URL fehlt oder ist ungültig — in den Einstellungen prüfen"
             e is UnknownHostException -> "Server nicht gefunden — Hostname/IP prüfen"
             e is ConnectException ->
                 "Server nicht erreichbar — läuft er, stimmt der Port, gleiches WLAN/VPN?"
             e is SocketTimeoutException && e.message?.contains("connect", ignoreCase = true) == true ->
                 "Server nicht erreichbar — läuft er, stimmt der Port, gleiches WLAN/VPN?"
-            e is SocketTimeoutException ->
-                "Zeitüberschreitung — Server zu langsam? Timeout in den Einstellungen erhöhen"
+            e is SocketTimeoutException -> "Zeitüberschreitung — Server zu langsam oder Verbindung schlecht"
             e is SSLException -> "TLS-Fehler — Zertifikat des Servers ungültig"
             e.message?.contains("Cleartext HTTP traffic", ignoreCase = true) == true ->
                 "Unverschlüsseltes http:// ist zu dieser Adresse nicht erlaubt — https:// oder lokale Adresse nutzen"
@@ -63,7 +70,7 @@ class ApiNetworkException(cause: IOException) :
  * bleiben auch beim zehnten Versuch falsch.
  */
 fun Throwable.isRetryable(): Boolean = when (this) {
-    is ApiNetworkException -> true
+    is ApiNetworkException -> retryable
     is ApiHttpException -> code == 408 || code == 429 || code >= 500
     else -> false
 }

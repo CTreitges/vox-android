@@ -1,6 +1,7 @@
 package com.chris.whisperbar.ui.models
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -165,27 +167,39 @@ fun ModelRow(
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                RadioButton(selected = selected, onClick = onSelect, enabled = installed)
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(label, style = MaterialTheme.typography.titleMedium)
-                        if (model.recommended) {
+                // Radio + Titel + Details als EIN auswaehlbares Element (Spec §5.6): TalkBack liest
+                // "Small, Optionsfeld, ausgewaehlt" statt viermal nur "Optionsfeld". Die Trailing-Knoepfe
+                // (Laden/Abbrechen/Loeschen) bleiben eigene, beschriftete Knoten ausserhalb.
+                Row(
+                    modifier = Modifier
+                        .weight(1f)
+                        .selectable(selected = selected, enabled = installed, role = Role.RadioButton, onClick = onSelect)
+                        .semantics(mergeDescendants = true) {},
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    RadioButton(selected = selected, onClick = null, enabled = installed)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(label, style = MaterialTheme.typography.titleMedium)
+                            if (model.recommended) {
+                                StatusChip(
+                                    stringResource(R.string.models_recommended), R.drawable.ic_check,
+                                    MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer,
+                                )
+                            }
+                        }
+                        Text(
+                            offlineModelDetails(model.id),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        if (!fits) {
                             StatusChip(
-                                stringResource(R.string.models_recommended), R.drawable.ic_check,
-                                MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.onPrimaryContainer,
+                                stringResource(R.string.models_too_big), R.drawable.ic_warning,
+                                MaterialTheme.wb.warningContainer, MaterialTheme.wb.onWarningContainer,
                             )
                         }
-                    }
-                    Text(
-                        offlineModelDetails(model.id),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (!fits) {
-                        StatusChip(
-                            stringResource(R.string.models_too_big), R.drawable.ic_warning,
-                            MaterialTheme.wb.warningContainer, MaterialTheme.wb.onWarningContainer,
-                        )
                     }
                 }
                 when {
@@ -198,7 +212,8 @@ fun ModelRow(
                     running != null -> IconButton(onClick = onCancel) {
                         WbIcon(R.drawable.ic_close, stringResource(R.string.models_cancel_cd))
                     }
-                    failed != null -> FilledTonalButton(onClick = onRetry) { Text(stringResource(R.string.common_retry)) }
+                    // Wie "Laden": waehrend ein anderer Download laeuft, wuerde der Dienst den Start still ignorieren.
+                    failed != null -> FilledTonalButton(onClick = onRetry, enabled = !busy) { Text(stringResource(R.string.common_retry)) }
                     else -> {
                         val cd = stringResource(R.string.models_download_cd, label)
                         FilledTonalButton(

@@ -164,9 +164,19 @@ fun StatusCard(
     }
 }
 
-/** Fehler je Datei: OutlinedCard mit error-Rahmen, Grund (Live-Region Assertive) und "Erneut" nur fuer diese Datei. */
+/**
+ * Fehler je Datei: OutlinedCard mit error-Rahmen, Grund (Live-Region Assertive) und "Erneut" nur fuer
+ * diese Datei. [retryEnabled] = false, solange noch eine andere Datei laeuft (ein neuer Lauf wuerde
+ * den laufenden ersetzen und dessen Ergebnis verwerfen).
+ */
 @Composable
-fun ErrorCard(message: String, retryLabel: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+fun ErrorCard(
+    message: String,
+    retryLabel: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+    retryEnabled: Boolean = true,
+) {
     OutlinedCard(
         modifier = modifier.fillMaxWidth(),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
@@ -186,7 +196,7 @@ fun ErrorCard(message: String, retryLabel: String, onRetry: () -> Unit, modifier
                 modifier = Modifier.size(24.dp),
             )
             Text(message, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-            TextButton(onClick = onRetry) { Text(retryLabel) }
+            TextButton(onClick = onRetry, enabled = retryEnabled) { Text(retryLabel) }
         }
     }
 }

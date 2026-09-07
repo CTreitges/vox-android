@@ -292,6 +292,7 @@ private fun TranscriptList(state: ShareUiState, onRetryFile: (Int) -> Unit, modi
                                 message = stringResource(R.string.share_one_failed, file.error),
                                 retryLabel = retry,
                                 onRetry = { onRetryFile(index) },
+                                retryEnabled = running == null,
                             )
                         }
                     }

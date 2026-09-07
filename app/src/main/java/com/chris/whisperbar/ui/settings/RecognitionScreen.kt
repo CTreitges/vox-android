@@ -93,16 +93,18 @@ fun RecognitionScreen(nav: NavState) {
                     optionLabel = { it.second },
                     onSelect = { prefs.language = it.first },
                 )
-                val wordList = !offline && !stt.provider.sttSendsPrompt
+                // Mistral/OpenRouter kennen kein prompt-Feld; eine context_bias-Wortliste ist nicht
+                // umgesetzt (Spec §2.4, offen) — also ehrlich sagen, dass der Kontext dort nicht ankommt.
+                val unsupported = !offline && !stt.provider.sttSendsPrompt
                 OutlinedTextField(
                     value = prefs.apiPrompt,
                     onValueChange = { prefs.apiPrompt = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(if (wordList) R.string.rec_context_words else R.string.pref_api_prompt_hint)) },
+                    label = { Text(stringResource(R.string.pref_api_prompt_hint)) },
                     minLines = 2,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                     supportingText = {
-                        Text(stringResource(if (wordList) R.string.rec_context_words_info else R.string.pref_api_prompt_info))
+                        Text(stringResource(if (unsupported) R.string.rec_context_unsupported else R.string.pref_api_prompt_info))
                     },
                 )
             }

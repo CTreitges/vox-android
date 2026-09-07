@@ -72,10 +72,13 @@ class ModelDownloader(
                 if (!e.retryable && e.kind != DownloadException.Kind.STORAGE) part.delete()
                 throw e
             } catch (e: IOException) {
+                // Abbruch waehrend read() haengt (Server liefert nicht): erst der Read-Timeout bringt uns
+                // hierher — dann ist das ein Abbruch, kein Netzfehler.
+                if (isCancelled()) return false
                 if (isOutOfSpace(e)) {
                     throw DownloadException(MSG_STORAGE, retryable = false, kind = DownloadException.Kind.STORAGE, cause = e)
                 }
-                if (attempt >= retries || isCancelled()) {
+                if (attempt >= retries) {
                     throw DownloadException(MSG_NET, retryable = true, kind = DownloadException.Kind.NETWORK, cause = e)
                 }
                 Thread.sleep(backoffMs shl attempt)

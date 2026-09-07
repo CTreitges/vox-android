@@ -12,9 +12,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- allowBackup=false: die Einstellungen enthalten API-Keys im Klartext (shared_prefs/whisperbar.xml).
+         Ohne Backup-Regeln landeten sie im Google-Auto-Backup und beim Geraetewechsel — die App
+         verspricht "Dein Key bleibt auf dem Geraet". Modelle (32-574 MB) sind ohnehin zu gross fuers Backup. -->
     <application
         android:name=".WhisperBarApp"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"

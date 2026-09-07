@@ -2,6 +2,11 @@ package com.chris.whisperbar
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.chris.whisperbar.api.ServerUrlCheck
+import com.chris.whisperbar.ui.nav.SetupFacts
+import com.chris.whisperbar.ui.nav.SetupRouter
+import com.chris.whisperbar.ui.nav.SystemStatus
+import com.chris.whisperbar.ui.state.PrefsState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -65,6 +70,48 @@ class PrefsTest {
         assertEquals("gpt-4o-mini", p.llmAccess().model)
         assertTrue(TranscriptionEngine.isConfigured(ctx))
         assertEquals(3, sp.getInt("prefs_version", 0))
+    }
+
+    // --- Review KOR-2/SEC-3: v2 hatte eine freie api_url ohne Anbieter ---------------------
+
+    @Test fun v2EigenerServerWirdZuCustomMigriert() {
+        sp.edit()
+            .putString("api_url", "http://192.168.1.5:8000/v1")
+            .putString("api_model", "Systran/faster-whisper-medium")
+            .commit()
+
+        val p = Prefs(ctx)
+        assertEquals("custom", p.sttProviderId)
+        assertEquals(Engine.ONLINE, p.engine) // eigener Server braucht keinen Key
+        val stt = p.sttAccess()
+        assertEquals("http://192.168.1.5:8000/v1", stt.baseUrl)
+        assertEquals("Systran/faster-whisper-medium", stt.model)
+        assertEquals(600_000, stt.readTimeoutMs)
+        assertNull(ServerUrlCheck.check(stt.baseUrl, stt.provider)) // http zu LAN-Adresse ist beim eigenen Server ok
+        assertTrue(SetupRouter.recognitionReady(SetupFacts.from(PrefsState(p), SystemStatus())))
+        assertTrue(TranscriptionEngine.isConfigured(ctx))
+    }
+
+    @Test fun v2KatalogUrlWirdDemAnbieterZugeordnet() {
+        sp.edit()
+            .putString("api_url", "https://api.groq.com/openai/v1/")
+            .putString("api_key", "gsk-alt")
+            .putString("api_model", "whisper-large-v3")
+            .commit()
+        val p = Prefs(ctx)
+        assertEquals("groq", p.sttProviderId)
+        assertEquals("whisper-large-v3", p.sttAccess().model)
+        assertEquals("https://api.groq.com/openai/v1/", p.sttAccess().baseUrl) // gespeicherte URL bleibt
+        assertEquals(Engine.ONLINE, p.engine)
+    }
+
+    @Test fun vorhandenerAnbieterUndFehlendeUrlBleibenUnangetastet() {
+        sp.edit().putString("stt_provider", "openai").putString("api_url", "http://192.168.1.5:8000/v1").commit()
+        assertEquals("openai", Prefs(ctx).sttProviderId)
+
+        sp.edit().clear().putString("api_key", "sk").commit()
+        assertEquals("openai", Prefs(ctx).sttProviderId)
+        assertFalse(sp.contains("stt_provider"))
     }
 
     @Test fun migrationLaeuftNurEinmal() {

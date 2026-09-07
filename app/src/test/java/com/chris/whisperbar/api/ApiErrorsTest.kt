@@ -7,6 +7,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.IOException
 import java.net.ConnectException
+import java.net.MalformedURLException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLHandshakeException
@@ -39,6 +40,14 @@ class ApiErrorsTest {
         assertFalse(ApiHttpException(400, "bad request").isRetryable())
     }
 
+    @Test fun kaputteBaseUrlIstKeinWiederholungsfall() {
+        // Review API-4: URL("/chat/completions") -> MalformedURLException; Retry waere sinnlos.
+        val e = ApiNetworkException(MalformedURLException("no protocol: /chat/completions"))
+        assertFalse(e.isRetryable())
+        assertTrue(e.message!!.contains("Base-URL"))
+        assertFalse(e.message!!.contains("no protocol"))
+    }
+
     @Test fun fehlenderKeyIstKeinWiederholungsfall() {
         assertFalse(ApiNotConfiguredException().isRetryable())
     }
@@ -53,6 +62,8 @@ class ApiErrorsTest {
         assertTrue(ApiNetworkException.describe(UnknownHostException("x")).contains("nicht gefunden"))
         assertTrue(ApiNetworkException.describe(ConnectException("refused")).contains("nicht erreichbar"))
         assertTrue(ApiNetworkException.describe(SocketTimeoutException("Read timed out")).contains("Zeitüberschreitung"))
+        // Review TST-1: es gibt keine Timeout-Einstellung in der Oberflaeche — nicht dorthin schicken.
+        assertFalse(ApiNetworkException.describe(SocketTimeoutException("Read timed out")).contains("Einstellungen"))
         assertTrue(ApiNetworkException.describe(SocketTimeoutException("connect timed out")).contains("nicht erreichbar"))
         assertTrue(ApiNetworkException.describe(SSLHandshakeException("bad cert")).contains("TLS"))
         assertTrue(
@@ -73,6 +84,11 @@ class ApiErrorsTest {
         assertTrue(ApiHttpException(401, "x").message!!.contains("API-Key"))
         assertTrue(ApiHttpException(403, "x").message!!.contains("API-Key"))
         assertTrue(ApiHttpException(404, "x").message!!.contains("/v1"))
+        assertTrue(ApiHttpException(404, "not here").message!!.contains("/v1"))
+        // Review API-6: OpenAI antwortet auf falsche Modell-IDs mit 404 — dann liegt es nicht an der Base-URL.
+        val model404 = ApiHttpException(404, "The model `gpt-xyz` does not exist").message!!
+        assertTrue(model404.contains("Modell-ID"))
+        assertFalse(model404.contains("/v1"))
         assertTrue(ApiHttpException(400, "failed to read audio data").message!!.contains("WAV"))
         assertNull(ApiHttpException.hint(400, "bad request"))
         assertNull(ApiHttpException.hint(500, "boom"))

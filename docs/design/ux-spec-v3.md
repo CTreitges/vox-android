@@ -297,6 +297,7 @@ Column(padding 20, gap 16)
 │    ExposedDropdownMenuBox rec_language "Sprache": Prefs.LANGUAGES (Automatisch erkennen · Deutsch · Englisch · Spanisch · Französisch · Italienisch)
 │    OutlinedTextField pref_api_prompt_hint (bestehend), minLines 2, capitalization Sentences; supportingText pref_api_prompt_info (bestehend)
 │    Bei Anbieter Mistral/OpenRouter (sttSendsPrompt=false): Label rec_context_words "Kontext-Wörter (kommagetrennt)", supportingText rec_context_words_info "Wird als Wortliste (context_bias) mitgeschickt."
+│    [Stand 3.0.0: context_bias ist NICHT umgesetzt (Mistral-Doku: nur Englisch belastbar, OpenRouter kennt es nicht) — supportingText rec_context_unsupported "Dieser Anbieter nimmt keinen Kontext entgegen — …", Label bleibt pref_api_prompt_hint.]
 └─ Datenschutz-Zeile bodySmall onSurfaceVariant, Leading ic_privacy_tip 16: rec_privacy_online "Audio wird zur Erkennung an %1$s gesendet." | rec_privacy_offline "Alles bleibt auf dem Gerät."
 ```
 
@@ -923,8 +924,7 @@ Regeln: bestehende Keys bleiben gültig (mit „(bestehend)" markiert; Text ggf.
 | `rec_test_fail` | Fehler: %1$s |
 | `rec_privacy_online` | Audio wird zur Erkennung an %1$s gesendet. |
 | `rec_privacy_offline` | Alles bleibt auf dem Gerät. |
-| `rec_context_words` | Kontext-Wörter (kommagetrennt) |
-| `rec_context_words_info` | Wird als Wortliste mitgeschickt und hilft bei Eigennamen. |
+| `rec_context_unsupported` | Dieser Anbieter nimmt keinen Kontext entgegen — das Feld wirkt nur bei anderen Anbietern und offline. (3.0.0, statt rec_context_words/_info) |
 | `pref_api_prompt_hint` (bestehend) | Kontext: Namen, Fachbegriffe, Schreibweisen |
 | `pref_api_prompt_info` (bestehend) | Wird als Prompt mitgeschickt und hilft der Erkennung bei Eigennamen und Fachwörtern. Kostet nichts extra. |
 | `pref_language` (bestehend) | Sprache |

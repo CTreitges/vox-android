@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
         env = AppEnv(PrefsState(Prefs(this)), SystemStatus.read(this)) { SystemStatus.read(this) }
-        route = RouteRequest.from(intent)
+        route = RouteRequest.initial(intent, savedInstanceState)
         setContent {
             WhisperBarTheme {
                 WhisperBarApp(env = env, route = route, onRouteConsumed = { route = null })

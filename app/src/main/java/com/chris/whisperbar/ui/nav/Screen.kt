@@ -1,6 +1,7 @@
 package com.chris.whisperbar.ui.nav
 
 import android.content.Intent
+import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.listSaver
@@ -95,6 +96,14 @@ data class RouteRequest(val route: String, val step: Int? = null) {
     companion object {
         /** Alias in der Manifest-Datei: Ziel von method.xml (settingsActivity) und alten Intents. */
         const val SETTINGS_ALIAS = "com.chris.whisperbar.SettingsActivity"
+
+        /**
+         * Deep-Link fuer onCreate: nur beim echten Erststart. Nach Rotation/Prozess-Tod liefert
+         * getIntent() denselben Deep-Link noch einmal — der per rememberSaveable wiederhergestellte
+         * Back-Stack (Spec §0.2) darf dann nicht durch replaceAll() ueberschrieben werden.
+         */
+        fun initial(intent: Intent?, savedInstanceState: Bundle?): RouteRequest? =
+            if (savedInstanceState == null) from(intent) else null
 
         fun from(intent: Intent?): RouteRequest? {
             if (intent == null) return null

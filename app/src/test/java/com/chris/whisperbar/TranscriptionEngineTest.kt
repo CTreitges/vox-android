@@ -41,6 +41,7 @@ class TranscriptionEngineTest {
     private var chatBody: String? = null
     private var sttResponse = """{"text":"also ähm hallo welt"}"""
     private var chatResponse = """{"choices":[{"message":{"content":"<think>ueberlegen</think>Hallo Welt."}}]}"""
+    private var chatStatus = 200
 
     @Before fun setUp() {
         ctx.getSharedPreferences("whisperbar", Context.MODE_PRIVATE).edit().clear().commit()
@@ -56,7 +57,7 @@ class TranscriptionEngineTest {
         server.createContext("/v1/chat/completions") { ex ->
             chatBody = ex.requestBody.readBytes().toString(Charsets.UTF_8)
             val out = chatResponse.toByteArray()
-            ex.sendResponseHeaders(200, out.size.toLong())
+            ex.sendResponseHeaders(chatStatus, out.size.toLong())
             ex.responseBody.use { it.write(out) }
         }
         server.start()
@@ -179,6 +180,74 @@ class TranscriptionEngineTest {
         val messages = chat.getJSONArray("messages")
         assertTrue(messages.getJSONObject(0).getString("content").contains("Zeichensetzung"))
         assertEquals("also ähm hallo welt", messages.getJSONObject(1).getString("content"))
+    }
+
+    // --- Review API-1: die Veredelung darf ein Diktat nie verschlucken -------------------
+
+    @Test fun llmFehlerLiefertDenRohtextMitHinweis() {
+        useLocalServer()
+        prefs.refineMode = RefineMode.POLISH
+        chatStatus = 401
+        chatResponse = """{"error":{"message":"invalid api key"}}"""
+        var hint: String? = null
+        val text = TranscriptionEngine.transcribe(ctx, speech) { hint = it }
+
+        assertEquals("Also hallo welt", text) // STT-Ergebnis poliert, nicht verworfen
+        assertTrue(hint!!, hint!!.contains("401"))
+        assertTrue(chatBody != null) // die LLM-Anfrage wurde tatsaechlich versucht
+    }
+
+    @Test fun llmServerfehlerUndUnbrauchbareAntwortLiefernDenRohtext() {
+        useLocalServer()
+        prefs.refineMode = RefineMode.BEAUTIFY
+        chatStatus = 500
+        var hint: String? = null
+        assertEquals("Also hallo welt", TranscriptionEngine.transcribe(ctx, speech) { hint = it })
+        assertTrue(hint!!.contains("500"))
+
+        chatStatus = 200
+        chatResponse = "<html>Not JSON</html>"
+        hint = null
+        assertEquals("Also hallo welt", TranscriptionEngine.transcribe(ctx, speech) { hint = it })
+        assertTrue(hint != null)
+    }
+
+    @Test fun llmOhneBaseUrlWirdUebersprungenUndSttFehlerBleibtEinFehler() {
+        // Eigener LLM-Zugang ohne URL bei Cloud-STT: Refine ueberspringen (API-4), Diktat kommt an.
+        useLocalServer()
+        prefs.refineMode = RefineMode.POLISH
+        prefs.llmProviderId = "custom"
+        prefs.llmUrl = ""
+        // Der STT-Anbieter ist hier ebenfalls "custom", also erbt der LLM-Zugang die STT-URL:
+        // deshalb ueber die Test-Instanz pruefen, dass ein leerer Zugang ApiNotConfigured wirft.
+        val llm = com.chris.whisperbar.api.AccessResolver.resolveLlm(
+            stt = com.chris.whisperbar.api.AccessResolver.resolveStt("groq", "", "gsk", "", 0),
+            providerId = "custom", baseUrl = "", apiKey = "", model = "qwen3:8b",
+        )
+        assertEquals("", llm.baseUrl)
+        try {
+            com.chris.whisperbar.api.TextRefiner(llm).refine("hallo", "de", RefineMode.POLISH, false)
+            fail("ApiNotConfiguredException erwartet")
+        } catch (e: ApiNotConfiguredException) {
+            // erwartet: keine Anfrage an "/chat/completions" ohne Host
+        }
+
+        // Ein Fehler der ERKENNUNG bleibt dagegen ein Fehler (nichts wird stillschweigend leer).
+        prefs.llmProviderId = "same"
+        sttResponse = """{"error":{"message":"boom"}}"""
+        server.removeContext("/v1/audio/transcriptions")
+        server.createContext("/v1/audio/transcriptions") { ex ->
+            ex.requestBody.readBytes()
+            val out = sttResponse.toByteArray()
+            ex.sendResponseHeaders(500, out.size.toLong())
+            ex.responseBody.use { it.write(out) }
+        }
+        try {
+            TranscriptionEngine.transcribe(ctx, speech)
+            fail("ApiHttpException erwartet")
+        } catch (e: com.chris.whisperbar.api.ApiHttpException) {
+            assertEquals(500, e.code)
+        }
     }
 
     @Test fun keyWirdAlsBearerGesendet() {

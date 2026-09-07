@@ -19,9 +19,12 @@ object TranscriptionRequest {
      * - `languages[]` statt `language` bei OpenAI gpt-transcribe (Array-Feld).
      * - keine Sprache bei "auto" (der Anbieter erkennt sie selbst).
      * - `prompt`/`response_format` nur, wenn der Anbieter sie kennt (Mistral, OpenRouter nicht).
+     * - kein `model`, wenn keins eingetragen ist (eigener Server ohne Default: whisper.cpp
+     *   ignoriert das Feld, speaches/LocalAI melden bei "" einen 422 ohne brauchbaren Text).
      */
     fun fields(access: ApiAccess, language: String, prompt: String): List<Pair<String, String>> {
-        val out = mutableListOf("model" to access.model)
+        val out = mutableListOf<Pair<String, String>>()
+        if (access.model.isNotBlank()) out += "model" to access.model
         if (access.provider.sttSendsResponseFormat) out += "response_format" to "json"
         val lang = language.trim()
         if (lang.isNotEmpty() && lang != "auto") {

@@ -3,7 +3,9 @@ package com.chris.whisperbar.api
 import java.net.URI
 
 /**
- * Prueft eine eingetippte Base-URL, bevor sie gespeichert wird. Rein (ohne Android).
+ * Prueft eine eingetippte Base-URL. Rein (ohne Android). Gespeichert wird bei jedem Tastendruck;
+ * das Ergebnis steuert `isError`/Hinweistext des Felds und ueber `SetupFacts.urlValid`, ob der
+ * Assistent den Zugang als fertig zaehlt.
  *
  * Unverschluesseltes http:// ist nur zu privaten Adressen sinnvoll (LAN, VPN, Tailscale):
  * die Network-Security-Config erlaubt Klartext global, weil Android keine IP-Bereiche
@@ -13,7 +15,7 @@ object ServerUrlCheck {
 
     enum class Severity { ERROR, WARNING }
 
-    /** [Severity.ERROR] blockt das Speichern, [Severity.WARNING] ist nur ein Hinweis. */
+    /** [Severity.ERROR] = Zugang gilt als unvollstaendig (Assistent bleibt offen), [Severity.WARNING] = nur Hinweis. */
     data class Problem(val severity: Severity, val message: String)
 
     const val MSG_INVALID = "Ungültige URL"

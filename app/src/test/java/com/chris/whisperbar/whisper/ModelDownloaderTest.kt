@@ -16,6 +16,7 @@ import java.io.File
 import java.net.InetSocketAddress
 import java.security.MessageDigest
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Tests gegen einen lokalen JDK-HttpServer, der Range-Requests (206 + Content-Range) kann und sich
@@ -34,6 +35,7 @@ class ModelDownloaderTest {
     // Server-Verhalten je Test
     private var rangeSupported = true
     private var slowChunkMs = 0L
+    private var holdMs = 0L // Server "haengt": so lange keine Antwort-Header
     private var statusOverride = 0
     private var body: ByteArray = data
     private var truncateFirstResponseAt = -1 // erste Antwort nach so vielen Bytes beenden (Netzabbruch)
@@ -56,6 +58,7 @@ class ModelDownloaderTest {
         val range = ex.requestHeaders.getFirst("Range")
         val first = synchronized(ranges) { ranges.add(range); ranges.size == 1 }
         runCatching {
+            if (holdMs > 0) Thread.sleep(holdMs)
             if (statusOverride != 0) {
                 synchronized(statuses) { statuses.add(statusOverride) }
                 ex.sendResponseHeaders(statusOverride, -1)
@@ -95,8 +98,9 @@ class ModelDownloaderTest {
     private fun seenRanges() = synchronized(ranges) { ranges.toList() }
     private fun seenStatuses() = synchronized(statuses) { statuses.toList() }
 
-    private fun downloader(retries: Int = 3, freeSpace: (File) -> Long = { it.usableSpace }) = ModelDownloader(
+    private fun downloader(retries: Int = 3, freeSpace: (File) -> Long = { it.usableSpace }, readTimeoutMs: Int = 30_000) = ModelDownloader(
         baseUrl = "http://127.0.0.1:${server.address.port}/",
+        readTimeoutMs = readTimeoutMs,
         retries = retries,
         backoffMs = 5,
         progressIntervalMs = 50,
@@ -119,15 +123,36 @@ class ModelDownloaderTest {
     }
 
     @Test fun cancelMittendrinLaesstTeildateiStehen() {
+        // Review TST-4: Abbruch an den Fortschritt binden, nicht an die Wanduhr (kalter JIT/CI-Last).
+        // Der erste Fortschritts-Aufruf kommt nach >= 50 ms mitten im Strom (19 Stuecke x 20 ms Server-Pause).
         slowChunkMs = 20
-        val start = System.nanoTime()
-        val done = downloader().download(model, store, isCancelled = { System.nanoTime() - start > 80_000_000L })
+        val seen = AtomicLong()
+        val done = downloader().download(model, store, isCancelled = { seen.get() > 0 }) { bytes, _, _ -> seen.set(bytes) }
         assertFalse(done)
         val part = store.partFile(model)
         assertTrue(part.exists())
         assertTrue("0 < ${part.length()} < ${data.size}", part.length() in 1 until data.size.toLong())
         assertFalse(store.file(model).exists())
         assertFalse(store.isInstalled(model))
+    }
+
+    @Test fun cancelImBackoffStartetKeinenWeiterenVersuch() {
+        statusOverride = 503
+        val done = downloader().download(model, store, isCancelled = { seenStatuses().isNotEmpty() })
+        assertFalse(done)
+        assertEquals(listOf(503), seenStatuses()) // kein zweiter Request nach dem Abbruch
+        assertFalse(store.partFile(model).exists())
+    }
+
+    @Test fun cancelBeiHaengenderVerbindungIstEinAbbruchKeinNetzfehler() {
+        // Review NAT-2: Nutzer tippt "Abbrechen", waehrend der Server nicht liefert. Erst der
+        // Read-Timeout weckt uns — das muss als Abbruch (false) enden, nicht als DownloadException,
+        // sonst zeigt der Dienst "Fehlgeschlagen" und behaelt die Teildatei.
+        holdMs = 3_000
+        val start = System.nanoTime()
+        val done = downloader(readTimeoutMs = 200).download(model, store, isCancelled = { true })
+        assertFalse(done)
+        assertTrue("kam nach ${(System.nanoTime() - start) / 1_000_000} ms", System.nanoTime() - start < 2_500_000_000L)
     }
 
     @Test fun resumeSetztMitRangeFortUndPrueftDieGesamtsumme() {

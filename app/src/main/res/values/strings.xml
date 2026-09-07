@@ -226,8 +226,7 @@
     <string name="rec_test_fail">Fehler: %1$s</string>
     <string name="rec_privacy_online">Audio wird zur Erkennung an %1$s gesendet.</string>
     <string name="rec_privacy_offline">Alles bleibt auf dem Gerät.</string>
-    <string name="rec_context_words">Kontext-Wörter (kommagetrennt)</string>
-    <string name="rec_context_words_info">Wird als Wortliste mitgeschickt und hilft bei Eigennamen.</string>
+    <string name="rec_context_unsupported">Dieser Anbieter nimmt keinen Kontext entgegen — das Feld wirkt nur bei anderen Anbietern und offline.</string>
     <string name="pref_api_prompt_hint">Kontext: Namen, Fachbegriffe, Schreibweisen</string>
     <string name="pref_api_prompt_info">Wird als Prompt mitgeschickt und hilft der Erkennung bei Eigennamen und Fachwörtern. Kostet nichts extra.</string>
     <string name="pref_language">Sprache</string>
@@ -439,6 +438,7 @@
     <string name="kb_need_permission">Mikrofon-Berechtigung fehlt — tippe zum Einrichten</string>
     <string name="kb_not_configured">Kein Zugang eingerichtet — tippe zum Einrichten</string>
     <string name="kb_error">Fehler bei der Erkennung — erneut versuchen</string>
+    <string name="refine_skipped">Textverbesserung übersprungen: %1$s</string>
     <string name="kb_space">Leer</string>
     <string name="cd_mic">Diktat-Mikrofon — halten zum Sprechen</string>
     <string name="cd_kb_switch">Eingabemethode wechseln</string>

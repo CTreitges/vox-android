@@ -93,6 +93,8 @@ fun SttAccessSection(snack: SnackController, showPrivacy: Boolean = true) {
                 label = { Text(stringResource(R.string.rec_model)) },
                 placeholder = { Text("whisper-1") },
                 singleLine = true,
+                // Kein Default beim eigenen Server: speaches/LocalAI lehnen ein leeres model mit 422 ab.
+                isError = prefs.apiModel.isBlank(),
                 supportingText = { Text(stringResource(R.string.model_custom_info)) },
             )
         } else {
